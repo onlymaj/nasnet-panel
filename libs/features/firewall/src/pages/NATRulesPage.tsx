@@ -18,7 +18,6 @@
  */
 
 import { memo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useNATUIStore, useConnectionStore } from '@nasnet/state/stores';
 import { useNATRules } from '@nasnet/api-client/queries';
 import { NATRulesTable } from '../components/NATRulesTable';
@@ -27,18 +26,7 @@ import { MasqueradeQuickDialog } from '../components/MasqueradeQuickDialog';
 import { PortForwardWizardDialog } from '../components/PortForwardWizardDialog';
 import { NATRuleBuilder } from '@nasnet/ui/patterns/security/nat-rule-builder';
 import type { NatChain, NATRule } from '@nasnet/core/types';
-import {
-  Button,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@nasnet/ui/primitives';
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@nasnet/ui/primitives';
 import { Plus, Zap, Globe } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
 import { usePlatform } from '@nasnet/ui/patterns';
@@ -61,14 +49,11 @@ const EmptyState = memo(function EmptyState({
   chain,
   onAddRule,
   onQuickMasquerade,
-  onPortForward,
+  onPortForward
 }: EmptyStateProps) {
-  const { t } = useTranslation('firewall');
-
   // Chain-specific empty states
   if (chain === 'srcnat') {
-    return (
-      <Card className="border-dashed">
+    return <Card className="border-dashed">
         <CardHeader className="text-center">
           <CardTitle>No Source NAT Rules</CardTitle>
           <CardDescription>
@@ -76,35 +61,19 @@ const EmptyState = memo(function EmptyState({
           </CardDescription>
         </CardHeader>
         <CardContent className="gap-component-sm flex flex-col justify-center sm:flex-row">
-          <Button
-            onClick={onQuickMasquerade}
-            aria-label="Quick Masquerade"
-          >
-            <Zap
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button onClick={onQuickMasquerade} aria-label="Quick Masquerade">
+            <Zap className="mr-component-sm h-4 w-4" aria-hidden="true" />
             Quick Masquerade
           </Button>
-          <Button
-            variant="outline"
-            onClick={onAddRule}
-            aria-label="Add Custom Rule"
-          >
-            <Plus
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" onClick={onAddRule} aria-label="Add Custom Rule">
+            <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
             Add Custom Rule
           </Button>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (chain === 'dstnat') {
-    return (
-      <Card className="border-dashed">
+    return <Card className="border-dashed">
         <CardHeader className="text-center">
           <CardTitle>No Destination NAT Rules</CardTitle>
           <CardDescription>
@@ -112,35 +81,20 @@ const EmptyState = memo(function EmptyState({
           </CardDescription>
         </CardHeader>
         <CardContent className="gap-component-sm flex flex-col justify-center sm:flex-row">
-          <Button
-            onClick={onPortForward}
-            aria-label="Port Forward Wizard"
-          >
-            <Globe
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button onClick={onPortForward} aria-label="Port Forward Wizard">
+            <Globe className="mr-component-sm h-4 w-4" aria-hidden="true" />
             Port Forward Wizard
           </Button>
-          <Button
-            variant="outline"
-            onClick={onAddRule}
-            aria-label="Add Custom Rule"
-          >
-            <Plus
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" onClick={onAddRule} aria-label="Add Custom Rule">
+            <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
             Add Custom Rule
           </Button>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
 
   // All chains empty state
-  return (
-    <Card className="border-dashed">
+  return <Card className="border-dashed">
       <CardHeader className="text-center">
         <CardTitle>No NAT Rules Configured</CardTitle>
         <CardDescription>
@@ -148,40 +102,20 @@ const EmptyState = memo(function EmptyState({
         </CardDescription>
       </CardHeader>
       <CardContent className="gap-component-sm flex flex-col justify-center sm:flex-row">
-        <Button
-          onClick={onQuickMasquerade}
-          aria-label="Quick Masquerade"
-        >
-          <Zap
-            className="mr-component-sm h-4 w-4"
-            aria-hidden="true"
-          />
+        <Button onClick={onQuickMasquerade} aria-label="Quick Masquerade">
+          <Zap className="mr-component-sm h-4 w-4" aria-hidden="true" />
           Quick Masquerade
         </Button>
-        <Button
-          onClick={onPortForward}
-          aria-label="Port Forward Wizard"
-        >
-          <Globe
-            className="mr-component-sm h-4 w-4"
-            aria-hidden="true"
-          />
+        <Button onClick={onPortForward} aria-label="Port Forward Wizard">
+          <Globe className="mr-component-sm h-4 w-4" aria-hidden="true" />
           Port Forward Wizard
         </Button>
-        <Button
-          variant="outline"
-          onClick={onAddRule}
-          aria-label="Add NAT Rule"
-        >
-          <Plus
-            className="mr-component-sm h-4 w-4"
-            aria-hidden="true"
-          />
+        <Button variant="outline" onClick={onAddRule} aria-label="Add NAT Rule">
+          <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
           Add NAT Rule
         </Button>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 });
 
 // ============================================================================
@@ -198,26 +132,28 @@ const EmptyState = memo(function EmptyState({
  * @returns NAT rules page component
  */
 export const NATRulesPage = memo(function NATRulesPage() {
-  const { t } = useTranslation('firewall');
   const platform = usePlatform();
   const isMobile = platform === 'mobile';
-
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
-  const { selectedChain, setSelectedChain } = useNATUIStore();
-
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
+  const {
+    selectedChain,
+    setSelectedChain
+  } = useNATUIStore();
   const [showAddRule, setShowAddRule] = useState(false);
   const [showMasqueradeDialog, setShowMasqueradeDialog] = useState(false);
   const [showPortForwardWizard, setShowPortForwardWizard] = useState(false);
   const [editingRule, setEditingRule] = useState<NATRule | null>(null);
-
   const chains: NatChain[] = ['srcnat', 'dstnat'];
 
   // Fetch rules for current chain
-  const { data: rules, isLoading, refetch } = useNATRules(routerIp);
+  const {
+    data: rules,
+    isLoading,
+    refetch
+  } = useNATRules(routerIp);
 
   // Filter rules by selected chain
-  const filteredRules =
-    selectedChain === 'all' ? rules : rules?.filter((r) => (r.chain as string) === selectedChain);
+  const filteredRules = selectedChain === 'all' ? rules : rules?.filter(r => r.chain as string === selectedChain);
 
   // ========================================
   // Handlers
@@ -227,28 +163,22 @@ export const NATRulesPage = memo(function NATRulesPage() {
     setEditingRule(null);
     setShowAddRule(true);
   };
-
   const handleQuickMasquerade = () => {
     setShowMasqueradeDialog(true);
   };
-
   const handlePortForward = () => {
     setShowPortForwardWizard(true);
   };
-
   const handleTabChange = (value: string) => {
     setSelectedChain(value as NatChain | 'all');
   };
-
   const handleEditRule = (rule: NATRule) => {
     setEditingRule(rule);
     setShowAddRule(true);
   };
-
   const handleRuleSaved = async () => {
     await refetch();
   };
-
   const handleSuccess = async () => {
     await refetch();
   };
@@ -257,8 +187,7 @@ export const NATRulesPage = memo(function NATRulesPage() {
   // Render
   // ========================================
 
-  return (
-    <div className="flex h-full flex-col">
+  return <div className="flex h-full flex-col">
       {/* Page Header */}
       <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
         <div className="p-component-md flex items-center justify-between">
@@ -269,85 +198,39 @@ export const NATRulesPage = memo(function NATRulesPage() {
             </p>
           </div>
           <div className="gap-component-sm flex">
-            {!isMobile && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleQuickMasquerade}
-                  aria-label="Quick Masquerade"
-                >
-                  <Zap
-                    className="mr-component-sm h-4 w-4"
-                    aria-hidden="true"
-                  />
+            {!isMobile && <>
+                <Button variant="outline" onClick={handleQuickMasquerade} aria-label="Quick Masquerade">
+                  <Zap className="mr-component-sm h-4 w-4" aria-hidden="true" />
                   Quick Masquerade
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={handlePortForward}
-                  aria-label="Port Forward Wizard"
-                >
-                  <Globe
-                    className="mr-component-sm h-4 w-4"
-                    aria-hidden="true"
-                  />
+                <Button variant="outline" onClick={handlePortForward} aria-label="Port Forward Wizard">
+                  <Globe className="mr-component-sm h-4 w-4" aria-hidden="true" />
                   Port Forward Wizard
                 </Button>
-              </>
-            )}
-            <Button
-              onClick={handleAddRule}
-              aria-label="Add NAT Rule"
-            >
-              <Plus
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
+              </>}
+            <Button onClick={handleAddRule} aria-label="Add NAT Rule">
+              <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
               Add NAT Rule
             </Button>
           </div>
         </div>
 
         {/* Mobile Action Buttons */}
-        {isMobile && (
-          <div className="gap-component-sm px-component-md pb-component-md flex">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleQuickMasquerade}
-              className="flex-1"
-              aria-label="Masquerade"
-            >
-              <Zap
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
+        {isMobile && <div className="gap-component-sm px-component-md pb-component-md flex">
+            <Button variant="outline" size="sm" onClick={handleQuickMasquerade} className="flex-1" aria-label="Masquerade">
+              <Zap className="mr-component-sm h-4 w-4" aria-hidden="true" />
               Masquerade
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePortForward}
-              className="flex-1"
-              aria-label="Port Forward"
-            >
-              <Globe
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
+            <Button variant="outline" size="sm" onClick={handlePortForward} className="flex-1" aria-label="Port Forward">
+              <Globe className="mr-component-sm h-4 w-4" aria-hidden="true" />
               Port Forward
             </Button>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Chain Tabs */}
       <div className="flex-1 overflow-hidden">
-        <Tabs
-          value={selectedChain}
-          onValueChange={handleTabChange}
-          className="flex h-full flex-col"
-        >
+        <Tabs value={selectedChain} onValueChange={handleTabChange} className="flex h-full flex-col">
           <div className="border-border px-component-md border-b">
             <TabsList className={isMobile ? 'w-full justify-start overflow-x-auto' : ''}>
               <TabsTrigger value="all">All</TabsTrigger>
@@ -358,127 +241,58 @@ export const NATRulesPage = memo(function NATRulesPage() {
 
           <div className="flex-1 overflow-y-auto">
             {/* All Chains Tab */}
-            <TabsContent
-              value="all"
-              className="p-component-md m-0"
-            >
-              {isLoading ?
-                <div
-                  className="space-y-component-md"
-                  role="status"
-                  aria-label={t('common:loading', { defaultValue: 'Loading' })}
-                >
+            <TabsContent value="all" className="p-component-md m-0">
+              {isLoading ? <div className="space-y-component-md" role="status" aria-label={"Loading"}>
                   <div className="space-y-component-md animate-pulse">
                     <div className="bg-muted h-16 rounded" />
                     <div className="bg-muted h-16 rounded" />
                     <div className="bg-muted h-16 rounded" />
                   </div>
-                </div>
-              : !filteredRules || filteredRules.length === 0 ?
-                <EmptyState
-                  onAddRule={handleAddRule}
-                  onQuickMasquerade={handleQuickMasquerade}
-                  onPortForward={handlePortForward}
-                />
-              : isMobile ?
-                <NATRulesTableMobile onEditRule={handleEditRule} />
-              : <NATRulesTable onEditRule={handleEditRule} />}
+                </div> : !filteredRules || filteredRules.length === 0 ? <EmptyState onAddRule={handleAddRule} onQuickMasquerade={handleQuickMasquerade} onPortForward={handlePortForward} /> : isMobile ? <NATRulesTableMobile onEditRule={handleEditRule} /> : <NATRulesTable onEditRule={handleEditRule} />}
             </TabsContent>
 
             {/* Individual Chain Tabs */}
-            {chains.map((chain) => (
-              <TabsContent
-                key={chain}
-                value={chain}
-                className="p-component-md m-0"
-              >
-                {isLoading ?
-                  <div
-                    className="space-y-component-md"
-                    role="status"
-                    aria-label={t('common:loading', { defaultValue: 'Loading' })}
-                  >
+            {chains.map(chain => <TabsContent key={chain} value={chain} className="p-component-md m-0">
+                {isLoading ? <div className="space-y-component-md" role="status" aria-label={"Loading"}>
                     <div className="space-y-component-md animate-pulse">
                       <div className="bg-muted h-16 rounded" />
                       <div className="bg-muted h-16 rounded" />
                     </div>
-                  </div>
-                : !filteredRules || filteredRules.length === 0 ?
-                  <EmptyState
-                    chain={chain}
-                    onAddRule={handleAddRule}
-                    onQuickMasquerade={handleQuickMasquerade}
-                    onPortForward={handlePortForward}
-                  />
-                : isMobile ?
-                  <NATRulesTableMobile
-                    chain={chain}
-                    onEditRule={handleEditRule}
-                  />
-                : <NATRulesTable
-                    chain={chain}
-                    onEditRule={handleEditRule}
-                  />
-                }
-              </TabsContent>
-            ))}
+                  </div> : !filteredRules || filteredRules.length === 0 ? <EmptyState chain={chain} onAddRule={handleAddRule} onQuickMasquerade={handleQuickMasquerade} onPortForward={handlePortForward} /> : isMobile ? <NATRulesTableMobile chain={chain} onEditRule={handleEditRule} /> : <NATRulesTable chain={chain} onEditRule={handleEditRule} />}
+              </TabsContent>)}
           </div>
         </Tabs>
       </div>
 
       {/* NAT Rule Builder */}
-      <NATRuleBuilder
-        routerId={routerIp}
-        initialRule={
-          editingRule ?
-            ({
-              chain: editingRule.chain,
-              action: editingRule.action,
-              protocol: editingRule.protocol,
-              srcAddress: editingRule.srcAddress,
-              dstAddress: editingRule.dstAddress,
-              srcPort: editingRule.srcPort,
-              dstPort: editingRule.dstPort,
-              inInterface: editingRule.inInterface,
-              outInterface: editingRule.outInterface,
-              toAddresses: editingRule.toAddresses,
-              toPorts: editingRule.toPorts,
-              comment: editingRule.comment,
-            } as any)
-          : undefined
-        }
-        open={showAddRule}
-        onClose={() => {
-          setShowAddRule(false);
-          setEditingRule(null);
-        }}
-        onSave={async () => {
-          await handleRuleSaved();
-          setShowAddRule(false);
-          setEditingRule(null);
-        }}
-        mode={editingRule ? 'edit' : 'create'}
-      />
+      <NATRuleBuilder routerId={routerIp} initialRule={editingRule ? {
+      chain: editingRule.chain,
+      action: editingRule.action,
+      protocol: editingRule.protocol,
+      srcAddress: editingRule.srcAddress,
+      dstAddress: editingRule.dstAddress,
+      srcPort: editingRule.srcPort,
+      dstPort: editingRule.dstPort,
+      inInterface: editingRule.inInterface,
+      outInterface: editingRule.outInterface,
+      toAddresses: editingRule.toAddresses,
+      toPorts: editingRule.toPorts,
+      comment: editingRule.comment
+    } as any : undefined} open={showAddRule} onClose={() => {
+      setShowAddRule(false);
+      setEditingRule(null);
+    }} onSave={async () => {
+      await handleRuleSaved();
+      setShowAddRule(false);
+      setEditingRule(null);
+    }} mode={editingRule ? 'edit' : 'create'} />
 
       {/* Masquerade Quick Dialog */}
-      <MasqueradeQuickDialog
-        open={showMasqueradeDialog}
-        onOpenChange={setShowMasqueradeDialog}
-        routerIp={routerIp}
-        onSuccess={handleSuccess}
-      />
+      <MasqueradeQuickDialog open={showMasqueradeDialog} onOpenChange={setShowMasqueradeDialog} routerIp={routerIp} onSuccess={handleSuccess} />
 
       {/* Port Forward Wizard Dialog */}
-      <PortForwardWizardDialog
-        open={showPortForwardWizard}
-        onOpenChange={setShowPortForwardWizard}
-        routerIp={routerIp}
-        onSuccess={handleSuccess}
-      />
-    </div>
-  );
+      <PortForwardWizardDialog open={showPortForwardWizard} onOpenChange={setShowPortForwardWizard} routerIp={routerIp} onSuccess={handleSuccess} />
+    </div>;
 });
-
 NATRulesPage.displayName = 'NATRulesPage';
-
 export default NATRulesPage;

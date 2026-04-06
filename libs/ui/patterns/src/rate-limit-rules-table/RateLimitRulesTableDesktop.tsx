@@ -13,67 +13,33 @@
  */
 
 import { useMemo } from 'react';
-
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Pencil, Copy, Trash2, GripVertical } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import type { RateLimitRule } from '@nasnet/core/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Button,
-  Badge,
-  Switch,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Switch, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
 import type { RateLimitRulesTablePresenterProps, SortableRowProps } from './types';
 
 // ============================================================================
 // Action Badge Component
 // ============================================================================
 
-function ActionBadge({ action }: { action: string }) {
+function ActionBadge({
+  action
+}: {
+  action: string;
+}) {
   // Map actions to Badge semantic variants
   // drop=destructive (red), tarpit=warning (amber), add-to-list=info (blue)
   const variantMap: Record<string, 'default' | 'success' | 'error' | 'warning' | 'info'> = {
-    drop: 'error', // Red
-    tarpit: 'warning', // Amber
-    'add-to-list': 'info', // Blue
+    drop: 'error',
+    // Red
+    tarpit: 'warning',
+    // Amber
+    'add-to-list': 'info' // Blue
   };
-
   const variant = variantMap[action] || 'default';
-
   return <Badge variant={variant}>{action}</Badge>;
 }
 
@@ -88,43 +54,38 @@ function SortableRow({
   onDuplicate,
   onDelete,
   onToggle,
-  onShowStats,
+  onShowStats
 }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: rule.id!,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: rule.id!
   });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : 1
   };
-
   const isUnused = (rule.packets ?? 0) === 0;
 
   // Calculate percentage of max for progress bar
-  const percentOfMax = maxBytes > 0 ? ((rule.bytes ?? 0) / maxBytes) * 100 : 0;
+  const percentOfMax = maxBytes > 0 ? (rule.bytes ?? 0) / maxBytes * 100 : 0;
 
   // Format time window for display
   const timeWindowMap: Record<string, string> = {
     'per-second': '/ sec',
     'per-minute': '/ min',
-    'per-hour': '/ hour',
+    'per-hour': '/ hour'
   };
   const timeWindowDisplay = timeWindowMap[rule.timeWindow] || rule.timeWindow;
-
-  return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      className={`${rule.isDisabled ? 'bg-slate-50 opacity-50 dark:bg-slate-800/50' : ''} ${isUnused ? 'bg-muted/50 opacity-60' : ''}`}
-    >
+  return <TableRow ref={setNodeRef} style={style} className={`${rule.isDisabled ? 'bg-slate-50 opacity-50 dark:bg-slate-800/50' : ''} ${isUnused ? 'bg-muted/50 opacity-60' : ''}`}>
       {/* Drag handle */}
-      <TableCell
-        className="w-8 cursor-grab"
-        {...attributes}
-        {...listeners}
-      >
+      <TableCell className="w-8 cursor-grab" {...attributes} {...listeners}>
         <GripVertical className="h-4 w-4 text-slate-400" />
       </TableCell>
 
@@ -150,83 +111,50 @@ function SortableRow({
 
       {/* List Name (only for add-to-list action) */}
       <TableCell>
-        {rule.action === 'add-to-list' && rule.addressList ?
-          <Badge
-            variant="outline"
-            className="font-mono text-xs"
-          >
+        {rule.action === 'add-to-list' && rule.addressList ? <Badge variant="outline" className="font-mono text-xs">
             {rule.addressList}
-          </Badge>
-        : <span className="text-slate-400">-</span>}
+          </Badge> : <span className="text-slate-400">-</span>}
       </TableCell>
 
       {/* Triggered Count */}
-      <TableCell
-        className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/70"
-        onClick={() => onShowStats(rule)}
-      >
+      <TableCell className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/70" onClick={() => onShowStats(rule)}>
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm">{rule.packets ?? 0}</span>
-          {percentOfMax > 0 && (
-            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-              <div
-                className="bg-primary h-full transition-all duration-300"
-                style={{ width: `${Math.min(percentOfMax, 100)}%` }}
-              />
-            </div>
-          )}
+          {percentOfMax > 0 && <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+              <div className="bg-primary h-full transition-all duration-300" style={{
+            width: `${Math.min(percentOfMax, 100)}%`
+          }} />
+            </div>}
         </div>
       </TableCell>
 
       {/* Enabled Toggle */}
       <TableCell>
-        <Switch
-          checked={!rule.isDisabled}
-          onCheckedChange={() => onToggle(rule)}
-          aria-label={rule.isDisabled ? 'Enable rule' : 'Disable rule'}
-        />
+        <Switch checked={!rule.isDisabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.isDisabled ? 'Enable rule' : 'Disable rule'} />
       </TableCell>
 
       {/* Actions */}
       <TableCell>
         <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            aria-label="Edit rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onEdit(rule)} aria-label="Edit rule">
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            aria-label="Duplicate rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onDuplicate(rule)} aria-label="Duplicate rule">
             <Copy className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="text-red-600 hover:text-red-700 dark:text-red-400"
-            aria-label="Delete rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onDelete(rule)} className="text-red-600 hover:text-red-700 dark:text-red-400" aria-label="Delete rule">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 }
 
 // ============================================================================
 // Main Desktop Presenter Component
 // ============================================================================
 
-export interface RateLimitRulesTableDesktopProps
-  extends Omit<RateLimitRulesTablePresenterProps, 'pollingInterval'> {
+export interface RateLimitRulesTableDesktopProps extends Omit<RateLimitRulesTablePresenterProps, 'pollingInterval'> {
   editingRule: RateLimitRule | null;
   deleteConfirmRule: RateLimitRule | null;
   statsRule: RateLimitRule | null;
@@ -263,22 +191,19 @@ export function RateLimitRulesTableDesktop({
   confirmDelete,
   closeEdit,
   closeDelete,
-  closeStats,
+  closeStats
 }: RateLimitRulesTableDesktopProps) {
-  const { t } = useTranslation('firewall');
-
   // Drag-drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
 
   // Handler for drag end
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
+    const {
+      active,
+      over
+    } = event;
     if (over && active.id !== over.id) {
       onReorder(active.id as string, over.id as string);
     }
@@ -286,51 +211,36 @@ export function RateLimitRulesTableDesktop({
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className={`p-4 ${className || ''}`}>
+    return <div className={`p-4 ${className || ''}`}>
         <div className="animate-pulse space-y-4">
           <div className="h-10 rounded bg-slate-200 dark:bg-slate-700" />
           <div className="h-16 rounded bg-slate-200 dark:bg-slate-700" />
           <div className="h-16 rounded bg-slate-200 dark:bg-slate-700" />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div className={`p-4 text-red-600 dark:text-red-400 ${className || ''}`}>
+    return <div className={`p-4 text-red-600 dark:text-red-400 ${className || ''}`}>
         Error loading rate limit rules: {error.message}
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div className={`p-8 text-center ${className || ''}`}>
+    return <div className={`p-8 text-center ${className || ''}`}>
         <p className="mb-4 text-slate-500 dark:text-slate-400">No rate limit rules found</p>
         <Button onClick={() => onEdit({} as RateLimitRule)}>Add Rate Limit Rule</Button>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className={className}>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="w-8"
-                  aria-label="Drag handle"
-                />
+                <TableHead className="w-8" aria-label="Drag handle" />
                 <TableHead>Source</TableHead>
                 <TableHead>Limit</TableHead>
                 <TableHead>Time Window</TableHead>
@@ -342,22 +252,8 @@ export function RateLimitRulesTableDesktop({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <SortableContext
-                items={rules.map((r) => r.id!)}
-                strategy={verticalListSortingStrategy}
-              >
-                {rules.map((rule) => (
-                  <SortableRow
-                    key={rule.id}
-                    rule={rule}
-                    maxBytes={maxBytes}
-                    onEdit={onEdit}
-                    onDuplicate={onDuplicate}
-                    onDelete={onDelete}
-                    onToggle={onToggle}
-                    onShowStats={onShowStats}
-                  />
-                ))}
+              <SortableContext items={rules.map(r => r.id!)} strategy={verticalListSortingStrategy}>
+                {rules.map(rule => <SortableRow key={rule.id} rule={rule} maxBytes={maxBytes} onEdit={onEdit} onDuplicate={onDuplicate} onDelete={onDelete} onToggle={onToggle} onShowStats={onShowStats} />)}
               </SortableContext>
             </TableBody>
           </Table>
@@ -365,19 +261,14 @@ export function RateLimitRulesTableDesktop({
       </div>
 
       {/* Edit/Create Sheet - Will integrate RateLimitRuleEditor when available */}
-      <Sheet
-        open={!!editingRule}
-        onOpenChange={(open) => !open && closeEdit()}
-      >
+      <Sheet open={!!editingRule} onOpenChange={open => !open && closeEdit()}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
           <SheetHeader>
             <SheetTitle>
               {editingRule?.id ? 'Edit Rate Limit Rule' : 'Add Rate Limit Rule'}
             </SheetTitle>
             <SheetDescription>
-              {editingRule?.id ?
-                'Modify the rate limit rule configuration'
-              : 'Create a new rate limit rule'}
+              {editingRule?.id ? 'Modify the rate limit rule configuration' : 'Create a new rate limit rule'}
             </SheetDescription>
           </SheetHeader>
           <div className="py-4">
@@ -392,10 +283,7 @@ export function RateLimitRulesTableDesktop({
       </Sheet>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && closeDelete()}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && closeDelete()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Rate Limit Rule?</DialogTitle>
@@ -413,16 +301,10 @@ export function RateLimitRulesTableDesktop({
             </ul>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={closeDelete}
-            >
+            <Button variant="outline" onClick={closeDelete}>
               Cancel
             </Button>
-            <Button
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
+            <Button onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
               Delete Rule
             </Button>
           </DialogFooter>
@@ -430,11 +312,7 @@ export function RateLimitRulesTableDesktop({
       </Dialog>
 
       {/* Statistics Panel - Placeholder for RuleStatisticsPanel */}
-      {statsRule && (
-        <Sheet
-          open={!!statsRule}
-          onOpenChange={(open) => !open && closeStats()}
-        >
+      {statsRule && <Sheet open={!!statsRule} onOpenChange={open => !open && closeStats()}>
           <SheetContent className="w-full sm:max-w-xl">
             <SheetHeader>
               <SheetTitle>Rule Statistics</SheetTitle>
@@ -458,8 +336,6 @@ export function RateLimitRulesTableDesktop({
               </div>
             </div>
           </SheetContent>
-        </Sheet>
-      )}
-    </>
-  );
+        </Sheet>}
+    </>;
 }

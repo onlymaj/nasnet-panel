@@ -17,13 +17,13 @@
         "tag": "{{PROXY_TAG}}",
         "workers": "{{WORKER_COUNT}}"
       },
-      "memoryLimitMB": "{{MEMORY_LIMIT}}",
+      "memoryLimitMB": 64,
       "cpuShares": 256,
       "requiresBridge": true,
       "portMappings": [
         {
-          "internal": "{{PROXY_PORT}}",
-          "external": "{{PROXY_PORT}}",
+          "internal": 8443,
+          "external": 8443,
           "protocol": "tcp",
           "purpose": "MTProxy Telegram proxy"
         }

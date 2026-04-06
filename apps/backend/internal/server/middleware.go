@@ -9,9 +9,6 @@ import (
 
 // ApplyProdMiddleware configures production middleware (minimal, no CORS).
 func ApplyProdMiddleware(e *echo.Echo) {
-	// Compression middleware first (before other middleware)
-	e.Use(middleware.Gzip())
-
 	// Logger middleware (optional, enabled via env)
 	if os.Getenv("ENABLE_LOGGING") == "true" {
 		e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
@@ -31,9 +28,6 @@ func ApplyProdMiddleware(e *echo.Echo) {
 
 // ApplyDevMiddleware configures development middleware (logging, CORS, recovery).
 func ApplyDevMiddleware(e *echo.Echo) {
-	// Compression middleware first
-	e.Use(middleware.Gzip())
-
 	// CORS middleware for development (allow all origins)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"*"},

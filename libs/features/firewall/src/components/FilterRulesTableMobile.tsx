@@ -14,50 +14,29 @@
  */
 
 import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useSearch } from '@tanstack/react-router';
 import { cn } from '@nasnet/ui/utils';
 import { useConnectionStore } from '@nasnet/state/stores';
-import {
-  useFilterRules,
-  useDeleteFilterRule,
-  useToggleFilterRule,
-  useCreateFilterRule,
-  useUpdateFilterRule,
-} from '@nasnet/api-client/queries/firewall';
+import { useFilterRules, useDeleteFilterRule, useToggleFilterRule, useCreateFilterRule, useUpdateFilterRule } from '@nasnet/api-client/queries/firewall';
 import type { FilterRule, FilterRuleInput, FilterChain } from '@nasnet/core/types';
 import { CounterCell, FilterRuleEditor, RuleStatisticsPanel } from '@nasnet/ui/patterns';
 import { useCounterSettingsStore } from '@nasnet/features/firewall';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Button,
-  Badge,
-  Switch,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
+import { Card, CardContent, CardHeader, Button, Badge, Switch, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
 import { Pencil, Copy, Trash2 } from 'lucide-react';
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
-const ACTION_BADGE_VARIANTS: Record<string, 'default' | 'success' | 'error' | 'warning' | 'info'> =
-  {
-    accept: 'success',
-    drop: 'error',
-    reject: 'error',
-    log: 'info',
-    jump: 'warning',
-    tarpit: 'error',
-    passthrough: 'default',
-  };
+const ACTION_BADGE_VARIANTS: Record<string, 'default' | 'success' | 'error' | 'warning' | 'info'> = {
+  accept: 'success',
+  drop: 'error',
+  reject: 'error',
+  log: 'info',
+  jump: 'warning',
+  tarpit: 'error',
+  passthrough: 'default'
+};
 
 // ============================================================================
 // Action Badge Component
@@ -67,19 +46,15 @@ const ACTION_BADGE_VARIANTS: Record<string, 'default' | 'success' | 'error' | 'w
  * ActionBadge Component
  * @description Badge displaying filter rule action with semantic color
  */
-const ActionBadge = memo(function ActionBadge({ action }: { action: string }) {
+const ActionBadge = memo(function ActionBadge({
+  action
+}: {
+  action: string;
+}) {
   const variant = ACTION_BADGE_VARIANTS[action] || 'default';
-
-  return (
-    <Badge
-      variant={variant}
-      className="text-xs"
-      role="img"
-      aria-label={`Action: ${action}`}
-    >
+  return <Badge variant={variant} className="text-xs" role="img" aria-label={`Action: ${action}`}>
       {action}
-    </Badge>
-  );
+    </Badge>;
 });
 
 // ============================================================================
@@ -115,12 +90,10 @@ const RuleCard = memo(function RuleCard({
   onToggle,
   onShowStats,
   isHighlighted,
-  highlightRef,
+  highlightRef
 }: RuleCardProps) {
-  const { t } = useTranslation('firewall');
   const isUnused = (rule.packets ?? 0) === 0;
-  const showRelativeBar = useCounterSettingsStore((state) => state.showRelativeBar);
-
+  const showRelativeBar = useCounterSettingsStore(state => state.showRelativeBar);
   const matchers: string[] = useMemo(() => {
     const result: string[] = [];
     if (rule.protocol && rule.protocol !== 'all') result.push(`${rule.protocol}`);
@@ -132,128 +105,56 @@ const RuleCard = memo(function RuleCard({
       result.push(`[${rule.connectionState.join(',')}]`);
     }
     return result;
-  }, [
-    rule.protocol,
-    rule.srcAddress,
-    rule.dstAddress,
-    rule.srcPort,
-    rule.dstPort,
-    rule.connectionState,
-  ]);
+  }, [rule.protocol, rule.srcAddress, rule.dstAddress, rule.srcPort, rule.dstPort, rule.connectionState]);
 
   // Calculate percentage of max for progress bar
-  const percentOfMax = maxBytes > 0 ? ((rule.bytes ?? 0) / maxBytes) * 100 : 0;
-
-  return (
-    <Card
-      ref={isHighlighted ? (highlightRef as React.RefObject<HTMLDivElement>) : undefined}
-      className={cn(
-        rule.disabled && 'opacity-50',
-        isUnused && 'bg-muted/50 opacity-60',
-        isHighlighted && 'animate-highlight bg-warning/20'
-      )}
-    >
+  const percentOfMax = maxBytes > 0 ? (rule.bytes ?? 0) / maxBytes * 100 : 0;
+  return <Card ref={isHighlighted ? highlightRef as React.RefObject<HTMLDivElement> : undefined} className={cn(rule.disabled && 'opacity-50', isUnused && 'bg-muted/50 opacity-60', isHighlighted && 'animate-highlight bg-warning/20')}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="gap-component-sm mb-component-xs flex items-center">
               <span className="text-muted-foreground font-mono text-xs">#{rule.order}</span>
-              <Badge
-                variant="secondary"
-                className="text-xs"
-              >
+              <Badge variant="secondary" className="text-xs">
                 {rule.chain}
               </Badge>
               <ActionBadge action={rule.action} />
             </div>
           </div>
-          <Switch
-            checked={!rule.disabled}
-            onCheckedChange={() => onToggle(rule)}
-            aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'}
-          />
+          <Switch checked={!rule.disabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'} />
         </div>
       </CardHeader>
 
       <CardContent className="pt-0">
         {/* Matchers */}
-        {matchers.length > 0 && (
-          <div className="text-muted-foreground mb-3 font-mono text-xs">{matchers.join(' ')}</div>
-        )}
+        {matchers.length > 0 && <div className="text-muted-foreground mb-3 font-mono text-xs">{matchers.join(' ')}</div>}
 
         {/* Counters - Replaced with CounterCell */}
-        <div
-          className="mb-component-md hover:bg-muted/50 p-component-sm -mx-component-sm cursor-pointer rounded transition-colors"
-          onClick={() => onShowStats(rule)}
-          role="button"
-          tabIndex={0}
-          aria-label={`View traffic statistics for rule ${rule.order ?? ''}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') onShowStats(rule);
-          }}
-        >
-          <CounterCell
-            packets={rule.packets ?? 0}
-            bytes={rule.bytes ?? 0}
-            percentOfMax={percentOfMax}
-            isUnused={isUnused}
-            showRate={false} // Never show rate on mobile
-            showBar={showRelativeBar}
-          />
+        <div className="mb-component-md hover:bg-muted/50 p-component-sm -mx-component-sm cursor-pointer rounded transition-colors" onClick={() => onShowStats(rule)} role="button" tabIndex={0} aria-label={`View traffic statistics for rule ${rule.order ?? ''}`} onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') onShowStats(rule);
+      }}>
+          <CounterCell packets={rule.packets ?? 0} bytes={rule.bytes ?? 0} percentOfMax={percentOfMax} isUnused={isUnused} showRate={false} // Never show rate on mobile
+        showBar={showRelativeBar} />
         </div>
 
         {/* Comment */}
-        {rule.comment && (
-          <div className="text-muted-foreground mb-component-md text-sm italic">{rule.comment}</div>
-        )}
+        {rule.comment && <div className="text-muted-foreground mb-component-md text-sm italic">{rule.comment}</div>}
 
         {/* Actions */}
-        <div
-          className="gap-component-sm flex"
-          role="group"
-          aria-label="Filter rule actions"
-        >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            className="focus-visible:ring-ring min-h-[44px] flex-1 focus-visible:ring-2 focus-visible:ring-offset-2"
-            aria-label={`Edit filter rule ${rule.order}`}
-          >
-            <Pencil
-              className="mr-component-xs h-4 w-4"
-              aria-hidden="true"
-            />
+        <div className="gap-component-sm flex" role="group" aria-label="Filter rule actions">
+          <Button variant="outline" size="sm" onClick={() => onEdit(rule)} className="focus-visible:ring-ring min-h-[44px] flex-1 focus-visible:ring-2 focus-visible:ring-offset-2" aria-label={`Edit filter rule ${rule.order}`}>
+            <Pencil className="mr-component-xs h-4 w-4" aria-hidden="true" />
             Edit
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            className="focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2"
-            aria-label={`Duplicate filter rule ${rule.order}`}
-          >
-            <Copy
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" size="sm" onClick={() => onDuplicate(rule)} className="focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2" aria-label={`Duplicate filter rule ${rule.order}`}>
+            <Copy className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="text-error hover:text-error/80 focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2"
-            aria-label={`Delete filter rule ${rule.order}`}
-          >
-            <Trash2
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" size="sm" onClick={() => onDelete(rule)} className="text-error hover:text-error/80 focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2" aria-label={`Delete filter rule ${rule.order}`}>
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 });
 
 // ============================================================================
@@ -281,30 +182,31 @@ export interface FilterRulesTableMobileProps {
  */
 export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
   className,
-  chain,
+  chain
 }: FilterRulesTableMobileProps) {
-  const { t } = useTranslation('firewall');
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
-  const pollingInterval = useCounterSettingsStore((state) => state.pollingInterval);
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
+  const pollingInterval = useCounterSettingsStore(state => state.pollingInterval);
 
   // Get highlight parameter from URL search params
-  const searchParams = useSearch({ strict: false }) as { highlight?: string };
+  const searchParams = useSearch({
+    strict: false
+  }) as {
+    highlight?: string;
+  };
   const highlightRuleId = searchParams.highlight;
   const highlightRef = useRef<HTMLDivElement | null>(null);
-
   const {
     data: rules,
     isLoading,
-    error,
+    error
   } = useFilterRules(routerIp, {
     chain,
-    refetchInterval: pollingInterval || false,
+    refetchInterval: pollingInterval || false
   });
   const deleteFilterRule = useDeleteFilterRule(routerIp);
   const toggleFilterRule = useToggleFilterRule(routerIp);
   const createFilterRule = useCreateFilterRule(routerIp);
   const updateFilterRule = useUpdateFilterRule(routerIp);
-
   const [editingRule, setEditingRule] = useState<FilterRule | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteConfirmRule, setDeleteConfirmRule] = useState<FilterRule | null>(null);
@@ -316,7 +218,7 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
   // Calculate max bytes for relative bar
   const maxBytes = useMemo(() => {
     if (!sortedRules || sortedRules.length === 0) return 0;
-    return Math.max(...sortedRules.map((r) => r.bytes ?? 0));
+    return Math.max(...sortedRules.map(r => r.bytes ?? 0));
   }, [sortedRules]);
 
   // Handlers
@@ -324,57 +226,48 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
     setEditingRule(rule);
     setIsEditorOpen(true);
   }, []);
-
   const handleDuplicate = useCallback((rule: FilterRule) => {
-    const duplicatedRule = { ...rule, id: undefined, order: undefined };
+    const duplicatedRule = {
+      ...rule,
+      id: undefined,
+      order: undefined
+    };
     setEditingRule(duplicatedRule);
     setIsEditorOpen(true);
   }, []);
-
-  const handleSaveRule = useCallback(
-    async (ruleInput: FilterRuleInput) => {
-      if (editingRule?.id) {
-        // Update existing rule
-        await updateFilterRule.mutateAsync({
-          ruleId: editingRule.id,
-          updates: ruleInput,
-        });
-      } else {
-        // Create new rule
-        await createFilterRule.mutateAsync(ruleInput);
-      }
-      setIsEditorOpen(false);
-      setEditingRule(null);
-    },
-    [editingRule?.id, updateFilterRule, createFilterRule]
-  );
-
+  const handleSaveRule = useCallback(async (ruleInput: FilterRuleInput) => {
+    if (editingRule?.id) {
+      // Update existing rule
+      await updateFilterRule.mutateAsync({
+        ruleId: editingRule.id,
+        updates: ruleInput
+      });
+    } else {
+      // Create new rule
+      await createFilterRule.mutateAsync(ruleInput);
+    }
+    setIsEditorOpen(false);
+    setEditingRule(null);
+  }, [editingRule?.id, updateFilterRule, createFilterRule]);
   const handleCloseEditor = useCallback(() => {
     setIsEditorOpen(false);
     setEditingRule(null);
   }, []);
-
   const handleDelete = useCallback((rule: FilterRule) => {
     setDeleteConfirmRule(rule);
   }, []);
-
-  const handleToggle = useCallback(
-    (rule: FilterRule) => {
-      toggleFilterRule.mutate({
-        ruleId: rule.id!,
-        disabled: !rule.disabled,
-      });
-    },
-    [toggleFilterRule]
-  );
-
+  const handleToggle = useCallback((rule: FilterRule) => {
+    toggleFilterRule.mutate({
+      ruleId: rule.id!,
+      disabled: !rule.disabled
+    });
+  }, [toggleFilterRule]);
   const confirmDelete = useCallback(() => {
     if (deleteConfirmRule) {
       deleteFilterRule.mutate(deleteConfirmRule.id!);
       setDeleteConfirmRule(null);
     }
   }, [deleteConfirmRule, deleteFilterRule]);
-
   const handleShowStats = useCallback((rule: FilterRule) => {
     setStatsRule(rule);
   }, []);
@@ -386,10 +279,9 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
       const timer = setTimeout(() => {
         highlightRef.current?.scrollIntoView({
           behavior: 'smooth',
-          block: 'center',
+          block: 'center'
         });
       }, 100);
-
       return () => clearTimeout(timer);
     }
     return undefined;
@@ -397,98 +289,44 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
 
   // Loading state
   if (isLoading) {
-    return (
-      <div
-        className={cn('p-component-md space-y-component-md', className)}
-        role="status"
-        aria-label="Loading filter rules"
-      >
+    return <div className={cn('p-component-md space-y-component-md', className)} role="status" aria-label="Loading filter rules">
         <div className="space-y-component-md animate-pulse">
           <div className="bg-muted h-32 rounded" />
           <div className="bg-muted h-32 rounded" />
           <div className="bg-muted h-32 rounded" />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div
-        className={cn(
-          'p-component-md bg-error/10 border-error/20 rounded-[var(--semantic-radius-card)] border',
-          className
-        )}
-        role="alert"
-        aria-live="assertive"
-      >
+    return <div className={cn('p-component-md bg-error/10 border-error/20 rounded-[var(--semantic-radius-card)] border', className)} role="alert" aria-live="assertive">
         <h3 className="text-error mb-component-sm font-semibold">Error loading filter rules</h3>
         <p className="text-error/80 text-sm">{error.message}</p>
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div
-        className={cn('p-component-lg text-muted-foreground text-center', className)}
-        role="status"
-      >
+    return <div className={cn('p-component-lg text-muted-foreground text-center', className)} role="status">
         <p className="font-medium">
           {chain ? `No rules in ${chain} chain` : 'No filter rules found'}
         </p>
         <p className="mt-component-sm text-sm">
-          {chain ?
-            `Add the first rule to the ${chain} chain to get started.`
-          : 'Create filter rules to manage traffic on your router.'}
+          {chain ? `Add the first rule to the ${chain} chain to get started.` : 'Create filter rules to manage traffic on your router.'}
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
-      <div
-        className={cn('space-y-component-sm', className)}
-        role="list"
-        aria-label="Filter rules"
-      >
-        {sortedRules.map((rule) => (
-          <RuleCard
-            key={rule.id}
-            rule={rule}
-            maxBytes={maxBytes}
-            onEdit={handleEdit}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDelete}
-            onToggle={handleToggle}
-            isHighlighted={highlightRuleId === rule.id}
-            highlightRef={highlightRuleId === rule.id ? highlightRef : undefined}
-            onShowStats={handleShowStats}
-          />
-        ))}
+  return <>
+      <div className={cn('space-y-component-sm', className)} role="list" aria-label="Filter rules">
+        {sortedRules.map(rule => <RuleCard key={rule.id} rule={rule} maxBytes={maxBytes} onEdit={handleEdit} onDuplicate={handleDuplicate} onDelete={handleDelete} onToggle={handleToggle} isHighlighted={highlightRuleId === rule.id} highlightRef={highlightRuleId === rule.id ? highlightRef : undefined} onShowStats={handleShowStats} />)}
       </div>
 
       {/* Edit/Create Filter Rule Editor */}
-      <FilterRuleEditor
-        routerId={routerIp}
-        initialRule={editingRule || undefined}
-        open={isEditorOpen}
-        onClose={handleCloseEditor}
-        onSave={handleSaveRule}
-        onDelete={editingRule?.id ? () => handleDelete(editingRule) : undefined}
-        isSaving={createFilterRule.isPending || updateFilterRule.isPending}
-        isDeleting={deleteFilterRule.isPending}
-        mode={editingRule?.id ? 'edit' : 'create'}
-      />
+      <FilterRuleEditor routerId={routerIp} initialRule={editingRule || undefined} open={isEditorOpen} onClose={handleCloseEditor} onSave={handleSaveRule} onDelete={editingRule?.id ? () => handleDelete(editingRule) : undefined} isSaving={createFilterRule.isPending || updateFilterRule.isPending} isDeleting={deleteFilterRule.isPending} mode={editingRule?.id ? 'edit' : 'create'} />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && setDeleteConfirmRule(null)}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && setDeleteConfirmRule(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Filter Rule?</DialogTitle>
@@ -506,16 +344,10 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
             </ul>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirmRule(null)}
-            >
+            <Button variant="outline" onClick={() => setDeleteConfirmRule(null)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-            >
+            <Button variant="destructive" onClick={confirmDelete}>
               Delete Rule
             </Button>
           </DialogFooter>
@@ -523,20 +355,11 @@ export const FilterRulesTableMobile = memo(function FilterRulesTableMobile({
       </Dialog>
 
       {/* Statistics Panel */}
-      {statsRule && (
-        <RuleStatisticsPanel
-          isOpen={!!statsRule}
-          onClose={() => setStatsRule(null)}
-          rule={statsRule}
-          historyData={[]} // TODO: Integrate with IndexedDB counterHistoryStorage
-          onExportCsv={() => {
-            // TODO: Implement CSV export using counterHistoryStorage.exportToCsv
-            console.log('Export CSV for rule:', statsRule.id);
-          }}
-        />
-      )}
-    </>
-  );
+      {statsRule && <RuleStatisticsPanel isOpen={!!statsRule} onClose={() => setStatsRule(null)} rule={statsRule} historyData={[]} // TODO: Integrate with IndexedDB counterHistoryStorage
+    onExportCsv={() => {
+      // TODO: Implement CSV export using counterHistoryStorage.exportToCsv
+      console.log('Export CSV for rule:', statsRule.id);
+    }} />}
+    </>;
 });
-
 FilterRulesTableMobile.displayName = 'FilterRulesTableMobile';

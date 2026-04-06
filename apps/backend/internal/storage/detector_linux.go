@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"go.uber.org/zap"
 	"golang.org/x/sys/unix"
 )
 
@@ -86,14 +87,14 @@ func (d *StorageDetector) probeMountPoint(path string) (*MountPoint, error) {
 		FSType:    fsType,
 	}
 
-	d.logger.Debug().
-		Str("path", path).
-		Uint64("total_mb", totalMB).
-		Uint64("free_mb", freeMB).
-		Uint64("used_mb", usedMB).
-		Float64("used_pct", usedPct).
-		Str("fs_type", fsType).
-		Msg("probed mount point")
+	d.logger.Debug("probed mount point",
+		zap.String("path", path),
+		zap.Uint64("total_mb", totalMB),
+		zap.Uint64("free_mb", freeMB),
+		zap.Uint64("used_mb", usedMB),
+		zap.Float64("used_pct", usedPct),
+		zap.String("fs_type", fsType),
+	)
 
 	return mp, nil
 }

@@ -1,41 +1,24 @@
 /**
  * Connection Heartbeat Hook
- * Periodically monitors router connection status (Epic 0.1, Story 0-1-7)
+ * Keeps the shared connection store aligned with the router resource query.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
-import { makeRouterOSRequest } from '@nasnet/api-client/core';
+import { useRouterResource } from '@nasnet/api-client/queries';
 import { useConnectionStore } from '@nasnet/state/stores';
-
-/**
- * Configuration for heartbeat monitoring
- */
-const HEARTBEAT_CONFIG = {
-  /**
-   * Interval between heartbeat checks (30 seconds)
-   */
-  interval: 30_000,
-
-  /**
-   * Timeout for heartbeat requests (5 seconds)
-   */
-  timeout: 5000,
-} as const;
 
 /**
  * Connection Heartbeat Hook
  *
- * Periodically checks router connection by sending lightweight
- * requests to the RouterOS API. Updates connection state based
- * on response.
+ * Uses the same resource query that powers the dashboard to derive a single
+ * router reachability signal for the app shell.
  *
  * Features:
- * - Runs every 30 seconds
- * - Only checks when a router IP is available
- * - Reads fresh state from store on each tick to avoid stale closures
- * - Updates connection state automatically
- * - Cleans up on unmount
+ * - Shares the TanStack Query cache with router pages
+ * - Marks the shell connected when router resource data is available
+ * - Marks the shell disconnected on query errors
+ * - Uses reconnecting while the first request is in flight
  *
  * @example
  * ```tsx
@@ -48,83 +31,45 @@ const HEARTBEAT_CONFIG = {
  * ```
  */
 export function useConnectionHeartbeat() {
-  const currentRouterIp = useConnectionStore((s) => s.currentRouterIp);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Stable callback that reads fresh store state each invocation
-  const checkConnection = useCallback(async (routerIp: string) => {
-    try {
-      const result = await makeRouterOSRequest<{ name: string }>(routerIp, 'system/identity', {
-        method: 'GET',
-      });
-
-      if (result.success) {
-        const store = useConnectionStore.getState();
-        if (store.state !== 'connected') {
-          store.setConnected();
-          console.debug('[Heartbeat] Connection restored');
-        }
-      } else {
-        throw new Error(result.error || 'Connection check failed');
-      }
-    } catch (error) {
-      const store = useConnectionStore.getState();
-      if (store.state !== 'disconnected') {
-        store.setDisconnected();
-        console.debug('[Heartbeat] Connection lost', error);
-      }
-    }
-  }, []);
+  const currentRouterIp = useConnectionStore((s) => s.currentRouterIp) || '';
+  const { data, error, isLoading, isFetching } = useRouterResource(currentRouterIp);
+  const hasConnectedRef = useRef(false);
 
   useEffect(() => {
-    // Only run heartbeat if we have a router IP
+    hasConnectedRef.current = false;
+  }, [currentRouterIp]);
+
+  useEffect(() => {
     if (!currentRouterIp) {
+      useConnectionStore.getState().setDisconnected();
       return;
     }
 
-    // Run initial check
-    checkConnection(currentRouterIp);
+    const store = useConnectionStore.getState();
 
-    // Set up periodic checks
-    intervalRef.current = setInterval(
-      () => checkConnection(currentRouterIp),
-      HEARTBEAT_CONFIG.interval
-    );
-
-    // Cleanup on unmount or when router IP changes
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+    if (error) {
+      if (hasConnectedRef.current) {
+        if (store.state !== 'disconnected') {
+          store.setDisconnected();
+          console.debug('[Heartbeat] Connection lost', error);
+        }
+      } else if (store.state !== 'reconnecting') {
+        store.setReconnecting();
       }
-    };
-  }, [currentRouterIp, checkConnection]);
-}
+      return;
+    }
 
-/**
- * Manual connection test function
- * Can be used for on-demand connection checks
- *
- * @param routerIp - Router IP address to test
- * @returns Promise resolving to true if connected, false otherwise
- *
- * @example
- * ```tsx
- * const isConnected = await testConnection('192.168.88.1');
- * if (!isConnected) {
- *   alert('Lost connection to router');
- * }
- * ```
- */
-export async function testConnection(routerIp: string): Promise<boolean> {
-  if (!routerIp) return false;
+    if (data) {
+      hasConnectedRef.current = true;
+      if (store.state !== 'connected') {
+        store.setConnected();
+        console.debug('[Heartbeat] Connection restored');
+      }
+      return;
+    }
 
-  try {
-    const result = await makeRouterOSRequest<{ name: string }>(routerIp, 'system/identity', {
-      method: 'GET',
-    });
-    return result.success;
-  } catch {
-    return false;
-  }
+    if ((isLoading || isFetching) && store.state === 'disconnected') {
+      store.setReconnecting();
+    }
+  }, [currentRouterIp, data, error, isFetching, isLoading]);
 }

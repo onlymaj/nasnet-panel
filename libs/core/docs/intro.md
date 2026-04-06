@@ -53,13 +53,6 @@ libs/core/
 │       ├── schema-utils.ts          # Zod schema builders
 │       └── error-messages.ts        # Backend error mapping
 │
-└── i18n/           # Internationalization (i18next)
-    └── src/
-        ├── I18nProvider.tsx         # i18next provider
-        ├── DirectionProvider.tsx    # RTL/LTR support
-        ├── i18n.ts                  # i18next config
-        ├── hooks/                   # i18n hooks
-        └── locales/                 # Translations (.json)
 ```
 
 ## Dependency Rules (Strict)
@@ -86,10 +79,10 @@ The core library enforces strict dependency boundaries:
 
 **Rules:**
 
-- ✅ **Core CAN** depend on: External libraries (Zod, i18next, TypeScript)
+- ✅ **Core CAN** depend on: External libraries (Zod, TypeScript)
 - ❌ **Core CANNOT** depend on: apps/, features/, ui/ libraries
 - ✅ **All other libraries CAN** import from core
-- ✅ **React dependencies** allowed only in forms/ and i18n/
+- ✅ **React dependencies** allowed only in forms/
 
 Why? Core types and utilities should be reusable by:
 
@@ -109,7 +102,6 @@ All aliases are defined in `apps/connect/vite.config.ts`:
   '@nasnet/core/utils': 'libs/core/utils/src',
   '@nasnet/core/constants': 'libs/core/constants/src',
   '@nasnet/core/forms': 'libs/core/forms/src',
-  '@nasnet/core/i18n': 'libs/core/i18n/src',
 }
 ```
 
@@ -120,7 +112,6 @@ import type { FilterRule } from '@nasnet/core/types';
 import { validateIPv4, formatBytes } from '@nasnet/core/utils';
 import { ROUTES, API_ENDPOINTS } from '@nasnet/core/constants';
 import { useZodForm } from '@nasnet/core/forms';
-import { useTranslation } from '@nasnet/core/i18n';
 ```
 
 ## Sub-Library Overview
@@ -180,17 +171,6 @@ Builds on top of React Hook Form + Zod for:
 - Backend error mapping
 
 **Requires React** - forms/ context and hooks.
-
-### i18n/ — Internationalization
-
-i18next setup with:
-
-- Language detection
-- RTL/LTR support
-- Translation providers
-- Locale files (.json)
-
-**Requires React** - i18n/ providers and hooks.
 
 ## Package Configuration (Nx)
 

@@ -15,35 +15,9 @@
  */
 
 import { useState, memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRateLimitingUIStore, useConnectionStore } from '@nasnet/state/stores';
-import {
-  RateLimitRulesTable,
-  RateLimitRuleEditor,
-  SynFloodConfigPanel,
-  BlockedIPsTable,
-  RateLimitStatsOverview,
-  usePlatform,
-} from '@nasnet/ui/patterns';
-import {
-  Button,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Alert,
-  AlertDescription,
-} from '@nasnet/ui/primitives';
+import { RateLimitRulesTable, RateLimitRuleEditor, SynFloodConfigPanel, BlockedIPsTable, RateLimitStatsOverview, usePlatform } from '@nasnet/ui/patterns';
+import { Button, Tabs, TabsContent, TabsList, TabsTrigger, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Card, CardContent, CardDescription, CardHeader, CardTitle, Alert, AlertDescription } from '@nasnet/ui/primitives';
 import { Plus, RefreshCw, Download, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
 
@@ -59,44 +33,32 @@ interface EmptyStateProps {
 /**
  * @description Empty state shown when no rules or data exist
  */
-const EmptyState = memo(function EmptyState({ tab, onAddRule }: EmptyStateProps) {
-  const { t } = useTranslation('firewall');
-
+const EmptyState = memo(function EmptyState({
+  tab,
+  onAddRule
+}: EmptyStateProps) {
   if (tab === 'rate-limits') {
-    return (
-      <Card className="border-dashed">
+    return <Card className="border-dashed">
         <CardHeader className="text-center">
-          <CardTitle>{t('rateLimiting.emptyStates.noRules')}</CardTitle>
-          <CardDescription>{t('rateLimiting.emptyStates.noRulesDescription')}</CardDescription>
+          <CardTitle>{"No rate limit rules configured"}</CardTitle>
+          <CardDescription>{"Add your first rate limit rule to protect against connection flooding"}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button
-            onClick={onAddRule}
-            aria-label="Add rate limit rule"
-            className="min-h-[44px]"
-          >
-            <Plus
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
-            {t('rateLimiting.buttons.addRateLimit')}
+          <Button onClick={onAddRule} aria-label="Add rate limit rule" className="min-h-[44px]">
+            <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+            {"Add Rate Limit"}
           </Button>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (tab === 'statistics') {
-    return (
-      <Card className="border-dashed">
+    return <Card className="border-dashed">
         <CardHeader className="text-center">
-          <CardTitle>{t('rateLimiting.emptyStates.noBlockedIPs')}</CardTitle>
-          <CardDescription>{t('rateLimiting.emptyStates.noBlockedIPsDescription')}</CardDescription>
+          <CardTitle>{"No blocked IPs"}</CardTitle>
+          <CardDescription>{"No IPs have been blocked by rate limiting"}</CardDescription>
         </CardHeader>
-      </Card>
-    );
+      </Card>;
   }
-
   return null;
 });
 
@@ -114,172 +76,106 @@ const EmptyState = memo(function EmptyState({ tab, onAddRule }: EmptyStateProps)
  * @returns Rate limiting page component
  */
 export const RateLimitingPage = memo(function RateLimitingPage() {
-  const { t } = useTranslation('firewall');
   const platform = usePlatform();
   const isMobile = platform === 'mobile';
-
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
   const {
     selectedTab,
     setSelectedTab,
     showRuleEditor,
     openRuleEditor,
     closeRuleEditor,
-    editingRule,
+    editingRule
   } = useRateLimitingUIStore();
-
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Mock data state - in production this would come from API
   const [hasRules, setHasRules] = useState(false);
   const [hasBlockedIPs, setHasBlockedIPs] = useState(false);
-
   const handleAddRule = () => {
     openRuleEditor();
   };
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     // Simulate refresh
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 500));
     setIsRefreshing(false);
   };
-
   const handleExportCSV = () => {
     // Export functionality - to be implemented
     console.log('Export CSV');
   };
-
   const handleClearBlockedIPs = () => {
     // Clear blocked IPs - to be implemented
     console.log('Clear blocked IPs');
   };
-
   const handleTabChange = (value: string) => {
     setSelectedTab(value as 'rate-limits' | 'syn-flood' | 'statistics');
   };
-
-  return (
-    <div className="flex h-full flex-col">
+  return <div className="flex h-full flex-col">
       {/* Page Header */}
       <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
         <div className="p-component-md flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight">
-              {t('rateLimiting.title')}
+              {"Rate Limiting"}
             </h1>
-            <p className="text-muted-foreground text-sm">{t('rateLimiting.subtitle')}</p>
+            <p className="text-muted-foreground text-sm">{"Connection rate control and DDoS protection"}</p>
           </div>
 
           {/* Header Actions - Dynamic based on selected tab */}
           <div className="gap-component-sm flex">
-            {selectedTab === 'rate-limits' && (
-              <Button
-                onClick={handleAddRule}
-                aria-label="Add new rate limit rule"
-                className="min-h-[44px]"
-              >
-                <Plus
-                  className="mr-component-sm h-4 w-4"
-                  aria-hidden="true"
-                />
-                {t('rateLimiting.buttons.addRateLimit')}
-              </Button>
-            )}
+            {selectedTab === 'rate-limits' && <Button onClick={handleAddRule} aria-label="Add new rate limit rule" className="min-h-[44px]">
+                <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+                {"Add Rate Limit"}
+              </Button>}
 
-            {selectedTab === 'statistics' && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  aria-label="Refresh statistics"
-                  className="min-h-[44px]"
-                >
-                  <RefreshCw
-                    className={cn('mr-component-sm h-4 w-4', isRefreshing && 'animate-spin')}
-                    aria-hidden="true"
-                  />
-                  {t('rateLimiting.statistics.refresh')}
+            {selectedTab === 'statistics' && <>
+                <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} aria-label="Refresh statistics" className="min-h-[44px]">
+                  <RefreshCw className={cn('mr-component-sm h-4 w-4', isRefreshing && 'animate-spin')} aria-hidden="true" />
+                  {"Refresh"}
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportCSV}
-                  aria-label="Export statistics as CSV"
-                  className="min-h-[44px]"
-                >
-                  <Download
-                    className="mr-component-sm h-4 w-4"
-                    aria-hidden="true"
-                  />
-                  {t('rateLimiting.statistics.exportCSV')}
+                <Button variant="outline" onClick={handleExportCSV} aria-label="Export statistics as CSV" className="min-h-[44px]">
+                  <Download className="mr-component-sm h-4 w-4" aria-hidden="true" />
+                  {"Export CSV"}
                 </Button>
-                {hasBlockedIPs && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleClearBlockedIPs}
-                    aria-label="Clear all blocked IPs"
-                    className="min-h-[44px]"
-                  >
-                    {t('rateLimiting.buttons.clear')}
-                  </Button>
-                )}
-              </>
-            )}
+                {hasBlockedIPs && <Button variant="destructive" onClick={handleClearBlockedIPs} aria-label="Clear all blocked IPs" className="min-h-[44px]">
+                    {"Clear"}
+                  </Button>}
+              </>}
           </div>
         </div>
       </div>
 
       {/* Tab Layout */}
       <div className="flex-1 overflow-hidden">
-        <Tabs
-          value={selectedTab}
-          onValueChange={handleTabChange}
-          className="flex h-full flex-col"
-        >
+        <Tabs value={selectedTab} onValueChange={handleTabChange} className="flex h-full flex-col">
           <div className="border-border px-component-md border-b">
             <TabsList className={isMobile ? 'w-full justify-start overflow-x-auto' : ''}>
-              <TabsTrigger value="rate-limits">{t('rateLimiting.tabs.rateLimits')}</TabsTrigger>
-              <TabsTrigger value="syn-flood">{t('rateLimiting.tabs.synFlood')}</TabsTrigger>
-              <TabsTrigger value="statistics">{t('rateLimiting.tabs.statistics')}</TabsTrigger>
+              <TabsTrigger value="rate-limits">{"Rate Limits"}</TabsTrigger>
+              <TabsTrigger value="syn-flood">{"SYN Flood Protection"}</TabsTrigger>
+              <TabsTrigger value="statistics">{"Statistics"}</TabsTrigger>
             </TabsList>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {/* Rate Limits Tab */}
-            <TabsContent
-              value="rate-limits"
-              className="p-component-md m-0"
-            >
-              {!hasRules ?
-                <EmptyState
-                  tab="rate-limits"
-                  onAddRule={handleAddRule}
-                />
-              : <RateLimitRulesTable />}
+            <TabsContent value="rate-limits" className="p-component-md m-0">
+              {!hasRules ? <EmptyState tab="rate-limits" onAddRule={handleAddRule} /> : <RateLimitRulesTable />}
             </TabsContent>
 
             {/* SYN Flood Protection Tab */}
-            <TabsContent
-              value="syn-flood"
-              className="p-component-md space-y-component-md m-0"
-            >
+            <TabsContent value="syn-flood" className="p-component-md space-y-component-md m-0">
               {/* Info Alert */}
               <Alert>
-                <Info
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-                <AlertDescription>{t('rateLimiting.synFlood.description')}</AlertDescription>
+                <Info className="h-4 w-4" aria-hidden="true" />
+                <AlertDescription>{"Protect against SYN flood attacks by limiting SYN packet rate"}</AlertDescription>
               </Alert>
 
               {/* Warning Alert */}
               <Alert variant="destructive">
-                <AlertTriangle
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
-                <AlertDescription>{t('rateLimiting.synFlood.warning')}</AlertDescription>
+                <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                <AlertDescription>{"SYN flood protection blocks packets globally. Tune carefully."}</AlertDescription>
               </Alert>
 
               {/* SYN Flood Config Panel */}
@@ -287,74 +183,47 @@ export const RateLimitingPage = memo(function RateLimitingPage() {
             </TabsContent>
 
             {/* Statistics Tab */}
-            <TabsContent
-              value="statistics"
-              className="p-component-md space-y-component-lg m-0"
-            >
+            <TabsContent value="statistics" className="p-component-md space-y-component-lg m-0">
               {/* Stats Overview */}
               <RateLimitStatsOverview routerId={routerIp} />
 
               {/* Blocked IPs Table */}
-              {!hasBlockedIPs ?
-                <EmptyState
-                  tab="statistics"
-                  onAddRule={handleAddRule}
-                />
-              : <div>
+              {!hasBlockedIPs ? <EmptyState tab="statistics" onAddRule={handleAddRule} /> : <div>
                   <div className="mb-component-md">
                     <h2 className="font-display text-lg font-semibold">
-                      {t('rateLimiting.statistics.blockedIPsTable')}
+                      {"Blocked IPs"}
                     </h2>
                     <p className="text-muted-foreground text-sm">
-                      {t('rateLimiting.fieldHelp.whitelistInfo')}
+                      {"Whitelisted IPs bypass all rate limit rules"}
                     </p>
                   </div>
                   <BlockedIPsTable blockedIPsTable={{} as any} />
-                </div>
-              }
+                </div>}
             </TabsContent>
           </div>
         </Tabs>
       </div>
 
       {/* Add/Edit Rule Sheet */}
-      <Sheet
-        open={showRuleEditor}
-        onOpenChange={closeRuleEditor}
-      >
-        <SheetContent
-          side={isMobile ? 'bottom' : 'right'}
-          className={isMobile ? 'h-[90vh]' : 'w-full sm:max-w-2xl'}
-        >
+      <Sheet open={showRuleEditor} onOpenChange={closeRuleEditor}>
+        <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[90vh]' : 'w-full sm:max-w-2xl'}>
           <SheetHeader>
             <SheetTitle>
-              {editingRule ?
-                t('rateLimiting.dialogs.editRule.title')
-              : t('rateLimiting.dialogs.addRule.title')}
+              {editingRule ? "Edit Rate Limit Rule" : "Add Rate Limit Rule"}
             </SheetTitle>
             <SheetDescription>
-              {editingRule ?
-                t('rateLimiting.dialogs.editRule.description')
-              : t('rateLimiting.dialogs.addRule.description')}
+              {editingRule ? "Modify existing rate limit rule configuration" : "Create a new rate limit rule to protect against connection flooding"}
             </SheetDescription>
           </SheetHeader>
           <div className="mt-component-lg">
-            <RateLimitRuleEditor
-              routerId={routerIp}
-              initialRule={editingRule || undefined}
-              open={showRuleEditor}
-              onClose={closeRuleEditor}
-              onSave={async () => {
-                closeRuleEditor();
-              }}
-            />
+            <RateLimitRuleEditor routerId={routerIp} initialRule={editingRule || undefined} open={showRuleEditor} onClose={closeRuleEditor} onSave={async () => {
+            closeRuleEditor();
+          }} />
           </div>
         </SheetContent>
       </Sheet>
-    </div>
-  );
+    </div>;
 });
-
 RateLimitingPage.displayName = 'RateLimitingPage';
 
 /**

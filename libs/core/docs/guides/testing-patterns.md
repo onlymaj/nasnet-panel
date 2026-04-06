@@ -912,26 +912,15 @@ describe('Router Query Mocks', () => {
 });
 ```
 
-### Mocking i18n
+### Mocking String Helpers
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock i18n module
-vi.mock('@nasnet/core/i18n', () => ({
-  useTranslation: () => ({
-    t: (key: string, ...args: any[]) => key, // Return key as-is for testing
-  }),
-  useFormatters: () => ({
-    formatNumber: (n: number) => n.toLocaleString(),
-    formatDate: (d: Date) => d.toLocaleDateString(),
-  }),
-}));
+const t = (key: string) => key;
 
-describe('i18n Mocks', () => {
-  it('should provide mocked translation function', () => {
-    const { useTranslation } = require('@nasnet/core/i18n');
-    const { t } = useTranslation();
+describe('String helper mocks', () => {
+  it('should provide a deterministic string function', () => {
     expect(t('common.save')).toBe('common.save');
   });
 });

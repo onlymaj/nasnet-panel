@@ -61,7 +61,6 @@ The foundation. Contains no React components.
 - `libs/core/utils` — Pure utility functions (IP formatting, status calculations)
 - `libs/core/constants` — App-wide constants, route paths, socket events
 - `libs/core/forms` — React Hook Form + Zod integration, validation utilities
-- `libs/core/i18n` — i18next setup, hooks, direction detection
 - `libs/api-client/core` — Apollo Client configuration, links, normalized cache
 - `libs/api-client/generated` — Auto-generated TypeScript types and React hooks from GraphQL schema
 - `libs/api-client/queries` — Human-authored Apollo Client hooks organized by domain

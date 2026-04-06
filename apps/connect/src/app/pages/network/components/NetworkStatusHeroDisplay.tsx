@@ -5,13 +5,8 @@
  */
 
 import React from 'react';
-
-import { useTranslation } from 'react-i18next';
-
 import { cn } from '@nasnet/ui/utils';
-
 type NetworkDisplayStatus = 'online' | 'degraded' | 'offline' | 'connecting';
-
 interface NetworkStatusHeroDisplayProps {
   /** Router identity / hostname */
   routerName?: string;
@@ -28,44 +23,43 @@ interface NetworkStatusHeroDisplayProps {
 }
 
 // Note: STATUS_CONFIG labels are localized dynamically in the component
-const STATUS_CONFIG: Record<NetworkDisplayStatus, { dotClass: string; badgeClass: string }> = {
+const STATUS_CONFIG: Record<NetworkDisplayStatus, {
+  dotClass: string;
+  badgeClass: string;
+}> = {
   online: {
     dotClass: 'bg-success animate-pulse',
-    badgeClass: 'bg-success/10 text-success border-success/20',
+    badgeClass: 'bg-success/10 text-success border-success/20'
   },
   degraded: {
     dotClass: 'bg-warning',
-    badgeClass: 'bg-warning/10 text-warning border-warning/20',
+    badgeClass: 'bg-warning/10 text-warning border-warning/20'
   },
   offline: {
     dotClass: 'bg-error',
-    badgeClass: 'bg-error/10 text-error border-error/20',
+    badgeClass: 'bg-error/10 text-error border-error/20'
   },
   connecting: {
     dotClass: 'bg-muted-foreground animate-pulse',
-    badgeClass: 'bg-muted/50 text-muted-foreground border-border',
-  },
+    badgeClass: 'bg-muted/50 text-muted-foreground border-border'
+  }
 };
-
 export const NetworkStatusHeroDisplay = React.memo(function NetworkStatusHeroDisplay({
   routerName = 'Router',
   status,
   uptime,
   version,
   activeInterfaces,
-  totalInterfaces,
+  totalInterfaces
 }: NetworkStatusHeroDisplayProps) {
-  const { t } = useTranslation('network');
   const statusLabelMap: Record<NetworkDisplayStatus, string> = {
-    online: t('status.online'),
-    degraded: t('status.degraded'),
-    offline: t('status.offline'),
-    connecting: t('status.connecting'),
+    online: "Online",
+    degraded: "Degraded",
+    offline: "Offline",
+    connecting: "Connecting..."
   };
   const cfg = STATUS_CONFIG[status];
-
-  return (
-    <div className="bg-card border-border category-hero-networking flex flex-col gap-3 rounded-2xl border p-4 shadow-md">
+  return <div className="bg-card border-border category-hero-networking flex flex-col gap-3 rounded-2xl border p-4 shadow-md">
       {/* Identity row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -76,21 +70,14 @@ export const NetworkStatusHeroDisplay = React.memo(function NetworkStatusHeroDis
             <p className="text-foreground font-display text-sm font-semibold leading-tight">
               {routerName}
             </p>
-            {version && (
-              <p className="text-muted-foreground text-xs">
-                {t('status.routerOS')} {version}
-              </p>
-            )}
+            {version && <p className="text-muted-foreground text-xs">
+                {"RouterOS"} {version}
+              </p>}
           </div>
         </div>
 
         {/* Status badge */}
-        <span
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium',
-            cfg.badgeClass
-          )}
-        >
+        <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium', cfg.badgeClass)}>
           <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dotClass)} />
           {statusLabelMap[status]}
         </span>
@@ -98,28 +85,22 @@ export const NetworkStatusHeroDisplay = React.memo(function NetworkStatusHeroDis
 
       {/* Stats row */}
       <div className="border-border flex items-center gap-4 border-t pt-1">
-        {uptime && (
-          <div>
+        {uptime && <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide">
-              {t('quickStats.uptime')}
+              {"quickStats.uptime"}
             </p>
             <p className="text-foreground font-mono text-sm font-medium">{uptime}</p>
-          </div>
-        )}
-        {activeInterfaces !== undefined && totalInterfaces !== undefined && (
-          <div>
+          </div>}
+        {activeInterfaces !== undefined && totalInterfaces !== undefined && <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide">
-              {t('quickStats.interfaces')}
+              {"quickStats.interfaces"}
             </p>
             <p className="text-foreground font-mono text-sm font-medium">
               {activeInterfaces}
               <span className="text-muted-foreground">/{totalInterfaces}</span>
             </p>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 });
-
 NetworkStatusHeroDisplay.displayName = 'NetworkStatusHeroDisplay';

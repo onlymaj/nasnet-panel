@@ -16,11 +16,8 @@
  */
 
 import { useState } from 'react';
-
 import { createFileRoute } from '@tanstack/react-router';
-
 import type { ServiceTemplate } from '@nasnet/api-client/generated';
-import { useTranslation } from '@nasnet/core/i18n';
 import { TemplatesBrowser, TemplateInstallWizard } from '@nasnet/features/services';
 import { useToast } from '@nasnet/ui/primitives';
 
@@ -30,9 +27,12 @@ import { useToast } from '@nasnet/ui/primitives';
  * Renders the templates browser and handles wizard modal state.
  */
 export function TemplatesPage() {
-  const { t } = useTranslation('services');
-  const { id: routerId } = Route.useParams();
-  const { toast } = useToast();
+  const {
+    id: routerId
+  } = Route.useParams();
+  const {
+    toast
+  } = useToast();
 
   // Wizard modal state
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -64,41 +64,22 @@ export function TemplatesPage() {
   const handleInstallComplete = (instanceIDs: string[]) => {
     const count = instanceIDs.length;
     toast({
-      title: t('templates.installSuccess'),
-      description: t('templates.installSuccessMessage', {
-        count,
-        templateName: selectedTemplate?.name || '',
-        defaultValue: `Successfully installed ${count} service${count !== 1 ? 's' : ''} from template "${selectedTemplate?.name}"`,
-      }),
-      variant: 'success',
+      title: "Template Installed",
+      description: count === 1 ? `Successfully installed ${count} service from template "${selectedTemplate?.name || ''}"` : `Successfully installed ${count} services from template "${selectedTemplate?.name || ''}"`,
+      variant: 'success'
     });
     handleWizardClose();
   };
+  return <>
+      <TemplatesBrowser routerId={routerId} onInstall={handleInstall} className="p-4 md:p-6" />
 
-  return (
-    <>
-      <TemplatesBrowser
-        routerId={routerId}
-        onInstall={handleInstall}
-        className="p-4 md:p-6"
-      />
-
-      {selectedTemplate && (
-        <TemplateInstallWizard
-          routerId={routerId}
-          template={selectedTemplate}
-          open={wizardOpen}
-          onClose={handleWizardClose}
-          onComplete={handleInstallComplete}
-        />
-      )}
-    </>
-  );
+      {selectedTemplate && <TemplateInstallWizard routerId={routerId} template={selectedTemplate} open={wizardOpen} onClose={handleWizardClose} onComplete={handleInstallComplete} />}
+    </>;
 }
 
 /**
  * Route Configuration
  */
 export const Route = createFileRoute('/router/$id/services/templates')({
-  component: TemplatesPage,
+  component: TemplatesPage
 });

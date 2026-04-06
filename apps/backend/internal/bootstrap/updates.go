@@ -29,6 +29,8 @@ type UpdateComponents struct {
 	UpdateScheduler  *updates.UpdateScheduler
 }
 
+const defaultManifestRepo = "joinnasnet/nasnet"
+
 // instanceHealthAdapter adapts InstanceManager to features.HealthChecker interface.
 type instanceHealthAdapter struct {
 	manager *lifecycle.InstanceManager
@@ -104,6 +106,7 @@ func InitializeUpdateManager(
 	// 2. Update Service - checks for available updates via GitHub Releases API
 	updateService, err := updates.NewUpdateService(updates.UpdateServiceConfig{
 		GitHubClient: githubClient,
+		ManifestRepo: defaultManifestRepo,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("new update service: %w", err)

@@ -34,7 +34,7 @@ const meta: Meta<typeof AddServiceDialog> = {
     docs: {
       description: {
         component:
-          'Dialog for adding or editing custom service port definitions. Features form validation, conflict detection, and i18n support.',
+          'Dialog for adding or editing custom service port definitions. Features form validation, conflict detection, and English-only UI copy.',
       },
     },
   },

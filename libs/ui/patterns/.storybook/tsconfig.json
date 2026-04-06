@@ -24,8 +24,6 @@
     "../../../core/constants/src/**/*.tsx",
     "../../../core/forms/src/**/*.ts",
     "../../../core/forms/src/**/*.tsx",
-    "../../../core/i18n/src/**/*.ts",
-    "../../../core/i18n/src/**/*.tsx",
     "../../../api-client/core/src/**/*.ts",
     "../../../api-client/core/src/**/*.tsx",
     "../../../api-client/generated/**/*.ts",

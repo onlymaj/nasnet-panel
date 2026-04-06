@@ -103,9 +103,6 @@ export const RouterPanel = React.memo(function RouterPanel({
       }
 
       if (routerData?.ipAddress) {
-        useConnectionStore.getState().setCurrentRouter(id, routerData.ipAddress);
-
-        // Load saved credentials for API client
         const savedCredentials = loadCredentials(id);
 
         if (savedCredentials) {
@@ -118,6 +115,7 @@ export const RouterPanel = React.memo(function RouterPanel({
             username: savedCredentials.username,
             password: savedCredentials.password,
           });
+          useConnectionStore.getState().setCurrentRouter(id, routerData.ipAddress);
         } else {
           // No saved credentials - show credential dialog
           setShowCredentialDialog(true);
@@ -142,6 +140,9 @@ export const RouterPanel = React.memo(function RouterPanel({
     // Store credentials in API client
     storeCredentials(creds);
     setCredentials(creds);
+    if (routerIp) {
+      useConnectionStore.getState().setCurrentRouter(id, routerIp);
+    }
 
     // Save to localStorage if requested
     if (shouldSave) {

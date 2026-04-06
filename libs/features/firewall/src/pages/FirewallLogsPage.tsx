@@ -16,7 +16,6 @@
  */
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useConnectionStore, useFirewallLogStore } from '@nasnet/state/stores';
 import { useRuleNavigation } from '../hooks';
 import {
@@ -52,21 +51,16 @@ import { Play, Pause, Download, Filter, BarChart3, ChevronLeft, ChevronRight } f
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const mediaQuery = window.matchMedia(query);
     setMatches(mediaQuery.matches);
-
     const handleChange = (event: MediaQueryListEvent) => {
       setMatches(event.matches);
     };
-
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, [query]);
-
   return matches;
 }
 
@@ -82,7 +76,6 @@ interface AutoRefreshControlsProps {
   onExport: () => void;
   className?: string;
 }
-
 const AutoRefreshControls = React.memo(function AutoRefreshControlsComponent({
   isAutoRefreshEnabled,
   refreshInterval,
@@ -92,8 +85,6 @@ const AutoRefreshControls = React.memo(function AutoRefreshControlsComponent({
   className,
 }: AutoRefreshControlsProps) {
   AutoRefreshControls.displayName = 'AutoRefreshControls';
-  const { t } = useTranslation('firewall');
-
   return (
     <div className={cn('gap-component-sm flex items-center', className)}>
       {/* Play/Pause Toggle */}
@@ -101,9 +92,7 @@ const AutoRefreshControls = React.memo(function AutoRefreshControlsComponent({
         variant={isAutoRefreshEnabled ? 'default' : 'outline'}
         size="sm"
         onClick={onToggleRefresh}
-        aria-label={
-          isAutoRefreshEnabled ? t('logs.controls.pauseRefresh') : t('logs.controls.startRefresh')
-        }
+        aria-label={isAutoRefreshEnabled ? 'Pause auto-refresh' : 'Start auto-refresh'}
         title={isAutoRefreshEnabled ? 'Pause auto-refresh' : 'Start auto-refresh'}
         className="focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       >
@@ -135,7 +124,7 @@ const AutoRefreshControls = React.memo(function AutoRefreshControlsComponent({
           <SelectItem value="10000">10s</SelectItem>
           <SelectItem value="30000">30s</SelectItem>
           <SelectItem value="60000">60s</SelectItem>
-          <SelectItem value="manual">{t('logs.controls.manual')}</SelectItem>
+          <SelectItem value="manual">{'Manual'}</SelectItem>
         </SelectContent>
       </Select>
 
@@ -150,7 +139,7 @@ const AutoRefreshControls = React.memo(function AutoRefreshControlsComponent({
           className="mr-component-sm h-4 w-4"
           aria-hidden="true"
         />
-        {t('logs.controls.export')}
+        {'Export'}
       </Button>
     </div>
   );
@@ -173,7 +162,6 @@ interface DesktopLayoutProps {
   autoRefreshControls: React.ReactNode;
   className?: string;
 }
-
 const DesktopLayout = React.memo(function DesktopLayoutComponent({
   routerId,
   filters,
@@ -188,16 +176,12 @@ const DesktopLayout = React.memo(function DesktopLayoutComponent({
   className,
 }: DesktopLayoutProps) {
   DesktopLayout.displayName = 'DesktopLayout';
-  const { t } = useTranslation('firewall');
-
   return (
     <div className="flex h-full">
       {/* Left Sidebar - Filters */}
       <div className="border-border bg-muted/30 p-component-md w-80 overflow-y-auto border-r">
         <div className="mb-component-md">
-          <h2 className="font-display mb-component-sm text-lg font-semibold">
-            {t('logs.filters.title')}
-          </h2>
+          <h2 className="font-display mb-component-sm text-lg font-semibold">{'Filters'}</h2>
         </div>
         <FirewallLogFilters
           filters={filters}
@@ -211,7 +195,7 @@ const DesktopLayout = React.memo(function DesktopLayoutComponent({
         {/* Header with Controls */}
         <div className="border-border p-component-md bg-card border-b">
           <div className="flex items-center justify-between">
-            <h1 className="font-display text-2xl font-bold">{t('logs.title')}</h1>
+            <h1 className="font-display text-2xl font-bold">{'Firewall Logs'}</h1>
             {autoRefreshControls}
           </div>
         </div>
@@ -230,12 +214,12 @@ const DesktopLayout = React.memo(function DesktopLayoutComponent({
       {expandedStats && (
         <div className="border-border bg-muted/30 p-component-md w-96 overflow-y-auto border-l">
           <div className="mb-component-md flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold">{t('logs.stats.title')}</h2>
+            <h2 className="font-display text-lg font-semibold">{'Log Statistics'}</h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={onToggleStats}
-              aria-label={t('logs.stats.collapse')}
+              aria-label={'logs.stats.collapse'}
               title="Collapse stats panel"
               className="focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
@@ -260,7 +244,7 @@ const DesktopLayout = React.memo(function DesktopLayoutComponent({
             size="sm"
             onClick={onToggleStats}
             className="px-component-sm focus-visible:ring-ring h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            aria-label={t('logs.stats.expand')}
+            aria-label={'logs.stats.expand'}
             title="Expand stats panel"
           >
             <ChevronLeft
@@ -292,7 +276,6 @@ interface MobileLayoutProps {
   activeFilterCount: number;
   className?: string;
 }
-
 const MobileLayout = React.memo(function MobileLayoutComponent({
   routerId,
   filters,
@@ -308,13 +291,11 @@ const MobileLayout = React.memo(function MobileLayoutComponent({
   className,
 }: MobileLayoutProps) {
   MobileLayout.displayName = 'MobileLayout';
-  const { t } = useTranslation('firewall');
-
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="border-border p-component-md bg-card border-b">
-        <h1 className="font-display mb-component-md text-xl font-bold">{t('logs.title')}</h1>
+        <h1 className="font-display mb-component-md text-xl font-bold">{'Firewall Logs'}</h1>
         <div className="gap-component-sm flex items-center">
           {autoRefreshControls}
           <Button
@@ -328,7 +309,7 @@ const MobileLayout = React.memo(function MobileLayoutComponent({
               className="mr-component-sm h-4 w-4"
               aria-hidden="true"
             />
-            {t('logs.filters.title')}
+            {'Filters'}
             {activeFilterCount > 0 && (
               <span
                 className="ml-component-sm px-component-sm py-component-xs bg-primary text-primary-foreground rounded-[var(--semantic-radius-badge)] text-xs font-semibold"
@@ -354,7 +335,7 @@ const MobileLayout = React.memo(function MobileLayoutComponent({
           <CardHeader>
             <CardTitle className="gap-component-sm font-display flex items-center">
               <BarChart3 className="h-5 w-5" />
-              {t('logs.stats.title')}
+              {'Log Statistics'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -376,8 +357,8 @@ const MobileLayout = React.memo(function MobileLayoutComponent({
           className="h-[80vh]"
         >
           <SheetHeader>
-            <SheetTitle className="font-display">{t('logs.filters.title')}</SheetTitle>
-            <SheetDescription>{t('logs.filters.description')}</SheetDescription>
+            <SheetTitle className="font-display">{'Filters'}</SheetTitle>
+            <SheetDescription>{'logs.filters.description'}</SheetDescription>
           </SheetHeader>
           <div className="mt-component-md overflow-y-auto">
             <FirewallLogFilters
@@ -406,9 +387,7 @@ const MobileLayout = React.memo(function MobileLayoutComponent({
  * @returns Firewall logs page component
  */
 export function FirewallLogsPage() {
-  const { t } = useTranslation('firewall');
   const isMobile = useMediaQuery('(max-width: 640px)');
-
   const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
 
   // Store state
@@ -426,7 +405,9 @@ export function FirewallLogsPage() {
   } = useFirewallLogStore();
 
   // Navigation hook
-  const { navigateToRuleByPrefix } = useRuleNavigation({ routerId: routerIp });
+  const { navigateToRuleByPrefix } = useRuleNavigation({
+    routerId: routerIp,
+  });
 
   // Use headless hook for log viewer logic
   const viewer = useFirewallLogViewer({
@@ -447,13 +428,11 @@ export function FirewallLogsPage() {
     if (viewer.logs.length > previousLogCountRef.current) {
       const newCount = viewer.logs.length - previousLogCountRef.current;
       if (liveRegionRef.current) {
-        liveRegionRef.current.textContent = t('logs.accessibility.newLogsAnnouncement', {
-          count: newCount,
-        });
+        liveRegionRef.current.textContent = `${newCount} new log entry received`;
       }
     }
     previousLogCountRef.current = viewer.logs.length;
-  }, [viewer.logs.length, t]);
+  }, [viewer.logs.length]);
 
   // Extract available prefixes from logs for autocomplete
   const availablePrefixes = Array.from(
@@ -481,7 +460,6 @@ export function FirewallLogsPage() {
     },
     [navigateToRuleByPrefix]
   );
-
   const handleExport = useCallback(() => {
     // Export logs to CSV
     const csv = [
@@ -512,8 +490,9 @@ export function FirewallLogsPage() {
         ].join(',')
       ),
     ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], {
+      type: 'text/csv',
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -521,7 +500,6 @@ export function FirewallLogsPage() {
     link.click();
     URL.revokeObjectURL(url);
   }, [viewer.logs]);
-
   const handleAddToBlocklist = useCallback((ip: string) => {
     // TODO: Implement blocklist integration
     // This will be connected to the address list API in a future task
@@ -537,7 +515,6 @@ export function FirewallLogsPage() {
       onExport={handleExport}
     />
   );
-
   return (
     <>
       {/* ARIA Live Region for new log announcements */}

@@ -1,75 +1,69 @@
 import React from 'react';
-
-import { useTranslation } from 'react-i18next';
 import { useCollapsibleSidebarContext } from '@nasnet/ui/layouts';
 import { Link, useRouterState } from '@tanstack/react-router';
-import {
-  Activity,
-  BarChart3,
-  Globe,
-  LayoutDashboard,
-  Network,
-  Router,
-  Settings,
-  Shield,
-  Wifi,
-  Zap,
-} from 'lucide-react';
+import { LayoutDashboard, Router, Settings } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
-
 interface NavItem {
   key: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
 }
-
 interface NavSection {
   titleKey: string;
   items: NavItem[];
 }
-
+const NAV_LABELS: Record<string, string> = {
+  Overview: 'Overview',
+  Monitoring: 'Monitoring',
+  Configuration: 'Configuration',
+  Advanced: 'Advanced',
+  Dashboard: 'Dashboard',
+  Routers: 'Routers',
+  Traffic: 'Traffic',
+  Network: 'Network',
+  WiFi: 'WiFi',
+  Security: 'Security',
+  Services: 'Services',
+  Diagnostics: 'Diagnostics',
+  Internet: 'Internet',
+  Settings: 'Settings',
+};
 const NAV_SECTIONS: NavSection[] = [
   {
-    titleKey: 'nav.sections.overview',
+    titleKey: 'Overview',
     items: [
-      { key: 'nav.dashboard', href: '/', icon: LayoutDashboard },
-      { key: 'nav.routers', href: '/routers', icon: Router },
+      {
+        key: 'Dashboard',
+        href: '/',
+        icon: LayoutDashboard,
+      },
+      {
+        key: 'Routers',
+        href: '/routers',
+        icon: Router,
+      },
     ],
   },
   {
-    titleKey: 'nav.sections.monitoring',
+    titleKey: 'Advanced',
     items: [
-      { key: 'nav.traffic', href: '/traffic', icon: BarChart3 },
-      { key: 'nav.network', href: '/network', icon: Network },
-      { key: 'nav.wifi', href: '/wifi', icon: Wifi },
-    ],
-  },
-  {
-    titleKey: 'nav.sections.configuration',
-    items: [
-      { key: 'nav.security', href: '/security', icon: Shield },
-      { key: 'nav.services', href: '/services', icon: Zap },
-    ],
-  },
-  {
-    titleKey: 'nav.sections.advanced',
-    items: [
-      { key: 'nav.diagnostics', href: '/diagnostics', icon: Activity },
-      { key: 'nav.internet', href: '/internet', icon: Globe },
-      { key: 'nav.settings', href: '/settings', icon: Settings },
+      {
+        key: 'Settings',
+        href: '/settings',
+        icon: Settings,
+      },
     ],
   },
 ];
-
 export function AppSidebar() {
-  const { t } = useTranslation('common');
   const { isCollapsed } = useCollapsibleSidebarContext();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
-
   return (
     <nav
-      aria-label={t('sidebar.navigation', { defaultValue: 'Main navigation' })}
+      aria-label={'Main navigation'}
       className="gap-component-sm px-component-sm flex h-full flex-col overflow-y-auto py-4 pb-8"
     >
       {NAV_SECTIONS.map((section) => (
@@ -79,7 +73,7 @@ export function AppSidebar() {
         >
           {!isCollapsed && (
             <p className="font-display text-secondary mb-1 px-3 text-xs font-semibold uppercase tracking-wider">
-              {t(section.titleKey, { defaultValue: section.titleKey })}
+              {NAV_LABELS[section.titleKey] ?? section.titleKey}
             </p>
           )}
           <ul className="flex flex-col gap-0.5">
@@ -102,13 +96,13 @@ export function AppSidebar() {
                       : 'text-foreground',
                       isCollapsed ? 'justify-center px-2' : ''
                     )}
-                    title={isCollapsed ? t(item.key) : undefined}
+                    title={isCollapsed ? (NAV_LABELS[item.key] ?? item.key) : undefined}
                   >
                     <Icon
                       className="h-5 w-5 shrink-0"
                       aria-hidden="true"
                     />
-                    {!isCollapsed && <span>{t(item.key, { defaultValue: item.key })}</span>}
+                    {!isCollapsed && <span>{NAV_LABELS[item.key] ?? item.key}</span>}
                   </Link>
                 </li>
               );

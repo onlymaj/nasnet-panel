@@ -5,9 +5,6 @@
  */
 
 import React from 'react';
-
-import { useTranslation } from 'react-i18next';
-
 import { cn } from '@nasnet/ui/utils';
 
 // ---------------------------------------------------------------------------
@@ -24,7 +21,6 @@ export interface NetworkDetailItem {
   /** Optional badge colour (maps to semantic status colours) */
   badge?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
 }
-
 interface NetworkDetailSectionProps {
   /** Section heading */
   title: string;
@@ -47,7 +43,7 @@ const BADGE_CLASSES: Record<NonNullable<NetworkDetailItem['badge']>, string> = {
   warning: 'bg-warning/15 text-warning',
   error: 'bg-error/15 text-error',
   info: 'bg-info/15 text-info',
-  neutral: 'bg-muted text-muted-foreground',
+  neutral: 'bg-muted text-muted-foreground'
 };
 
 // ---------------------------------------------------------------------------
@@ -59,49 +55,25 @@ export const NetworkDetailSection = React.memo(function NetworkDetailSection({
   description,
   items,
   isLoading = false,
-  className,
+  className
 }: NetworkDetailSectionProps) {
-  const { t } = useTranslation('network');
   if (isLoading) {
-    return (
-      <div
-        className={cn(
-          'bg-card rounded-card-lg border-border p-component-md border shadow-sm',
-          className
-        )}
-        aria-busy="true"
-        aria-label={`Loading ${title}`}
-      >
+    return <div className={cn('bg-card rounded-card-lg border-border p-component-md border shadow-sm', className)} aria-busy="true" aria-label={`Loading ${title}`}>
         <div className="animate-pulse space-y-3">
           <div className="bg-muted h-4 w-32 rounded" />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex justify-between gap-4"
-            >
+          {Array.from({
+          length: 4
+        }).map((_, i) => <div key={i} className="flex justify-between gap-4">
               <div className="bg-muted h-3 w-24 rounded" />
               <div className="bg-muted h-3 w-36 rounded" />
-            </div>
-          ))}
+            </div>)}
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <section
-      className={cn(
-        'bg-card rounded-card-lg border-border p-component-md border shadow-sm',
-        className
-      )}
-      aria-labelledby={`nds-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
-    >
+  return <section className={cn('bg-card rounded-card-lg border-border p-component-md border shadow-sm', className)} aria-labelledby={`nds-title-${title.replace(/\s+/g, '-').toLowerCase()}`}>
       {/* Header */}
       <div className="mb-3">
-        <h3
-          id={`nds-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
-          className="text-foreground font-display category-header category-header-networking text-sm font-semibold"
-        >
+        <h3 id={`nds-title-${title.replace(/\s+/g, '-').toLowerCase()}`} className="text-foreground font-display category-header category-header-networking text-sm font-semibold">
           {title}
         </h3>
         {description && <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>}
@@ -109,38 +81,17 @@ export const NetworkDetailSection = React.memo(function NetworkDetailSection({
 
       {/* Key-value rows */}
       <dl className="space-y-2">
-        {items.map((item, idx) => (
-          <div
-            key={idx}
-            className="flex items-start justify-between gap-4 text-sm"
-          >
+        {items.map((item, idx) => <div key={idx} className="flex items-start justify-between gap-4 text-sm">
             <dt className="text-muted-foreground shrink-0">{item.label}</dt>
-            <dd
-              className={cn(
-                'text-right',
-                item.mono ? 'text-foreground font-mono text-xs' : 'text-foreground'
-              )}
-            >
-              {item.badge ?
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-                    BADGE_CLASSES[item.badge]
-                  )}
-                >
+            <dd className={cn('text-right', item.mono ? 'text-foreground font-mono text-xs' : 'text-foreground')}>
+              {item.badge ? <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium', BADGE_CLASSES[item.badge])}>
                   {item.value}
-                </span>
-              : item.value}
+                </span> : item.value}
             </dd>
-          </div>
-        ))}
+          </div>)}
       </dl>
 
-      {items.length === 0 && (
-        <p className="text-muted-foreground text-xs">{t('status.noDetailsAvailable')}</p>
-      )}
-    </section>
-  );
+      {items.length === 0 && <p className="text-muted-foreground text-xs">{"No details available"}</p>}
+    </section>;
 });
-
 NetworkDetailSection.displayName = 'NetworkDetailSection';

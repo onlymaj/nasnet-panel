@@ -13,10 +13,7 @@
  */
 
 import React, { useState } from 'react';
-
 import { Shield, Zap, Lock, MessageSquare, Info } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import type { ServiceTemplate } from '@nasnet/api-client/generated';
 import { TemplatesBrowser, TemplateInstallWizard } from '@nasnet/features/services';
 import { PluginCard, type Plugin } from '@nasnet/ui/patterns';
@@ -25,143 +22,99 @@ import { Tabs, TabsContent, TabsList, TabsTrigger, useToast } from '@nasnet/ui/p
 /**
  * Mock plugin data for demonstration
  */
-const createMockPlugins = (): Plugin[] => [
-  {
-    id: 'tor',
-    name: 'TOR',
-    description:
-      'The Onion Router - Anonymous communication and privacy protection through a worldwide volunteer overlay network.',
-    icon: Shield,
-    version: '0.4.7.13',
-    status: 'running',
-    stats: {
-      connections: 47,
-      bytesIn: 1024 * 1024 * 125, // 125 MB
-      bytesOut: 1024 * 1024 * 89, // 89 MB
-      peersConnected: 12,
-    },
-    logs: [
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 2),
-        message: 'Circuit established to relay node in Germany',
-        type: 'success',
-      },
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 15),
-        message: 'New guard node selected: FastRelay-EU',
-        type: 'info',
-      },
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 45),
-        message: 'Bootstrapped 100%: Done',
-        type: 'success',
-      },
-    ],
-    features: [
-      'Anonymous browsing and communication',
-      'Onion routing for enhanced privacy',
-      'Access to .onion hidden services',
-      'Censorship circumvention',
-      'Exit node selection and configuration',
-    ],
+const createMockPlugins = (): Plugin[] => [{
+  id: 'tor',
+  name: 'TOR',
+  description: 'The Onion Router - Anonymous communication and privacy protection through a worldwide volunteer overlay network.',
+  icon: Shield,
+  version: '0.4.7.13',
+  status: 'running',
+  stats: {
+    connections: 47,
+    bytesIn: 1024 * 1024 * 125,
+    // 125 MB
+    bytesOut: 1024 * 1024 * 89,
+    // 89 MB
+    peersConnected: 12
   },
-  {
-    id: 'nostr',
-    name: 'Nostr',
-    description:
-      'Notes and Other Stuff Transmitted by Relays - A simple, open protocol for decentralized social networking.',
-    icon: MessageSquare,
-    version: '1.2.4',
-    status: 'installed',
-    logs: [
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 5),
-        message: 'Relay server configured on port 7777',
-        type: 'info',
-      },
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        message: 'Installation completed successfully',
-        type: 'success',
-      },
-    ],
-    features: [
-      'Decentralized social media protocol',
-      'Cryptographic key-based identity',
-      'Relay-based message distribution',
-      'Censorship-resistant communication',
-      'Lightning Network integration support',
-      'WebSocket relay server',
-    ],
+  logs: [{
+    timestamp: new Date(Date.now() - 1000 * 60 * 2),
+    message: 'Circuit established to relay node in Germany',
+    type: 'success'
+  }, {
+    timestamp: new Date(Date.now() - 1000 * 60 * 15),
+    message: 'New guard node selected: FastRelay-EU',
+    type: 'info'
+  }, {
+    timestamp: new Date(Date.now() - 1000 * 60 * 45),
+    message: 'Bootstrapped 100%: Done',
+    type: 'success'
+  }],
+  features: ['Anonymous browsing and communication', 'Onion routing for enhanced privacy', 'Access to .onion hidden services', 'Censorship circumvention', 'Exit node selection and configuration']
+}, {
+  id: 'nostr',
+  name: 'Nostr',
+  description: 'Notes and Other Stuff Transmitted by Relays - A simple, open protocol for decentralized social networking.',
+  icon: MessageSquare,
+  version: '1.2.4',
+  status: 'installed',
+  logs: [{
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    message: 'Relay server configured on port 7777',
+    type: 'info'
+  }, {
+    timestamp: new Date(Date.now() - 1000 * 60 * 30),
+    message: 'Installation completed successfully',
+    type: 'success'
+  }],
+  features: ['Decentralized social media protocol', 'Cryptographic key-based identity', 'Relay-based message distribution', 'Censorship-resistant communication', 'Lightning Network integration support', 'WebSocket relay server']
+}, {
+  id: 'v2ray',
+  name: 'V2Ray',
+  description: 'A platform for building proxies to bypass network restrictions with advanced routing capabilities and multiple protocols.',
+  icon: Zap,
+  version: '5.10.0',
+  status: 'running',
+  stats: {
+    connections: 23,
+    bytesIn: 1024 * 1024 * 456,
+    // 456 MB
+    bytesOut: 1024 * 1024 * 234,
+    // 234 MB
+    peersConnected: 8
   },
-  {
-    id: 'v2ray',
-    name: 'V2Ray',
-    description:
-      'A platform for building proxies to bypass network restrictions with advanced routing capabilities and multiple protocols.',
-    icon: Zap,
-    version: '5.10.0',
-    status: 'running',
-    stats: {
-      connections: 23,
-      bytesIn: 1024 * 1024 * 456, // 456 MB
-      bytesOut: 1024 * 1024 * 234, // 234 MB
-      peersConnected: 8,
-    },
-    logs: [
-      {
-        timestamp: new Date(Date.now() - 1000 * 30),
-        message: 'VMess protocol active on port 10086',
-        type: 'success',
-      },
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 8),
-        message: 'New client connected from 192.168.1.45',
-        type: 'info',
-      },
-      {
-        timestamp: new Date(Date.now() - 1000 * 60 * 20),
-        message: 'Routing rules updated successfully',
-        type: 'success',
-      },
-    ],
-    features: [
-      'Multiple protocol support (VMess, VLESS, Shadowsocks)',
-      'Advanced routing and traffic distribution',
-      'WebSocket and HTTP/2 transport',
-      'TLS encryption support',
-      'Flexible configuration and plugins',
-      'Traffic statistics and monitoring',
-    ],
-  },
-  {
-    id: 'mtproto',
-    name: 'MTProto Proxy',
-    description:
-      'Telegram MTProto proxy server for secure and fast Telegram messaging, bypassing restrictions and ISP throttling.',
-    icon: Lock,
-    version: '2.1.3',
-    status: 'available',
-    features: [
-      'Native Telegram protocol support',
-      'Fast and lightweight proxy',
-      'Sponsored channel rewards',
-      'NAT traversal support',
-      'Simple setup and configuration',
-      'Low resource consumption',
-    ],
-  },
-];
-
+  logs: [{
+    timestamp: new Date(Date.now() - 1000 * 30),
+    message: 'VMess protocol active on port 10086',
+    type: 'success'
+  }, {
+    timestamp: new Date(Date.now() - 1000 * 60 * 8),
+    message: 'New client connected from 192.168.1.45',
+    type: 'info'
+  }, {
+    timestamp: new Date(Date.now() - 1000 * 60 * 20),
+    message: 'Routing rules updated successfully',
+    type: 'success'
+  }],
+  features: ['Multiple protocol support (VMess, VLESS, Shadowsocks)', 'Advanced routing and traffic distribution', 'WebSocket and HTTP/2 transport', 'TLS encryption support', 'Flexible configuration and plugins', 'Traffic statistics and monitoring']
+}, {
+  id: 'mtproto',
+  name: 'MTProto Proxy',
+  description: 'Telegram MTProto proxy server for secure and fast Telegram messaging, bypassing restrictions and ISP throttling.',
+  icon: Lock,
+  version: '2.1.3',
+  status: 'available',
+  features: ['Native Telegram protocol support', 'Fast and lightweight proxy', 'Sponsored channel rewards', 'NAT traversal support', 'Simple setup and configuration', 'Low resource consumption']
+}];
 export interface PluginStoreTabProps {
   routerId: string;
 }
-
 export const PluginStoreTab = React.memo(function PluginStoreTab({
-  routerId,
+  routerId
 }: PluginStoreTabProps) {
-  const { t } = useTranslation('services');
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [plugins, setPlugins] = useState<Plugin[]>(createMockPlugins());
 
   // Template wizard state
@@ -173,23 +126,15 @@ export const PluginStoreTab = React.memo(function PluginStoreTab({
    * In production, this would call the router API
    */
   const handleInstall = (pluginId: string) => {
-    setPlugins((prev) =>
-      prev.map((plugin) =>
-        plugin.id === pluginId ?
-          {
-            ...plugin,
-            status: 'installed',
-            logs: [
-              {
-                timestamp: new Date(),
-                message: 'Installation completed successfully',
-                type: 'success',
-              },
-            ],
-          }
-        : plugin
-      )
-    );
+    setPlugins(prev => prev.map(plugin => plugin.id === pluginId ? {
+      ...plugin,
+      status: 'installed',
+      logs: [{
+        timestamp: new Date(),
+        message: 'Installation completed successfully',
+        type: 'success'
+      }]
+    } : plugin));
   };
 
   /**
@@ -197,18 +142,12 @@ export const PluginStoreTab = React.memo(function PluginStoreTab({
    * In production, this would call the router API
    */
   const handleUninstall = (pluginId: string) => {
-    setPlugins((prev) =>
-      prev.map((plugin) =>
-        plugin.id === pluginId ?
-          {
-            ...plugin,
-            status: 'available',
-            stats: undefined,
-            logs: undefined,
-          }
-        : plugin
-      )
-    );
+    setPlugins(prev => prev.map(plugin => plugin.id === pluginId ? {
+      ...plugin,
+      status: 'available',
+      stats: undefined,
+      logs: undefined
+    } : plugin));
   };
 
   /**
@@ -216,7 +155,7 @@ export const PluginStoreTab = React.memo(function PluginStoreTab({
    * In production, this would open a configuration dialog
    */
   const handleConfigure = (pluginId: string) => {
-    const plugin = plugins.find((p) => p.id === pluginId);
+    const plugin = plugins.find(p => p.id === pluginId);
     console.log(`Configure plugin: ${plugin?.name}`);
     // TODO: Open configuration dialog/modal
   };
@@ -247,64 +186,46 @@ export const PluginStoreTab = React.memo(function PluginStoreTab({
   const handleInstallComplete = (instanceIDs: string[]) => {
     const count = instanceIDs.length;
     toast({
-      title: t('marketplace.templateInstalledTitle'),
-      description: t('marketplace.templateInstalledDescription', {
-        count,
-        name: selectedTemplate?.name || '',
-      }),
-      variant: 'success',
+      title: "Template installed",
+      description: "Template installation completed.",
+      variant: 'success'
     });
     handleWizardClose();
   };
 
   // Count running plugins
-  const runningCount = plugins.filter((p) => p.status === 'running').length;
-  const installedCount = plugins.filter(
-    (p) => p.status === 'installed' || p.status === 'running'
-  ).length;
-
-  return (
-    <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop animate-fade-in-up py-4 md:py-6">
+  const runningCount = plugins.filter(p => p.status === 'running').length;
+  const installedCount = plugins.filter(p => p.status === 'installed' || p.status === 'running').length;
+  return <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop animate-fade-in-up py-4 md:py-6">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Page Header */}
         <div>
           <h1 className="text-foreground font-display text-xl font-bold md:text-2xl">
-            {t('marketplace.title')}
+            {"Feature Marketplace"}
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">{t('marketplace.description')}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{"Browse and install services and templates."}</p>
         </div>
 
         {/* Tabs Navigation */}
-        <Tabs
-          defaultValue="services"
-          className="space-y-6"
-        >
+        <Tabs defaultValue="services" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="services">{t('marketplace.servicesTab')}</TabsTrigger>
-            <TabsTrigger value="templates">{t('marketplace.templatesTab')}</TabsTrigger>
+            <TabsTrigger value="services">{"Services"}</TabsTrigger>
+            <TabsTrigger value="templates">{"Templates"}</TabsTrigger>
           </TabsList>
 
           {/* Services Tab Content */}
-          <TabsContent
-            value="services"
-            className="space-y-6"
-          >
+          <TabsContent value="services" className="space-y-6">
             {/* Status Summary Pills - Following demo pattern */}
             <div className="flex flex-wrap gap-2">
-              {runningCount > 0 && (
-                <div className="bg-success/10 border-success/30 flex items-center gap-2 rounded-full border px-4 py-2">
+              {runningCount > 0 && <div className="bg-success/10 border-success/30 flex items-center gap-2 rounded-full border px-4 py-2">
                   <span className="bg-success h-2 w-2 animate-pulse rounded-full" />
                   <span className="text-success text-sm font-medium">
-                    {runningCount} {t('marketplace.running')}
+                    {runningCount} {"running"}
                   </span>
-                </div>
-              )}
+                </div>}
               <div className="bg-muted border-border flex items-center gap-2 rounded-full border px-4 py-2">
                 <span className="text-muted-foreground text-sm font-medium">
-                  {t('marketplace.installedCount', {
-                    installed: installedCount,
-                    total: plugins.length,
-                  })}
+                  {"Installed"}
                 </span>
               </div>
             </div>
@@ -316,57 +237,34 @@ export const PluginStoreTab = React.memo(function PluginStoreTab({
               </div>
               <div className="flex-1">
                 <p className="text-info text-sm">
-                  <span className="font-semibold">💡 {t('marketplace.tipLabel')}:</span>{' '}
-                  {t('marketplace.tipDescription')}
+                  <span className="font-semibold">💡 {"Tip"}:</span>{' '}
+                  {"Install templates to speed up common setups."}
                 </p>
               </div>
             </div>
 
             {/* Plugin Grid - 1 col mobile, 2 cols desktop with stagger animation */}
             <div className="stagger-children grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-              {plugins.map((plugin) => (
-                <div
-                  key={plugin.id}
-                  className="rounded-card-sm bg-card shadow-sm"
-                >
-                  <PluginCard
-                    plugin={plugin}
-                    onInstall={handleInstall}
-                    onUninstall={handleUninstall}
-                    onConfigure={handleConfigure}
-                  />
-                </div>
-              ))}
+              {plugins.map(plugin => <div key={plugin.id} className="rounded-card-sm bg-card shadow-sm">
+                  <PluginCard plugin={plugin} onInstall={handleInstall} onUninstall={handleUninstall} onConfigure={handleConfigure} />
+                </div>)}
             </div>
 
             {/* Footer Note - Subtle */}
             <div className="border-border border-t pt-4">
-              <p className="text-muted-foreground text-xs">{t('marketplace.footerNote')}</p>
+              <p className="text-muted-foreground text-xs">{"More marketplace content will be added over time."}</p>
             </div>
           </TabsContent>
 
           {/* Templates Tab Content */}
           <TabsContent value="templates">
-            <TemplatesBrowser
-              routerId={routerId}
-              onInstall={handleTemplateInstall}
-            />
+            <TemplatesBrowser routerId={routerId} onInstall={handleTemplateInstall} />
           </TabsContent>
         </Tabs>
 
         {/* Template Install Wizard Modal */}
-        {selectedTemplate && (
-          <TemplateInstallWizard
-            routerId={routerId}
-            template={selectedTemplate}
-            open={wizardOpen}
-            onClose={handleWizardClose}
-            onComplete={handleInstallComplete}
-          />
-        )}
+        {selectedTemplate && <TemplateInstallWizard routerId={routerId} template={selectedTemplate} open={wizardOpen} onClose={handleWizardClose} onComplete={handleInstallComplete} />}
       </div>
-    </div>
-  );
+    </div>;
 });
-
 PluginStoreTab.displayName = 'PluginStoreTab';

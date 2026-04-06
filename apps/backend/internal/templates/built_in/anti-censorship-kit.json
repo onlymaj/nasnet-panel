@@ -46,7 +46,7 @@
       "portMappings": [
         {
           "internal": 8443,
-          "external": "{{MTPROXY_EXTERNAL_PORT}}",
+          "external": 8443,
           "protocol": "tcp",
           "purpose": "MTProxy Telegram proxy"
         }

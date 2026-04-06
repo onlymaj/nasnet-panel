@@ -19,39 +19,14 @@
  */
 
 import { useState, useCallback, memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useConnectionStore } from '@nasnet/state/stores';
 import { usePlatform } from '@nasnet/ui/patterns';
-import {
-  useAddressLists,
-  useCreateAddressListEntry,
-  useDeleteAddressListEntry,
-  useBulkCreateAddressListEntries,
-} from '@nasnet/api-client/queries/firewall';
+import { useAddressLists, useCreateAddressListEntry, useDeleteAddressListEntry, useBulkCreateAddressListEntries } from '@nasnet/api-client/queries/firewall';
 import { AddressListManager } from '@nasnet/ui/patterns/address-list-manager';
 import { AddressListEntryForm } from '../components/AddressListEntryForm';
 import { AddressListImportDialog } from '../components/AddressListImportDialog';
 import { AddressListExportDialog } from '../components/AddressListExportDialog';
-import {
-  Button,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Alert,
-  AlertDescription,
-} from '@nasnet/ui/primitives';
+import { Button, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Card, CardContent, CardDescription, CardHeader, CardTitle, Alert, AlertDescription } from '@nasnet/ui/primitives';
 import { Plus, Upload, AlertCircle } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
 import type { AddressListEntryFormData } from '../schemas/addressListSchemas';
@@ -69,41 +44,26 @@ interface EmptyStateProps {
   onAddEntry: () => void;
   onImport: () => void;
 }
-
-const EmptyState = memo(function EmptyState({ onAddEntry, onImport }: EmptyStateProps) {
-  const { t } = useTranslation('firewall');
-
-  return (
-    <Card className="border-dashed">
+const EmptyState = memo(function EmptyState({
+  onAddEntry,
+  onImport
+}: EmptyStateProps) {
+  return <Card className="border-dashed">
       <CardHeader className="text-center">
-        <CardTitle>{t('addressLists.emptyStates.noLists.title')}</CardTitle>
-        <CardDescription>{t('addressLists.emptyStates.noLists.description')}</CardDescription>
+        <CardTitle>{"No Address Lists"}</CardTitle>
+        <CardDescription>{"Get started by creating your first address list for use in firewall rules, rate limiting, and access control."}</CardDescription>
       </CardHeader>
       <CardContent className="gap-component-sm flex justify-center">
-        <Button
-          onClick={onAddEntry}
-          aria-label={t('addressLists.emptyStates.noLists.actions.create')}
-        >
-          <Plus
-            className="mr-component-sm h-4 w-4"
-            aria-hidden="true"
-          />
-          {t('addressLists.emptyStates.noLists.actions.create')}
+        <Button onClick={onAddEntry} aria-label={"Add First Entry"}>
+          <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+          {"Add First Entry"}
         </Button>
-        <Button
-          variant="outline"
-          onClick={onImport}
-          aria-label={t('addressLists.emptyStates.noLists.actions.import')}
-        >
-          <Upload
-            className="mr-component-sm h-4 w-4"
-            aria-hidden="true"
-          />
-          {t('addressLists.emptyStates.noLists.actions.import')}
+        <Button variant="outline" onClick={onImport} aria-label={"Import from File"}>
+          <Upload className="mr-component-sm h-4 w-4" aria-hidden="true" />
+          {"Import from File"}
         </Button>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 });
 
 // ============================================================================
@@ -115,15 +75,13 @@ const EmptyState = memo(function EmptyState({ onAddEntry, onImport }: EmptyState
  * @description Skeleton loader for address list content
  */
 const LoadingSkeleton = memo(function LoadingSkeleton() {
-  return (
-    <div className="space-y-component-md">
+  return <div className="space-y-component-md">
       <div className="space-y-component-md animate-pulse">
         <div className="bg-muted h-16 rounded" />
         <div className="bg-muted h-16 rounded" />
         <div className="bg-muted h-16 rounded" />
       </div>
-    </div>
-  );
+    </div>;
 });
 
 // ============================================================================
@@ -137,11 +95,9 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
  * @returns Address list view page component
  */
 export const AddressListView = memo(function AddressListView() {
-  const { t } = useTranslation('firewall');
   const platform = usePlatform();
   const isMobile = platform === 'mobile';
-
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
 
   // Dialog state
   const [showAddEntry, setShowAddEntry] = useState(false);
@@ -150,7 +106,11 @@ export const AddressListView = memo(function AddressListView() {
   const [selectedList, setSelectedList] = useState<string | null>(null);
 
   // Fetch address lists
-  const { data: lists, isLoading, error } = useAddressLists(routerIp);
+  const {
+    data: lists,
+    isLoading,
+    error
+  } = useAddressLists(routerIp);
 
   // Mutation hooks
   const createEntry = useCreateAddressListEntry(routerIp);
@@ -164,208 +124,130 @@ export const AddressListView = memo(function AddressListView() {
   const handleAddEntry = useCallback(() => {
     setShowAddEntry(true);
   }, []);
-
   const handleImport = useCallback(() => {
     setShowImport(true);
   }, []);
-
   const handleExport = useCallback(() => {
     setShowExport(true);
   }, []);
-
-  const handleCreateEntry = useCallback(
-    async (data: AddressListEntryFormData) => {
-      await createEntry.mutateAsync({
-        list: data.list,
-        address: data.address,
-        comment: data.comment,
-        timeout: data.timeout,
-      });
-      setShowAddEntry(false);
-    },
-    [createEntry]
-  );
-
-  const handleDeleteEntry = useCallback(
-    async (entryId: string, listName: string) => {
-      await deleteEntry.mutateAsync({ id: entryId, listName });
-    },
-    [deleteEntry]
-  );
-
-  const handleBulkImport = useCallback(
-    async (listName: string, entries: BulkAddressInput[]) => {
-      const result = await bulkCreate.mutateAsync({
-        listName,
-        entries,
-      });
-
-      setShowImport(false);
-      return result;
-    },
-    [bulkCreate]
-  );
+  const handleCreateEntry = useCallback(async (data: AddressListEntryFormData) => {
+    await createEntry.mutateAsync({
+      list: data.list,
+      address: data.address,
+      comment: data.comment,
+      timeout: data.timeout
+    });
+    setShowAddEntry(false);
+  }, [createEntry]);
+  const handleDeleteEntry = useCallback(async (entryId: string, listName: string) => {
+    await deleteEntry.mutateAsync({
+      id: entryId,
+      listName
+    });
+  }, [deleteEntry]);
+  const handleBulkImport = useCallback(async (listName: string, entries: BulkAddressInput[]) => {
+    const result = await bulkCreate.mutateAsync({
+      listName,
+      entries
+    });
+    setShowImport(false);
+    return result;
+  }, [bulkCreate]);
 
   // Extract unique list names for the form
-  const existingLists = lists?.map((list) => list.name) || [];
+  const existingLists = lists?.map(list => list.name) || [];
 
   // ========================================
   // Render
   // ========================================
 
-  return (
-    <div className="flex h-full flex-col">
+  return <div className="flex h-full flex-col">
       {/* Page Header */}
       <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
         <div className="p-component-md gap-component-md flex items-center justify-between">
           <div>
             <h1 className="font-display text-2xl font-bold tracking-tight">
-              {t('addressLists.title')}
+              {"Address Lists"}
             </h1>
-            <p className="text-muted-foreground text-sm">{t('addressLists.subtitle')}</p>
+            <p className="text-muted-foreground text-sm">{"Manage firewall address lists and entries"}</p>
           </div>
           <div className="gap-component-sm flex">
-            <Button
-              variant="outline"
-              onClick={handleImport}
-              aria-label={t('addressLists.buttons.import')}
-            >
-              <Upload
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
-              {t('addressLists.buttons.import')}
+            <Button variant="outline" onClick={handleImport} aria-label={"Import"}>
+              <Upload className="mr-component-sm h-4 w-4" aria-hidden="true" />
+              {"Import"}
             </Button>
-            <Button
-              onClick={handleAddEntry}
-              aria-label={t('addressLists.buttons.addEntry')}
-            >
-              <Plus
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
-              {t('addressLists.buttons.addEntry')}
+            <Button onClick={handleAddEntry} aria-label={"Add Entry"}>
+              <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+              {"Add Entry"}
             </Button>
           </div>
         </div>
       </div>
 
       {/* Content Area */}
-      <div
-        className="p-component-md flex-1 overflow-y-auto"
-        role="main"
-        aria-label="Address lists content"
-      >
+      <div className="p-component-md flex-1 overflow-y-auto" role="main" aria-label="Address lists content">
         {/* Error State */}
-        {error && (
-          <Alert
-            variant="destructive"
-            className="mb-component-md"
-          >
-            <AlertCircle
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+        {error && <Alert variant="destructive" className="mb-component-md">
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertDescription>
-              {t('addressLists.notifications.error.load')}: {error.message}
+              {"Failed to load address lists"}: {error.message}
             </AlertDescription>
-          </Alert>
-        )}
+          </Alert>}
 
         {/* Loading State */}
         {isLoading && <LoadingSkeleton />}
 
         {/* Empty State */}
-        {!isLoading && !error && (!lists || lists.length === 0) && (
-          <EmptyState
-            onAddEntry={handleAddEntry}
-            onImport={handleImport}
-          />
-        )}
+        {!isLoading && !error && (!lists || lists.length === 0) && <EmptyState onAddEntry={handleAddEntry} onImport={handleImport} />}
 
         {/* Address List Manager */}
-        {!isLoading && !error && lists && lists.length > 0 && (
-          <AddressListManager
-            lists={lists as any}
-            isLoading={isLoading}
-            error={error}
-            onDeleteEntry={(entryId: string) => handleDeleteEntry(entryId, '')}
-            showBulkActions={true}
-            enableVirtualization={true}
-          />
-        )}
+        {!isLoading && !error && lists && lists.length > 0 && <AddressListManager lists={lists as any} isLoading={isLoading} error={error} onDeleteEntry={(entryId: string) => handleDeleteEntry(entryId, '')} showBulkActions={true} enableVirtualization={true} />}
       </div>
 
       {/* Add Entry Sheet */}
-      <Sheet
-        open={showAddEntry}
-        onOpenChange={setShowAddEntry}
-      >
-        <SheetContent
-          side={isMobile ? 'bottom' : 'right'}
-          className={isMobile ? 'h-[90vh]' : 'w-full sm:max-w-2xl'}
-        >
+      <Sheet open={showAddEntry} onOpenChange={setShowAddEntry}>
+        <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[90vh]' : 'w-full sm:max-w-2xl'}>
           <SheetHeader>
             <SheetTitle className="font-display">
-              {t('addressLists.dialogs.addEntry.title')}
+              {"Add Address List Entry"}
             </SheetTitle>
-            <SheetDescription>{t('addressLists.dialogs.addEntry.description')}</SheetDescription>
+            <SheetDescription>{"Add a new IP address, subnet, or range to an address list"}</SheetDescription>
           </SheetHeader>
           <div className="mt-component-lg">
-            <AddressListEntryForm
-              existingLists={existingLists}
-              onSubmit={handleCreateEntry}
-              onCancel={() => setShowAddEntry(false)}
-              isLoading={createEntry.isPending}
-            />
+            <AddressListEntryForm existingLists={existingLists} onSubmit={handleCreateEntry} onCancel={() => setShowAddEntry(false)} isLoading={createEntry.isPending} />
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Import Dialog */}
-      <Dialog
-        open={showImport}
-        onOpenChange={setShowImport}
-      >
+      <Dialog open={showImport} onOpenChange={setShowImport}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display">
-              {t('addressLists.dialogs.import.title')}
+              {"Import Address List"}
             </DialogTitle>
-            <DialogDescription>{t('addressLists.dialogs.import.description')}</DialogDescription>
+            <DialogDescription>{"Import IP addresses from CSV or text file"}</DialogDescription>
           </DialogHeader>
           <div className="mt-component-md">
-            <AddressListImportDialog
-              routerId={routerIp}
-              existingLists={existingLists}
-              onImport={handleBulkImport as any}
-            />
+            <AddressListImportDialog routerId={routerIp} existingLists={existingLists} onImport={handleBulkImport as any} />
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Export Dialog */}
-      <Dialog
-        open={showExport}
-        onOpenChange={setShowExport}
-      >
+      <Dialog open={showExport} onOpenChange={setShowExport}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">
-              {t('addressLists.dialogs.export.title')}
+              {"Export Address Lists"}
             </DialogTitle>
-            <DialogDescription>{t('addressLists.dialogs.export.description')}</DialogDescription>
+            <DialogDescription>{"Export address lists to CSV format"}</DialogDescription>
           </DialogHeader>
           <div className="mt-component-md">
-            <AddressListExportDialog
-              listName={selectedList || ''}
-              entries={[]}
-            />
+            <AddressListExportDialog listName={selectedList || ''} entries={[]} />
           </div>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 });
-
 AddressListView.displayName = 'AddressListView';

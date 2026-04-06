@@ -15,8 +15,6 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-
 import {
   useServiceAlertSubscription,
   type AlertSeverity,
@@ -68,8 +66,10 @@ export interface UseServiceAlertToastsProps {
  * - INFO: 5 seconds - standard informational timing
  */
 const TOAST_DURATIONS: Record<AlertSeverity, number | null> = {
-  CRITICAL: null, // No auto-dismiss - stays until manually closed
-  WARNING: 8000, // 8 seconds (longer than default 5s)
+  CRITICAL: null,
+  // No auto-dismiss - stays until manually closed
+  WARNING: 8000,
+  // 8 seconds (longer than default 5s)
   INFO: 5000, // 5 seconds
 };
 
@@ -128,8 +128,6 @@ const MAX_DEDUP_SIZE = 100;
  */
 export function useServiceAlertToasts(props: UseServiceAlertToastsProps = {}) {
   const { routerId, enabled = true, onToastShown, onNavigateToService } = props;
-  const { t } = useTranslation();
-
   const { addNotification } = useNotificationStore();
 
   // Deduplication tracking: Set of alert IDs we've already shown
@@ -137,7 +135,11 @@ export function useServiceAlertToasts(props: UseServiceAlertToastsProps = {}) {
 
   // Subscribe to service alert events
   const { alertEvent } = useServiceAlertSubscription(
-    routerId ? { deviceId: routerId } : undefined,
+    routerId ?
+      {
+        deviceId: routerId,
+      }
+    : undefined,
     enabled
   );
 
@@ -177,13 +179,14 @@ export function useServiceAlertToasts(props: UseServiceAlertToastsProps = {}) {
         type: notificationType,
         title: alert.title,
         message: alert.message,
-        duration, // Override default timing
+        duration,
+        // Override default timing
 
         // Add "View Service" action for CRITICAL alerts only
         action:
           alert.severity === 'CRITICAL' && onNavigateToService ?
             {
-              label: t('services.alerts.viewService'),
+              label: 'services.alerts.viewService',
               onClick: () => {
                 // Navigate to service detail page via callback
                 // Extract instanceId from alert.data or use deviceId
@@ -201,7 +204,7 @@ export function useServiceAlertToasts(props: UseServiceAlertToastsProps = {}) {
         onToastShown(alert.id, alert.severity);
       }
     },
-    [addNotification, onNavigateToService, onToastShown, t]
+    [addNotification, onNavigateToService, onToastShown]
   );
 
   // Effect: Handle alert events

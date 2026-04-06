@@ -3,7 +3,7 @@
  * Headless hook for field-level contextual help
  *
  * This hook manages:
- * - Loading help content from i18n based on field key and mode
+ * - Building help content from the field key and mode
  * - Open/closed state of the help popover/sheet
  * - ARIA labels for accessibility
  * - Integration with global help mode store
@@ -13,11 +13,7 @@
  */
 
 import { useMemo, useState, useCallback } from 'react';
-
-import { useTranslation } from '@nasnet/core/i18n';
-
 import { useHelpMode } from './use-help-mode';
-
 import type { FieldHelpConfig, UseFieldHelpReturn, HelpContent, HelpMode } from './help.types';
 
 /**
@@ -34,7 +30,7 @@ const DEFAULT_HELP_CONTENT: HelpContent = {
  * Hook for managing field-level contextual help
  *
  * Provides all logic needed by both mobile and desktop presenters:
- * - Content loading from i18n with Simple/Technical mode support
+ * - Content generation with Simple/Technical mode support
  * - Open/closed state management
  * - ARIA labels for accessibility
  *
@@ -64,11 +60,7 @@ const DEFAULT_HELP_CONTENT: HelpContent = {
 export function useFieldHelp(config: FieldHelpConfig): UseFieldHelpReturn {
   const { field, mode: propMode } = config;
 
-  // Get i18n translation function for network namespace (where help content lives)
-  // useSuspense: false to avoid blocking render while loading
-  const { t, ready } = useTranslation('network');
-
-  // Global help mode from Zustand store
+  const ready = true;
   const { mode: globalMode, toggleMode: toggleGlobalMode } = useHelpMode();
 
   // Local open/closed state
@@ -77,50 +69,18 @@ export function useFieldHelp(config: FieldHelpConfig): UseFieldHelpReturn {
   // Use prop mode if provided, otherwise use global mode
   const mode: HelpMode = propMode ?? globalMode;
 
-  /**
-   * Load help content from i18n based on field key and current mode
-   * Content is structured as:
-   * {
-   *   "ip": {
-   *     "title": { "simple": "IP Address", "technical": "IPv4/IPv6 Address" },
-   *     "description": { "simple": "...", "technical": "..." },
-   *     "examples": ["192.168.1.1", ...],
-   *     "link": "https://..."
-   *   }
-   * }
-   */
   const content = useMemo<HelpContent>(() => {
     if (!ready) {
       return DEFAULT_HELP_CONTENT;
     }
-
-    // Get title based on mode
-    const title = t(`help.${field}.title.${mode}`, {
-      defaultValue: t(`help.${field}.title.simple`, { defaultValue: field }),
-    });
-
-    // Get description based on mode
-    const description = t(`help.${field}.description.${mode}`, {
-      defaultValue: t(`help.${field}.description.simple`, { defaultValue: '' }),
-    });
-
-    // Get examples (same for both modes)
-    const examplesRaw = t(`help.${field}.examples`, {
-      returnObjects: true,
-      defaultValue: [],
-    });
-    const examples = Array.isArray(examplesRaw) ? examplesRaw : [];
-
-    // Get documentation link (same for both modes)
-    const link = t(`help.${field}.link`, { defaultValue: '' });
-
     return {
-      title,
-      description,
-      examples: examples as string[],
-      link: link || undefined,
+      title: field,
+      description:
+        mode === 'technical' ? 'Technical details are not available for this field yet.' : '',
+      examples: [],
+      link: undefined,
     };
-  }, [t, field, mode, ready]);
+  }, [field, mode, ready]);
 
   /**
    * Generate ARIA label for the help icon
@@ -137,7 +97,6 @@ export function useFieldHelp(config: FieldHelpConfig): UseFieldHelpReturn {
   const toggle = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
-
   return {
     content,
     isOpen,

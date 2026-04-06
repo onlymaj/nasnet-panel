@@ -69,7 +69,6 @@ export default defineConfig(({ mode }) => ({
       '@nasnet/core/utils': resolve(import.meta.dirname, '../../libs/core/utils/src'),
       '@nasnet/core/constants': resolve(import.meta.dirname, '../../libs/core/constants/src'),
       '@nasnet/core/forms': resolve(import.meta.dirname, '../../libs/core/forms/src'),
-      '@nasnet/core/i18n': resolve(import.meta.dirname, '../../libs/core/i18n/src'),
       '@nasnet/ui/layouts': resolve(import.meta.dirname, '../../libs/ui/layouts/src'),
       '@nasnet/ui/primitives': resolve(import.meta.dirname, '../../libs/ui/primitives/src'),
       '@nasnet/ui/patterns': resolve(import.meta.dirname, '../../libs/ui/patterns/src'),
@@ -199,13 +198,6 @@ export default defineConfig(({ mode }) => ({
           'vendor-table': ['@tanstack/react-table', '@tanstack/react-virtual'],
           // Forms - React Hook Form with validation
           'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // Internationalization - i18next
-          'vendor-i18n': [
-            'i18next',
-            'react-i18next',
-            'i18next-http-backend',
-            'i18next-browser-languagedetector',
-          ],
         },
       },
     },

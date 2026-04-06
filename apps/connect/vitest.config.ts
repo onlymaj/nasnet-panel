@@ -52,7 +52,6 @@ export default defineConfig({
       '@nasnet/core/utils': path.resolve(__dirname, '../../libs/core/utils/src'),
       '@nasnet/core/constants': path.resolve(__dirname, '../../libs/core/constants/src'),
       '@nasnet/core/forms': path.resolve(__dirname, '../../libs/core/forms/src'),
-      '@nasnet/core/i18n': path.resolve(__dirname, '../../libs/core/i18n/src'),
       '@nasnet/ui/layouts': path.resolve(__dirname, '../../libs/ui/layouts/src'),
       '@nasnet/ui/primitives': path.resolve(__dirname, '../../libs/ui/primitives/src'),
       '@nasnet/ui/patterns': path.resolve(__dirname, '../../libs/ui/patterns/src'),

@@ -7,32 +7,11 @@
  */
 
 import { useState, memo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { cn } from '@nasnet/ui/utils';
 import { useConnectionStore } from '@nasnet/state/stores';
-import {
-  usePortKnockSequences,
-  useTogglePortKnockSequence,
-  useDeletePortKnockSequence,
-} from '@nasnet/api-client/queries';
+import { usePortKnockSequences, useTogglePortKnockSequence, useDeletePortKnockSequence } from '@nasnet/api-client/queries';
 import type { PortKnockSequence } from '@nasnet/core/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Button,
-  Badge,
-  Switch,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Switch, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
 import { Pencil, Trash2, ShieldAlert, Clock, Activity } from 'lucide-react';
 
 // ============================================================================
@@ -55,12 +34,13 @@ export interface PortKnockSequenceManagerDesktopProps {
 /**
  * @description Badge showing enabled/disabled status with semantic colors
  */
-function StatusBadge({ enabled }: { enabled: boolean }) {
-  return (
-    <Badge variant={enabled ? 'success' : 'secondary'}>{enabled ? 'Active' : 'Disabled'}</Badge>
-  );
+function StatusBadge({
+  enabled
+}: {
+  enabled: boolean;
+}) {
+  return <Badge variant={enabled ? 'success' : 'secondary'}>{enabled ? 'Active' : 'Disabled'}</Badge>;
 }
-
 StatusBadge.displayName = 'StatusBadge';
 
 // ============================================================================
@@ -70,51 +50,46 @@ StatusBadge.displayName = 'StatusBadge';
 export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceManagerDesktop({
   className,
   onEdit,
-  onCreate,
+  onCreate
 }: PortKnockSequenceManagerDesktopProps) {
-  const { t } = useTranslation('firewall');
-  const { activeRouterId } = useConnectionStore();
-
-  const { data, loading, error } = usePortKnockSequences(activeRouterId!);
+  const {
+    activeRouterId
+  } = useConnectionStore();
+  const {
+    data,
+    loading,
+    error
+  } = usePortKnockSequences(activeRouterId!);
   const [toggleSequence] = useTogglePortKnockSequence();
   const [deleteSequence] = useDeletePortKnockSequence();
-
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sequenceToDelete, setSequenceToDelete] = useState<PortKnockSequence | null>(null);
-
   const sequences = data?.portKnockSequences || [];
-
-  const handleToggle = useCallback(
-    async (sequence: PortKnockSequence) => {
-      try {
-        await toggleSequence({
-          variables: {
-            routerId: activeRouterId!,
-            id: sequence.id!,
-            enabled: !sequence.isEnabled,
-          },
-        });
-      } catch (err) {
-        console.error('Failed to toggle port knock sequence:', err);
-      }
-    },
-    [activeRouterId, toggleSequence]
-  );
-
+  const handleToggle = useCallback(async (sequence: PortKnockSequence) => {
+    try {
+      await toggleSequence({
+        variables: {
+          routerId: activeRouterId!,
+          id: sequence.id!,
+          enabled: !sequence.isEnabled
+        }
+      });
+    } catch (err) {
+      console.error('Failed to toggle port knock sequence:', err);
+    }
+  }, [activeRouterId, toggleSequence]);
   const handleDeleteClick = useCallback((sequence: PortKnockSequence) => {
     setSequenceToDelete(sequence);
     setDeleteDialogOpen(true);
   }, []);
-
   const handleDeleteConfirm = useCallback(async () => {
     if (!sequenceToDelete) return;
-
     try {
       await deleteSequence({
         variables: {
           routerId: activeRouterId!,
-          id: sequenceToDelete.id!,
-        },
+          id: sequenceToDelete.id!
+        }
       });
       setDeleteDialogOpen(false);
       setSequenceToDelete(null);
@@ -122,26 +97,18 @@ export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceMa
       console.error('Failed to delete port knock sequence:', err);
     }
   }, [sequenceToDelete, activeRouterId, deleteSequence]);
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
+    return <div className="flex items-center justify-center py-8">
         <div className="text-muted-foreground">Loading sequences...</div>
-      </div>
-    );
+      </div>;
   }
-
   if (error) {
-    return (
-      <div className="flex items-center justify-center py-8">
+    return <div className="flex items-center justify-center py-8">
         <div className="text-error">Error loading sequences: {error.message}</div>
-      </div>
-    );
+      </div>;
   }
-
   if (sequences.length === 0) {
-    return (
-      <div className="space-y-component-md flex flex-col items-center justify-center py-12">
+    return <div className="space-y-component-md flex flex-col items-center justify-center py-12">
         <ShieldAlert className="text-muted-foreground h-12 w-12" />
         <div className="text-center">
           <h3 className="mb-component-sm font-display text-lg font-semibold">
@@ -150,26 +117,14 @@ export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceMa
           <p className="text-muted-foreground mb-component-md text-sm">
             Create a knock sequence to protect sensitive services.
           </p>
-          {onCreate && (
-            <Button
-              onClick={onCreate}
-              data-testid="create-sequence-button"
-              aria-label="Create first port knock sequence"
-            >
+          {onCreate && <Button onClick={onCreate} data-testid="create-sequence-button" aria-label="Create first port knock sequence">
               Create First Sequence
-            </Button>
-          )}
+            </Button>}
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
-      <Table
-        className={cn(className)}
-        data-testid="sequences-table"
-      >
+  return <>
+      <Table className={cn(className)} data-testid="sequences-table">
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
@@ -182,65 +137,38 @@ export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceMa
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sequences.map((sequence) => (
-            <TableRow
-              key={sequence.id}
-              className={sequence.isEnabled ? '' : 'opacity-50'}
-              data-testid={`sequence-row-${sequence.id}`}
-            >
+          {sequences.map(sequence => <TableRow key={sequence.id} className={sequence.isEnabled ? '' : 'opacity-50'} data-testid={`sequence-row-${sequence.id}`}>
               <TableCell>
                 <div className="font-medium">{sequence.name}</div>
               </TableCell>
 
               <TableCell>
                 <div className="gap-component-md flex items-center">
-                  <Badge
-                    variant="secondary"
-                    className="font-mono"
-                  >
+                  <Badge variant="secondary" className="font-mono">
                     {sequence.protectedProtocol.toUpperCase()}:{sequence.protectedPort}
                   </Badge>
-                  {sequence.protectedPort === 22 && (
-                    <ShieldAlert
-                      className="text-warning h-4 w-4"
-                      aria-label="SSH protected service"
-                    />
-                  )}
+                  {sequence.protectedPort === 22 && <ShieldAlert className="text-warning h-4 w-4" aria-label="SSH protected service" />}
                 </div>
               </TableCell>
 
               <TableCell>
                 <div className="gap-component-md flex items-center">
-                  {sequence.knockPorts.map((port, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className="font-mono text-xs"
-                    >
+                  {sequence.knockPorts.map((port, index) => <Badge key={index} variant="outline" className="font-mono text-xs">
                       {port.port}
-                    </Badge>
-                  ))}
+                    </Badge>)}
                 </div>
               </TableCell>
 
               <TableCell>
                 <div className="gap-component-sm flex items-center">
-                  <Switch
-                    checked={sequence.isEnabled}
-                    onCheckedChange={() => handleToggle(sequence)}
-                    aria-label={sequence.isEnabled ? 'Disable sequence' : 'Enable sequence'}
-                    data-testid={`toggle-sequence-${sequence.id}`}
-                  />
+                  <Switch checked={sequence.isEnabled} onCheckedChange={() => handleToggle(sequence)} aria-label={sequence.isEnabled ? 'Disable sequence' : 'Enable sequence'} data-testid={`toggle-sequence-${sequence.id}`} />
                   <StatusBadge enabled={sequence.isEnabled} />
                 </div>
               </TableCell>
 
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
-                  <Activity
-                    className="text-muted-foreground h-3 w-3"
-                    aria-hidden="true"
-                  />
+                  <Activity className="text-muted-foreground h-3 w-3" aria-hidden="true" />
                   <span className="font-mono text-sm">{sequence.recentAccessCount || 0}</span>
                 </div>
               </TableCell>
@@ -248,17 +176,11 @@ export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceMa
               <TableCell>
                 <div className="gap-component-md text-muted-foreground flex items-center text-xs">
                   <div className="gap-component-md flex items-center">
-                    <Clock
-                      className="h-3 w-3"
-                      aria-hidden="true"
-                    />
+                    <Clock className="h-3 w-3" aria-hidden="true" />
                     <span>K: {sequence.knockTimeout}</span>
                   </div>
                   <div className="gap-component-md flex items-center">
-                    <Clock
-                      className="h-3 w-3"
-                      aria-hidden="true"
-                    />
+                    <Clock className="h-3 w-3" aria-hidden="true" />
                     <span>A: {sequence.accessTimeout}</span>
                   </div>
                 </div>
@@ -266,67 +188,42 @@ export const PortKnockSequenceManagerDesktop = memo(function PortKnockSequenceMa
 
               <TableCell>
                 <div className="gap-component-md flex items-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit?.(sequence.id!)}
-                    aria-label={`Edit ${sequence.name} sequence`}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => onEdit?.(sequence.id!)} aria-label={`Edit ${sequence.name} sequence`}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClick(sequence)}
-                    data-testid={`delete-sequence-${sequence.id}`}
-                    aria-label={`Delete ${sequence.name} sequence`}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(sequence)} data-testid={`delete-sequence-${sequence.id}`} aria-label={`Delete ${sequence.name} sequence`}>
                     <Trash2 className="text-error h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)}
         </TableBody>
       </Table>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-      >
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Port Knock Sequence</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete the sequence "{sequenceToDelete?.name}"? This will
               remove all associated firewall rules.
-              {sequenceToDelete?.protectedPort === 22 && (
-                <div className="mt-component-sm p-component-sm bg-warning/10 border-warning rounded-lg border text-sm">
+              {sequenceToDelete?.protectedPort === 22 && <div className="mt-component-sm p-component-sm bg-warning/10 border-warning rounded-lg border text-sm">
                   <strong>Warning:</strong> This sequence protects SSH. Ensure you have alternative
                   access before deleting.
-                </div>
-              )}
+                </div>}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-            >
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 });
-
 PortKnockSequenceManagerDesktop.displayName = 'PortKnockSequenceManagerDesktop';

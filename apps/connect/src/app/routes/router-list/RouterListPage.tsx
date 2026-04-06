@@ -1,9 +1,6 @@
 import React from 'react';
-
 import { useNavigate } from '@tanstack/react-router';
 import { Plus } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import { ROUTES } from '@nasnet/core/constants';
 import { Button } from '@nasnet/ui/primitives';
 
@@ -32,76 +29,51 @@ import { Button } from '@nasnet/ui/primitives';
  * - Story 0.9.6: Return to Router List
  */
 export const RouterListPage = React.memo(function RouterListPage() {
-  const { t } = useTranslation('router');
   const navigate = useNavigate();
 
   // Placeholder: Router list will come from Epic 0.1 credential persistence
   // For now, show empty state
   const routers: never[] = [];
-
   const handleAddRouter = () => {
     // Placeholder: Will navigate to auto-scan or manual entry (Epic 0.1)
-    navigate({ to: ROUTES.DASHBOARD });
+    navigate({
+      to: ROUTES.DASHBOARD
+    });
   };
-
-  return (
-    <div className="bg-muted animate-fade-in-up min-h-screen p-4 md:p-6">
+  return <div className="bg-muted animate-fade-in-up min-h-screen p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between px-2">
           <div>
-            <h1 className="font-display text-2xl font-semibold md:text-3xl">{t('list.title')}</h1>
-            <p className="text-muted-foreground mt-1 text-sm">{t('list.subtitle')}</p>
+            <h1 className="font-display text-2xl font-semibold md:text-3xl">{"Routers"}</h1>
+            <p className="text-muted-foreground mt-1 text-sm">{"Manage and connect to discovered routers"}</p>
           </div>
-          <Button
-            onClick={handleAddRouter}
-            className="gap-2"
-            aria-label={t('list.addButton')}
-          >
-            <Plus
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
-            <span className="hidden sm:inline">{t('list.addButton')}</span>
+          <Button onClick={handleAddRouter} className="gap-2" aria-label={"Add router"}>
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden sm:inline">{"Add router"}</span>
           </Button>
         </div>
 
-        {
-          routers.length === 0 ?
-            // Empty state
-            <div className="brand-gradient-subtle rounded-card-lg border-border/30 flex flex-col items-center justify-center border px-4 py-16 text-center">
-              <img
-                src="/favicon.png"
-                alt=""
-                aria-hidden="true"
-                className="ring-primary/20 mb-6 h-20 w-20 rounded-2xl shadow-md ring-4"
-              />
+        {routers.length === 0 ?
+      // Empty state
+      <div className="brand-gradient-subtle rounded-card-lg border-border/30 flex flex-col items-center justify-center border px-4 py-16 text-center">
+              <img src="/favicon.png" alt="" aria-hidden="true" className="ring-primary/20 mb-6 h-20 w-20 rounded-2xl shadow-md ring-4" />
               <h2 className="font-display mb-2 text-xl font-semibold md:text-2xl">
-                {t('list.noRoutersYet')}
+                {"No routers yet"}
               </h2>
               <p className="text-muted-foreground mb-6 max-w-md text-sm">
-                {t('list.emptyStateDescription')}
+                {"Add your first router to start managing your network."}
               </p>
-              <Button
-                onClick={handleAddRouter}
-                size="lg"
-                className="gap-2"
-              >
-                <Plus
-                  className="h-5 w-5"
-                  aria-hidden="true"
-                />
-                {t('list.addFirstRouter')}
+              <Button onClick={handleAddRouter} size="lg" className="gap-2">
+                <Plus className="h-5 w-5" aria-hidden="true" />
+                {"Add first router"}
               </Button>
-              <p className="text-muted-foreground mt-6 text-xs opacity-70">{t('list.epicNote')}</p>
+              <p className="text-muted-foreground mt-6 text-xs opacity-70">{"Router list management is still being expanded."}</p>
             </div>
-            // Router list (will be populated in Epic 0.1)
-          : <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      // Router list (will be populated in Epic 0.1)
+      : <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {/* Router cards will be rendered here */}
-            </div>
-
-        }
+            </div>}
       </div>
-    </div>
-  );
+    </div>;
 });
 RouterListPage.displayName = 'RouterListPage';

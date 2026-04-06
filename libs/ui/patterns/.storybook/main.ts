@@ -48,7 +48,6 @@ const config: StorybookConfig = {
           '@nasnet/core/types': join(__dirname, '../../../core/types/src'),
           '@nasnet/core/utils': join(__dirname, '../../../core/utils/src'),
           '@nasnet/core/constants': join(__dirname, '../../../core/constants/src'),
-          '@nasnet/core/i18n': join(__dirname, '../../../core/i18n/src'),
           '@nasnet/core/forms': join(__dirname, '../../../core/forms/src'),
           '@nasnet/state/stores': join(__dirname, '../../../state/stores/src'),
           '@nasnet/api-client/core': join(__dirname, '../../../api-client/core/src'),

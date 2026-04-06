@@ -16,56 +16,15 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useConnectionStore } from '@nasnet/state/stores';
 import { cn } from '@nasnet/ui/utils';
-import {
-  useMangleRules,
-  useDeleteMangleRule,
-  useToggleMangleRule,
-  useMoveMangleRule,
-} from '@nasnet/api-client/queries/firewall';
+import { useMangleRules, useDeleteMangleRule, useToggleMangleRule, useMoveMangleRule } from '@nasnet/api-client/queries/firewall';
 import { useMangleRuleTable } from '@nasnet/ui/patterns/mangle-rule-table';
 import { MangleRuleEditor } from '@nasnet/ui/patterns/mangle-rule-editor';
 import type { MangleRule } from '@nasnet/core/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Button,
-  Badge,
-  Switch,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Switch, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Pencil, Copy, Trash2, GripVertical } from 'lucide-react';
 
@@ -77,9 +36,12 @@ import { Pencil, Copy, Trash2, GripVertical } from 'lucide-react';
  * ActionBadge Component
  * Displays mangle action type with semantic color coding
  */
-const ActionBadge = React.memo(function ActionBadgeComponent({ action }: { action: string }) {
+const ActionBadge = React.memo(function ActionBadgeComponent({
+  action
+}: {
+  action: string;
+}) {
   ActionBadge.displayName = 'ActionBadge';
-
   const ACTION_COLORS: Record<string, string> = {
     'mark-connection': 'bg-info/10 text-info',
     'mark-packet': 'bg-primary/10 text-primary',
@@ -90,19 +52,12 @@ const ActionBadge = React.memo(function ActionBadgeComponent({ action }: { actio
     accept: 'bg-success/10 text-success',
     drop: 'bg-error/10 text-error',
     jump: 'bg-primary/10 text-primary',
-    log: 'bg-muted text-muted-foreground',
+    log: 'bg-muted text-muted-foreground'
   };
-
   const colorClass = ACTION_COLORS[action] || 'bg-muted text-muted-foreground';
-
-  return (
-    <Badge
-      variant="outline"
-      className={colorClass}
-    >
+  return <Badge variant="outline" className={colorClass}>
       {action}
-    </Badge>
-  );
+    </Badge>;
 });
 
 // ============================================================================
@@ -113,16 +68,15 @@ const ActionBadge = React.memo(function ActionBadgeComponent({ action }: { actio
  * ChainBadge Component
  * Displays mangle chain name with monospace formatting
  */
-const ChainBadge = React.memo(function ChainBadgeComponent({ chain }: { chain: string }) {
+const ChainBadge = React.memo(function ChainBadgeComponent({
+  chain
+}: {
+  chain: string;
+}) {
   ChainBadge.displayName = 'ChainBadge';
-  return (
-    <Badge
-      variant="secondary"
-      className="font-mono text-xs tabular-nums"
-    >
+  return <Badge variant="secondary" className="font-mono text-xs tabular-nums">
       {chain}
-    </Badge>
-  );
+    </Badge>;
 });
 
 // ============================================================================
@@ -134,12 +88,11 @@ const ChainBadge = React.memo(function ChainBadgeComponent({ chain }: { chain: s
  * Displays a compact summary of rule matchers with overflow indicator
  */
 const MatchersSummary = React.memo(function MatchersSummaryComponent({
-  rule,
+  rule
 }: {
   rule: MangleRule;
 }) {
   MatchersSummary.displayName = 'MatchersSummary';
-
   const matchers = useMemo(() => {
     const result: string[] = [];
     if (rule.protocol) result.push(`proto:${rule.protocol}`);
@@ -151,26 +104,18 @@ const MatchersSummary = React.memo(function MatchersSummaryComponent({
     if (rule.outInterface) result.push(`out:${rule.outInterface}`);
     return result;
   }, [rule]);
-
   if (matchers.length === 0) {
     return <span className="text-muted-foreground text-sm">any</span>;
   }
-
   if (matchers.length <= 2) {
     return <span className="font-mono text-sm">{matchers.join(', ')}</span>;
   }
-
-  return (
-    <span className="text-sm">
+  return <span className="text-sm">
       <span className="font-mono">{matchers.slice(0, 2).join(', ')}</span>
-      <Badge
-        variant="outline"
-        className="ml-component-sm text-xs"
-      >
+      <Badge variant="outline" className="ml-component-sm text-xs">
         +{matchers.length - 2} more
       </Badge>
-    </span>
-  );
+    </span>;
 });
 
 // ============================================================================
@@ -196,34 +141,29 @@ const SortableRow = React.memo(function SortableRowComponent({
   onDuplicate,
   onDelete,
   onToggle,
-  className,
+  className
 }: SortableRowProps) {
   SortableRow.displayName = 'SortableRow';
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: rule.id!,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: rule.id!
   });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : 1
   };
-
   const isUnused = (rule.packets ?? 0) === 0;
   const markValue = rule.newConnectionMark || rule.newPacketMark || rule.newRoutingMark || '-';
-
-  return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      className={rule.disabled ? 'bg-muted/50 opacity-50' : ''}
-    >
+  return <TableRow ref={setNodeRef} style={style} className={rule.disabled ? 'bg-muted/50 opacity-50' : ''}>
       {/* Drag handle */}
-      <TableCell
-        className="w-8 cursor-grab"
-        {...attributes}
-        {...listeners}
-      >
+      <TableCell className="w-8 cursor-grab" {...attributes} {...listeners}>
         <GripVertical className="text-category-firewall h-4 w-4" />
       </TableCell>
 
@@ -250,14 +190,9 @@ const SortableRow = React.memo(function SortableRowComponent({
 
       {/* Packets */}
       <TableCell className="font-mono text-sm tabular-nums">
-        {isUnused ?
-          <Badge
-            variant="outline"
-            className="text-muted-foreground text-xs"
-          >
+        {isUnused ? <Badge variant="outline" className="text-muted-foreground text-xs">
             unused
-          </Badge>
-        : (rule.packets ?? 0).toLocaleString()}
+          </Badge> : (rule.packets ?? 0).toLocaleString()}
       </TableCell>
 
       {/* Bytes */}
@@ -267,45 +202,24 @@ const SortableRow = React.memo(function SortableRowComponent({
 
       {/* Enabled Toggle */}
       <TableCell>
-        <Switch
-          checked={!rule.disabled}
-          onCheckedChange={() => onToggle(rule)}
-          aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'}
-        />
+        <Switch checked={!rule.disabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'} />
       </TableCell>
 
       {/* Actions */}
       <TableCell>
         <div className="gap-component-xs flex">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            aria-label="Edit rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onEdit(rule)} aria-label="Edit rule">
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            aria-label="Duplicate rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onDuplicate(rule)} aria-label="Duplicate rule">
             <Copy className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="text-error hover:text-error/80"
-            aria-label="Delete rule"
-          >
+          <Button variant="ghost" size="sm" onClick={() => onDelete(rule)} className="text-error hover:text-error/80" aria-label="Delete rule">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 });
 
 // ============================================================================
@@ -341,78 +255,78 @@ export interface MangleRulesTableDesktopProps {
  */
 export const MangleRulesTableDesktop = React.memo(function MangleRulesTableDesktopComponent({
   className,
-  chain,
+  chain
 }: MangleRulesTableDesktopProps) {
   MangleRulesTableDesktop.displayName = 'MangleRulesTableDesktop';
-  const { t } = useTranslation('firewall');
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
-
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
   const {
     data: rules,
     isLoading,
-    error,
-  } = useMangleRules(routerIp, chain ? { chain: chain as any } : undefined);
+    error
+  } = useMangleRules(routerIp, chain ? {
+    chain: chain as any
+  } : undefined);
   const deleteMangleRule = useDeleteMangleRule(routerIp);
   const toggleMangleRule = useToggleMangleRule(routerIp);
   const moveMangleRule = useMoveMangleRule(routerIp);
-
   const [editingRule, setEditingRule] = useState<MangleRule | null>(null);
   const [deleteConfirmRule, setDeleteConfirmRule] = useState<MangleRule | null>(null);
 
   // Drag-drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
 
   // Use the headless hook
-  const { data: sortedRules } = useMangleRuleTable({
+  const {
+    data: sortedRules
+  } = useMangleRuleTable({
     data: rules || [],
     initialSortBy: 'position',
     initialSortDirection: 'asc',
-    initialFilters: chain ? { chain } : {},
+    initialFilters: chain ? {
+      chain
+    } : {}
   });
 
   // Handlers
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
+    const {
+      active,
+      over
+    } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = sortedRules.findIndex((r) => r.id === active.id);
-      const newIndex = sortedRules.findIndex((r) => r.id === over.id);
-
+      const oldIndex = sortedRules.findIndex(r => r.id === active.id);
+      const newIndex = sortedRules.findIndex(r => r.id === over.id);
       if (oldIndex !== -1 && newIndex !== -1) {
         const rule = sortedRules[oldIndex];
         moveMangleRule.mutate({
           ruleId: rule.id!,
-          destination: newIndex,
+          destination: newIndex
         });
       }
     }
   };
-
   const handleEdit = (rule: MangleRule) => {
     setEditingRule(rule);
   };
-
   const handleDuplicate = (rule: MangleRule) => {
-    const duplicatedRule = { ...rule, id: undefined, position: undefined };
+    const duplicatedRule = {
+      ...rule,
+      id: undefined,
+      position: undefined
+    };
     setEditingRule(duplicatedRule);
   };
-
   const handleDelete = (rule: MangleRule) => {
     setDeleteConfirmRule(rule);
   };
-
   const handleToggle = (rule: MangleRule) => {
     toggleMangleRule.mutate({
       ruleId: rule.id!,
-      disabled: !rule.disabled,
+      disabled: !rule.disabled
     });
   };
-
   const confirmDelete = () => {
     if (deleteConfirmRule) {
       deleteMangleRule.mutate(deleteConfirmRule.id!);
@@ -422,79 +336,52 @@ export const MangleRulesTableDesktop = React.memo(function MangleRulesTableDeskt
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className={cn('p-component-md', className)}>
+    return <div className={cn('p-component-md', className)}>
         <div className="space-y-component-md animate-pulse">
           <div className="bg-muted h-10 rounded" />
           <div className="bg-muted h-16 rounded" />
           <div className="bg-muted h-16 rounded" />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div
-        className={cn('p-component-md text-error', className)}
-        role="alert"
-      >
-        <p className="mb-component-xs font-semibold">{t('mangle.notifications.error.load')}</p>
+    return <div className={cn('p-component-md text-error', className)} role="alert">
+        <p className="mb-component-xs font-semibold">{"Failed to load mangle rules"}</p>
         <p className="text-sm">{error.message}</p>
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div className={cn('p-component-lg text-center', className)}>
+    return <div className={cn('p-component-lg text-center', className)}>
         <p className="text-muted-foreground">
-          {chain ? t('mangle.table.noRulesInChain') : t('mangle.table.noRules')}
+          {chain ? "No rules in this chain" : "No mangle rules configured"}
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className={className}>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8" />
-                <TableHead>{t('mangle.table.columns.position')}</TableHead>
-                <TableHead>{t('mangle.table.columns.chain')}</TableHead>
-                <TableHead>{t('mangle.table.columns.action')}</TableHead>
-                <TableHead>{t('mangle.table.columns.markValue')}</TableHead>
-                <TableHead>{t('mangle.table.columns.matchers')}</TableHead>
-                <TableHead>{t('mangle.table.columns.packets')}</TableHead>
-                <TableHead>{t('mangle.table.columns.bytes')}</TableHead>
-                <TableHead>{t('mangle.table.columns.enabled')}</TableHead>
-                <TableHead>{t('mangle.table.columns.actions')}</TableHead>
+                <TableHead>{"#"}</TableHead>
+                <TableHead>{"Chain"}</TableHead>
+                <TableHead>{"Action"}</TableHead>
+                <TableHead>{"Mark Value"}</TableHead>
+                <TableHead>{"Matchers"}</TableHead>
+                <TableHead>{"Packets"}</TableHead>
+                <TableHead>{"Bytes"}</TableHead>
+                <TableHead>{"Enabled"}</TableHead>
+                <TableHead>{"Actions"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <SortableContext
-                items={sortedRules.map((r) => r.id!)}
-                strategy={verticalListSortingStrategy}
-              >
-                {sortedRules.map((rule) => (
-                  <SortableRow
-                    key={rule.id}
-                    rule={rule}
-                    onEdit={handleEdit}
-                    onDuplicate={handleDuplicate}
-                    onDelete={handleDelete}
-                    onToggle={handleToggle}
-                  />
-                ))}
+              <SortableContext items={sortedRules.map(r => r.id!)} strategy={verticalListSortingStrategy}>
+                {sortedRules.map(rule => <SortableRow key={rule.id} rule={rule} onEdit={handleEdit} onDuplicate={handleDuplicate} onDelete={handleDelete} onToggle={handleToggle} />)}
               </SortableContext>
             </TableBody>
           </Table>
@@ -502,73 +389,44 @@ export const MangleRulesTableDesktop = React.memo(function MangleRulesTableDeskt
       </div>
 
       {/* Edit/Create Sheet */}
-      <Sheet
-        open={!!editingRule}
-        onOpenChange={(open) => !open && setEditingRule(null)}
-      >
+      <Sheet open={!!editingRule} onOpenChange={open => !open && setEditingRule(null)}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
           <SheetHeader>
             <SheetTitle>
-              {editingRule?.id ?
-                t('mangle.dialogs.editRule.title')
-              : t('mangle.dialogs.addRule.title')}
+              {editingRule?.id ? "Edit Mangle Rule" : "Add Mangle Rule"}
             </SheetTitle>
             <SheetDescription>
-              {editingRule?.id ?
-                t('mangle.dialogs.editRule.description')
-              : t('mangle.dialogs.addRule.description')}
+              {editingRule?.id ? "Modify existing mangle rule configuration" : "Create a new mangle rule for traffic marking and QoS"}
             </SheetDescription>
           </SheetHeader>
-          {editingRule && (
-            <MangleRuleEditor
-              routerId={routerIp}
-              initialRule={editingRule}
-              open={!!editingRule}
-              onClose={() => setEditingRule(null)}
-              onSave={async () => setEditingRule(null)}
-            />
-          )}
+          {editingRule && <MangleRuleEditor routerId={routerIp} initialRule={editingRule} open={!!editingRule} onClose={() => setEditingRule(null)} onSave={async () => setEditingRule(null)} />}
         </SheetContent>
       </Sheet>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && setDeleteConfirmRule(null)}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && setDeleteConfirmRule(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('mangle.dialogs.deleteRule.title')}</DialogTitle>
-            <DialogDescription>{t('mangle.dialogs.deleteRule.description')}</DialogDescription>
+            <DialogTitle>{"Delete Mangle Rule"}</DialogTitle>
+            <DialogDescription>{"Are you sure you want to delete this mangle rule?"}</DialogDescription>
           </DialogHeader>
           <div className="py-component-md">
             <p className="mb-component-sm text-sm font-semibold">
-              {t('mangle.dialogs.deleteRule.warning')}
+              {"This action cannot be undone."}
             </p>
             <ul className="text-muted-foreground space-y-component-xs list-inside list-disc text-sm">
-              {(
-                t('mangle.dialogs.deleteRule.consequences', { returnObjects: true }) as string[]
-              ).map((consequence, i) => (
-                <li key={i}>{consequence}</li>
-              ))}
+              {(["Traffic marks will no longer be applied", "QoS queues depending on this mark may stop working", "Policy routing rules using this mark may be affected", "Firewall rules matching this mark will not trigger"] as string[]).map((consequence, i) => <li key={i}>{consequence}</li>)}
             </ul>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirmRule(null)}
-            >
-              {t('button.cancel', { ns: 'common' })}
+            <Button variant="outline" onClick={() => setDeleteConfirmRule(null)}>
+              {"Cancel"}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-            >
-              {t('button.delete', { ns: 'common' })}
+            <Button variant="destructive" onClick={confirmDelete}>
+              {"Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 });

@@ -15,7 +15,6 @@
  */
 
 import { useState, useCallback, memo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Plus, Upload, Download, Settings } from 'lucide-react';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@nasnet/ui/primitives';
 import { TemplateGallery, useTemplateGallery } from '@nasnet/ui/patterns/template-gallery';
@@ -58,9 +57,8 @@ export interface TemplatesPageProps {
 export const TemplatesPage = memo(function TemplatesPage({
   routerId,
   currentRules = [],
-  className,
+  className
 }: TemplatesPageProps) {
-  const { t } = useTranslation('firewall');
   const [selectedTemplate, setSelectedTemplate] = useState<FirewallTemplate | null>(null);
   const [activeTab, setActiveTab] = useState<'browse' | 'apply'>('browse');
 
@@ -68,7 +66,7 @@ export const TemplatesPage = memo(function TemplatesPage({
   const {
     data: builtInTemplates = [],
     isLoading: isLoadingBuiltIn,
-    error: builtInError,
+    error: builtInError
   } = useTemplates();
 
   // Fetch custom templates from IndexedDB
@@ -78,7 +76,7 @@ export const TemplatesPage = memo(function TemplatesPage({
     save: saveCustomTemplate,
     remove: removeCustomTemplate,
     exportTemplates: exportCustomTemplates,
-    importTemplates: importCustomTemplates,
+    importTemplates: importCustomTemplates
   } = useCustomTemplates();
 
   // Combine built-in and custom templates
@@ -87,9 +85,9 @@ export const TemplatesPage = memo(function TemplatesPage({
   // Initialize template gallery hook
   const gallery = useTemplateGallery({
     templates: allTemplates,
-    onSelect: (template) => {
+    onSelect: template => {
       setSelectedTemplate(template);
-    },
+    }
   });
 
   // Mutations
@@ -102,297 +100,185 @@ export const TemplatesPage = memo(function TemplatesPage({
     setSelectedTemplate(template);
     setActiveTab('apply');
   }, []);
-
-  const handlePreviewTemplate = useCallback(
-    async (params: {
-      routerId: string;
-      template: FirewallTemplate;
-      variables: Record<string, string>;
-    }) => {
-      // This would call the actual preview API
-      // For now, return mock data
-      return {
-        template: params.template,
-        resolvedRules: params.template.rules,
-        conflicts: [],
-        impactAnalysis: {
-          newRulesCount: params.template.ruleCount,
-          affectedChains: ['input', 'forward'],
-          estimatedApplyTime: 5,
-          warnings: [],
-        },
-      };
-    },
-    []
-  );
-
-  const handleApply = useCallback(
-    async (params: {
-      routerId: string;
-      template: FirewallTemplate;
-      variables: Record<string, string>;
-    }) => {
-      try {
-        const result = await applyMutation.mutateAsync({
-          routerId: params.routerId,
-          templateId: params.template.id,
-          variables: params.variables,
-        });
-
-        toast.success('Template applied successfully!', {
-          description: `${result.appliedRulesCount} firewall rules created`,
-        });
-
-        return result;
-      } catch (error) {
-        toast.error('Failed to apply template', {
-          description: error instanceof Error ? error.message : 'Unknown error',
-        });
-        throw error;
+  const handlePreviewTemplate = useCallback(async (params: {
+    routerId: string;
+    template: FirewallTemplate;
+    variables: Record<string, string>;
+  }) => {
+    // This would call the actual preview API
+    // For now, return mock data
+    return {
+      template: params.template,
+      resolvedRules: params.template.rules,
+      conflicts: [],
+      impactAnalysis: {
+        newRulesCount: params.template.ruleCount,
+        affectedChains: ['input', 'forward'],
+        estimatedApplyTime: 5,
+        warnings: []
       }
-    },
-    [applyMutation]
-  );
-
-  const handleRollback = useCallback(
-    async (params: { routerId: string; rollbackId: string }) => {
-      try {
-        await rollbackMutation.mutateAsync(params);
-
-        toast.success('Changes rolled back successfully', {
-          description: 'Firewall configuration restored',
-        });
-      } catch (error) {
-        toast.error('Failed to rollback changes', {
-          description: error instanceof Error ? error.message : 'Unknown error',
-        });
-        throw error;
-      }
-    },
-    [rollbackMutation]
-  );
-
-  const handleSaveCustomTemplate = useCallback(
-    async (template: FirewallTemplate) => {
-      try {
-        await saveCustomTemplate(template);
-        toast.success('Template saved!', {
-          description: `"${template.name}" saved to your custom templates`,
-        });
-      } catch (error) {
-        toast.error('Failed to save template', {
-          description: error instanceof Error ? error.message : 'Unknown error',
-        });
-        throw error;
-      }
-    },
-    [saveCustomTemplate]
-  );
-
-  const handleImportTemplate = useCallback(
-    async (template: FirewallTemplate) => {
-      try {
-        await saveCustomTemplate(template);
-        toast.success('Template imported!', {
-          description: `"${template.name}" added to your custom templates`,
-        });
-      } catch (error) {
-        toast.error('Failed to import template', {
-          description: error instanceof Error ? error.message : 'Unknown error',
-        });
-        throw error;
-      }
-    },
-    [saveCustomTemplate]
-  );
-
+    };
+  }, []);
+  const handleApply = useCallback(async (params: {
+    routerId: string;
+    template: FirewallTemplate;
+    variables: Record<string, string>;
+  }) => {
+    try {
+      const result = await applyMutation.mutateAsync({
+        routerId: params.routerId,
+        templateId: params.template.id,
+        variables: params.variables
+      });
+      toast.success('Template applied successfully!', {
+        description: `${result.appliedRulesCount} firewall rules created`
+      });
+      return result;
+    } catch (error) {
+      toast.error('Failed to apply template', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }, [applyMutation]);
+  const handleRollback = useCallback(async (params: {
+    routerId: string;
+    rollbackId: string;
+  }) => {
+    try {
+      await rollbackMutation.mutateAsync(params);
+      toast.success('Changes rolled back successfully', {
+        description: 'Firewall configuration restored'
+      });
+    } catch (error) {
+      toast.error('Failed to rollback changes', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }, [rollbackMutation]);
+  const handleSaveCustomTemplate = useCallback(async (template: FirewallTemplate) => {
+    try {
+      await saveCustomTemplate(template);
+      toast.success('Template saved!', {
+        description: `"${template.name}" saved to your custom templates`
+      });
+    } catch (error) {
+      toast.error('Failed to save template', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }, [saveCustomTemplate]);
+  const handleImportTemplate = useCallback(async (template: FirewallTemplate) => {
+    try {
+      await saveCustomTemplate(template);
+      toast.success('Template imported!', {
+        description: `"${template.name}" added to your custom templates`
+      });
+    } catch (error) {
+      toast.error('Failed to import template', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      });
+      throw error;
+    }
+  }, [saveCustomTemplate]);
   const handleExportAllCustom = useCallback(() => {
     if (customTemplates.length === 0) {
       toast.info('No custom templates to export');
       return;
     }
-
     downloadTemplates(customTemplates, 'json', {
-      fileName: 'custom-firewall-templates',
+      fileName: 'custom-firewall-templates'
     });
-
     toast.success('Templates exported!', {
-      description: `${customTemplates.length} templates downloaded`,
+      description: `${customTemplates.length} templates downloaded`
     });
   }, [customTemplates]);
-
   const handleApplySuccess = useCallback(() => {
     toast.success('Template applied successfully!');
   }, []);
-
   const handleApplyCancel = useCallback(() => {
     setActiveTab('browse');
     setSelectedTemplate(null);
   }, []);
-
   const handleRollbackComplete = useCallback(() => {
     toast.info('Rollback complete');
     setActiveTab('browse');
     setSelectedTemplate(null);
   }, []);
-
   const isLoading = isLoadingBuiltIn || isLoadingCustom;
-  const existingTemplateNames = allTemplates.map((t) => t.name);
-
-  return (
-    <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-lg space-y-component-lg container mx-auto">
+  const existingTemplateNames = allTemplates.map(t => t.name);
+  return <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-lg space-y-component-lg container mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold">{t('templates.title')}</h1>
-          <p className="text-muted-foreground">{t('templates.subtitle')}</p>
+          <h1 className="font-display text-3xl font-bold">{"Firewall Templates"}</h1>
+          <p className="text-muted-foreground">{"templates.subtitle"}</p>
         </div>
 
         <div className="gap-component-sm flex">
           {/* Export All Custom Templates */}
-          {customTemplates.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleExportAllCustom}
-              aria-label={t('templates.buttons.exportCustom')}
-            >
-              <Download
-                className="mr-component-sm h-4 w-4"
-                aria-hidden="true"
-              />
-              {t('templates.buttons.exportCustom')} ({customTemplates.length})
-            </Button>
-          )}
+          {customTemplates.length > 0 && <Button variant="outline" onClick={handleExportAllCustom} aria-label={"templates.buttons.exportCustom"}>
+              <Download className="mr-component-sm h-4 w-4" aria-hidden="true" />
+              {"templates.buttons.exportCustom"} ({customTemplates.length})
+            </Button>}
 
           {/* Import Template */}
-          <ImportTemplateDialog
-            existingNames={existingTemplateNames}
-            onImport={handleImportTemplate}
-            trigger={
-              <Button
-                variant="outline"
-                aria-label={t('templates.buttons.import')}
-              >
-                <Upload
-                  className="mr-component-sm h-4 w-4"
-                  aria-hidden="true"
-                />
-                {t('templates.buttons.import')}
-              </Button>
-            }
-          />
+          <ImportTemplateDialog existingNames={existingTemplateNames} onImport={handleImportTemplate} trigger={<Button variant="outline" aria-label={"templates.buttons.import"}>
+                <Upload className="mr-component-sm h-4 w-4" aria-hidden="true" />
+                {"templates.buttons.import"}
+              </Button>} />
 
           {/* Save Current Rules as Template */}
-          {currentRules.length > 0 && (
-            <SaveTemplateDialog
-              rules={currentRules}
-              existingNames={existingTemplateNames}
-              onSave={handleSaveCustomTemplate}
-              trigger={
-                <Button aria-label={t('templates.buttons.create')}>
-                  <Plus
-                    className="mr-component-sm h-4 w-4"
-                    aria-hidden="true"
-                  />
-                  {t('templates.buttons.create')}
-                </Button>
-              }
-            />
-          )}
+          {currentRules.length > 0 && <SaveTemplateDialog rules={currentRules} existingNames={existingTemplateNames} onSave={handleSaveCustomTemplate} trigger={<Button aria-label={"templates.buttons.create"}>
+                  <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+                  {"templates.buttons.create"}
+                </Button>} />}
         </div>
       </div>
 
       {/* Main Content */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as 'browse' | 'apply')}
-      >
+      <Tabs value={activeTab} onValueChange={v => setActiveTab(v as 'browse' | 'apply')}>
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="browse">{t('templates.tabs.browse')}</TabsTrigger>
-          <TabsTrigger
-            value="apply"
-            disabled={!selectedTemplate}
-          >
-            {t('templates.tabs.apply')}
+          <TabsTrigger value="browse">{"templates.tabs.browse"}</TabsTrigger>
+          <TabsTrigger value="apply" disabled={!selectedTemplate}>
+            {"templates.tabs.apply"}
           </TabsTrigger>
         </TabsList>
 
         {/* Browse Tab */}
-        <TabsContent
-          value="browse"
-          className="mt-6"
-        >
-          <TemplateGallery
-            gallery={gallery}
-            onApplyTemplate={handleApplyTemplate}
-            loading={isLoading}
-          />
+        <TabsContent value="browse" className="mt-6">
+          <TemplateGallery gallery={gallery} onApplyTemplate={handleApplyTemplate} loading={isLoading} />
 
           {/* Error State */}
-          {builtInError && (
-            <div className="border-error bg-error/10 p-component-md rounded-[var(--semantic-radius-card)] border">
-              <p className="text-error text-sm">{t('templates.errors.loadFailed')}</p>
-            </div>
-          )}
+          {builtInError && <div className="border-error bg-error/10 p-component-md rounded-[var(--semantic-radius-card)] border">
+              <p className="text-error text-sm">{"templates.errors.loadFailed"}</p>
+            </div>}
 
           {/* Empty State */}
-          {!isLoading && allTemplates.length === 0 && (
-            <div className="gap-component-md border-border p-component-xl flex flex-col items-center justify-center rounded-[var(--semantic-radius-card)] border-2 border-dashed text-center">
-              <Settings
-                className="text-muted-foreground h-12 w-12"
-                aria-hidden="true"
-              />
+          {!isLoading && allTemplates.length === 0 && <div className="gap-component-md border-border p-component-xl flex flex-col items-center justify-center rounded-[var(--semantic-radius-card)] border-2 border-dashed text-center">
+              <Settings className="text-muted-foreground h-12 w-12" aria-hidden="true" />
               <div>
                 <h3 className="font-display text-lg font-semibold">
-                  {t('templates.emptyStates.noTemplates.title')}
+                  {"templates.emptyStates.noTemplates.title"}
                 </h3>
                 <p className="mt-component-sm text-muted-foreground text-sm">
-                  {currentRules.length > 0 ?
-                    t('templates.emptyStates.noTemplates.descriptionWithRules')
-                  : t('templates.emptyStates.noTemplates.description')}
+                  {currentRules.length > 0 ? "templates.emptyStates.noTemplates.descriptionWithRules" : "templates.emptyStates.noTemplates.description"}
                 </p>
               </div>
-              {currentRules.length > 0 && (
-                <SaveTemplateDialog
-                  rules={currentRules}
-                  existingNames={existingTemplateNames}
-                  onSave={handleSaveCustomTemplate}
-                  trigger={
-                    <Button aria-label={t('templates.buttons.createFirst')}>
-                      <Plus
-                        className="mr-component-sm h-4 w-4"
-                        aria-hidden="true"
-                      />
-                      {t('templates.buttons.createFirst')}
-                    </Button>
-                  }
-                />
-              )}
-            </div>
-          )}
+              {currentRules.length > 0 && <SaveTemplateDialog rules={currentRules} existingNames={existingTemplateNames} onSave={handleSaveCustomTemplate} trigger={<Button aria-label={"templates.buttons.createFirst"}>
+                      <Plus className="mr-component-sm h-4 w-4" aria-hidden="true" />
+                      {"templates.buttons.createFirst"}
+                    </Button>} />}
+            </div>}
         </TabsContent>
 
         {/* Apply Tab */}
-        <TabsContent
-          value="apply"
-          className="mt-6"
-        >
-          {selectedTemplate && (
-            <TemplateApplyFlow
-              routerId={routerId}
-              template={selectedTemplate}
-              onPreview={handlePreviewTemplate}
-              onApply={handleApply}
-              onRollback={handleRollback}
-              onSuccess={handleApplySuccess}
-              onCancel={handleApplyCancel}
-              onRollbackComplete={handleRollbackComplete}
-            />
-          )}
+        <TabsContent value="apply" className="mt-6">
+          {selectedTemplate && <TemplateApplyFlow routerId={routerId} template={selectedTemplate} onPreview={handlePreviewTemplate} onApply={handleApply} onRollback={handleRollback} onSuccess={handleApplySuccess} onCancel={handleApplyCancel} onRollbackComplete={handleRollbackComplete} />}
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 });
-
 TemplatesPage.displayName = 'TemplatesPage';

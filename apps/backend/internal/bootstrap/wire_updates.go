@@ -30,6 +30,7 @@ func provideUpdateService(
 ) (*updates.UpdateService, error) {
 	return updates.NewUpdateService(updates.UpdateServiceConfig{
 		GitHubClient: githubClient,
+		ManifestRepo: defaultManifestRepo,
 	})
 }
 

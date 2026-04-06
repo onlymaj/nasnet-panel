@@ -7,7 +7,7 @@
  * - Edit existing custom services
  * - Validation with Zod schema (CustomServicePortInputSchema)
  * - Conflict detection (built-in + custom service names)
- * - i18n support (firewall.servicePorts namespace)
+ * - English-only labels and validation messages
  * - Form state management with React Hook Form
  *
  * @module @nasnet/features/firewall/components/AddServiceDialog
@@ -16,7 +16,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslation } from 'react-i18next';
 import {
   CustomServicePortInputSchema,
   type CustomServicePortInput,
@@ -97,7 +96,6 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
   onOpenChange,
   editService,
 }: AddServiceDialogProps) {
-  const { t } = useTranslation('firewall');
   const { addService, updateService } = useCustomServices();
 
   // ============================================================================
@@ -108,7 +106,6 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
     resolver: zodResolver(CustomServicePortInputSchema),
     defaultValues: editService || DEFAULT_CUSTOM_SERVICE_INPUT,
   });
-
   const {
     register,
     handleSubmit,
@@ -117,7 +114,6 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
     setError,
     watch,
   } = form;
-
   const protocol = watch('protocol');
 
   // ============================================================================
@@ -154,12 +150,13 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
         reset(DEFAULT_CUSTOM_SERVICE_INPUT);
       } catch (error) {
         // Error: Show error message on service field
-        const errorMessage =
-          error instanceof Error ? error.message : t('servicePorts.validation.nameExists');
-        setError('service', { message: errorMessage });
+        const errorMessage = error instanceof Error ? error.message : 'Service name already exists';
+        setError('service', {
+          message: errorMessage,
+        });
       }
     },
-    [editService, updateService, addService, onOpenChange, reset, setError, t]
+    [editService, updateService, addService, onOpenChange, reset, setError]
   );
 
   /**
@@ -175,7 +172,6 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
   // ============================================================================
 
   const isEditMode = !!editService;
-
   return (
     <Dialog
       open={open}
@@ -183,13 +179,11 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
     >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEditMode ? t('servicePorts.editService') : t('servicePorts.addService')}
-          </DialogTitle>
+          <DialogTitle>{isEditMode ? 'Edit Service' : 'Add Service'}</DialogTitle>
           <DialogDescription>
             {isEditMode ?
-              t('servicePorts.confirmations.deleteServiceDescription')
-            : t('servicePorts.emptyStates.noServicesDescription')}
+              'This action cannot be undone. The service will be removed from your custom list.'
+            : 'Add custom services to use in firewall rules'}
           </DialogDescription>
         </DialogHeader>
 
@@ -203,13 +197,13 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
               htmlFor="service"
               className="text-sm font-medium"
             >
-              {t('servicePorts.fields.name')}
+              {'Service Name'}
               <span className="text-error ml-component-xs">*</span>
             </Label>
             <Input
               id="service"
               type="text"
-              placeholder={t('servicePorts.placeholders.serviceName')}
+              placeholder={'e.g., my-app'}
               autoComplete="off"
               {...register('service')}
               aria-invalid={!!errors.service}
@@ -232,7 +226,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                 className="text-muted-foreground text-xs"
                 id="service-help"
               >
-                {t('servicePorts.validation.nameInvalid')}
+                {'Name must be alphanumeric with optional hyphens/underscores'}
               </p>
             )}
           </div>
@@ -240,7 +234,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
           {/* Protocol Field */}
           <div className="space-y-component-sm">
             <Label className="text-sm font-medium">
-              {t('servicePorts.fields.protocol')}
+              {'Protocol'}
               <span className="text-error ml-component-xs">*</span>
             </Label>
             <RadioGroup
@@ -257,7 +251,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                   htmlFor="protocol-tcp"
                   className="cursor-pointer font-normal"
                 >
-                  {t('servicePorts.protocols.tcp')}
+                  {'TCP'}
                 </Label>
               </div>
               <div className="space-x-component-sm flex items-center">
@@ -269,7 +263,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                   htmlFor="protocol-udp"
                   className="cursor-pointer font-normal"
                 >
-                  {t('servicePorts.protocols.udp')}
+                  {'UDP'}
                 </Label>
               </div>
               <div className="space-x-component-sm flex items-center">
@@ -281,7 +275,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                   htmlFor="protocol-both"
                   className="cursor-pointer font-normal"
                 >
-                  {t('servicePorts.protocols.both')}
+                  {'TCP & UDP'}
                 </Label>
               </div>
             </RadioGroup>
@@ -294,7 +288,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
               htmlFor="port"
               className="text-sm font-medium"
             >
-              {t('servicePorts.fields.port')}
+              {'Port'}
               <span className="text-error ml-component-xs">*</span>
             </Label>
             <Input
@@ -302,9 +296,11 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
               type="number"
               min={1}
               max={65535}
-              placeholder={t('servicePorts.placeholders.port')}
+              placeholder={'e.g., 8080'}
               className="font-mono"
-              {...register('port', { valueAsNumber: true })}
+              {...register('port', {
+                valueAsNumber: true,
+              })}
               aria-invalid={!!errors.port}
               aria-describedby={errors.port ? 'port-error' : 'port-help'}
             />
@@ -322,7 +318,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                 className="text-muted-foreground text-xs"
                 id="port-help"
               >
-                {t('servicePorts.validation.portInvalid')}
+                {'Invalid port number (1-65535)'}
               </p>
             )}
           </div>
@@ -333,12 +329,12 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
               htmlFor="description"
               className="text-sm font-medium"
             >
-              {t('servicePorts.fields.description')}
+              {'Description'}
               <span className="text-muted-foreground ml-component-xs text-xs">(optional)</span>
             </Label>
             <Textarea
               id="description"
-              placeholder={t('servicePorts.placeholders.description')}
+              placeholder={'Optional description'}
               rows={3}
               maxLength={500}
               {...register('description')}
@@ -359,7 +355,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
                 className="text-muted-foreground text-xs"
                 id="description-help"
               >
-                {t('servicePorts.validation.descriptionTooLong')}
+                {'Description must be less than 500 characters'}
               </p>
             )}
           </div>
@@ -372,7 +368,7 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
               onClick={handleClose}
               disabled={isSubmitting}
             >
-              {t('servicePorts.buttons.cancel', { defaultValue: 'Cancel' })}
+              {'Cancel'}
             </Button>
             <Button
               type="submit"
@@ -380,11 +376,11 @@ export const AddServiceDialog = React.memo(function AddServiceDialog({
             >
               {isSubmitting ?
                 isEditMode ?
-                  t('servicePorts.buttons.updating', { defaultValue: 'Updating...' })
-                : t('servicePorts.buttons.adding', { defaultValue: 'Adding...' })
+                  'Updating...'
+                : 'Adding...'
               : isEditMode ?
-                t('servicePorts.buttons.update', { defaultValue: 'Update' })
-              : t('servicePorts.buttons.save', { defaultValue: 'Save' })}
+                'Update'
+              : 'Save'}
             </Button>
           </DialogFooter>
         </form>

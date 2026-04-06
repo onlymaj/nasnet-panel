@@ -58,15 +58,12 @@ function handleAuthError(message?: string) {
 
 /**
  * Handle network errors.
- * Updates connection state and shows notification.
+ * Updates connection tracking without showing a global toast.
  */
 function handleNetworkError(error: Error) {
-  // Show notification for network errors
-  useNotificationStore.getState().addNotification({
-    type: 'error',
-    title: 'Network error',
-    message: 'Unable to reach the server. Please check your connection.',
-  });
+  if (import.meta.env?.DEV) {
+    console.warn('[Apollo network error]', error);
+  }
 
   // Dispatch event for network status tracking
   if (typeof window !== 'undefined') {

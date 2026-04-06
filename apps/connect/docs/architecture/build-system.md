@@ -175,7 +175,6 @@ rollupOptions: {
       ],
       'vendor-table':  ['@tanstack/react-table', '@tanstack/react-virtual'],
       'vendor-forms':  ['react-hook-form', '@hookform/resolvers', 'zod'],
-      'vendor-i18n':   ['i18next', 'react-i18next', 'i18next-http-backend', 'i18next-browser-languagedetector'],
     },
   },
 },
@@ -193,7 +192,6 @@ rollupOptions: {
 | `vendor-ui`        | Radix UI components         | Stable primitives                     |
 | `vendor-table`     | react-table, react-virtual  | Only needed on data-heavy pages       |
 | `vendor-forms`     | react-hook-form, zod        | Only needed on form pages             |
-| `vendor-i18n`      | i18next stack               | Loaded async after initial paint      |
 
 Heavy tab components (Firewall, Logs, DHCP, DNS, VPN, PluginStore, Network) are further split by
 TanStack Router's lazy loading. See

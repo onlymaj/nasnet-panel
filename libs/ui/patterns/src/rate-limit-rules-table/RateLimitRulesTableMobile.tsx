@@ -13,47 +13,26 @@
  */
 
 import { Pencil, Copy, Trash2, ChevronRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import type { RateLimitRule } from '@nasnet/core/types';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Button,
-  Badge,
-  Switch,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Skeleton,
-} from '@nasnet/ui/primitives';
-
+import { Card, CardContent, CardHeader, CardTitle, Button, Badge, Switch, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Skeleton } from '@nasnet/ui/primitives';
 import type { RateLimitRulesTablePresenterProps } from './types';
 
 // ============================================================================
 // Action Badge Component
 // ============================================================================
 
-function ActionBadge({ action }: { action: string }) {
+function ActionBadge({
+  action
+}: {
+  action: string;
+}) {
   // Map actions to Badge semantic variants
   const variantMap: Record<string, 'default' | 'success' | 'error' | 'warning' | 'info'> = {
     drop: 'error',
     tarpit: 'warning',
-    'add-to-list': 'info',
+    'add-to-list': 'info'
   };
-
   const variant = variantMap[action] || 'default';
-
   return <Badge variant={variant}>{action}</Badge>;
 }
 
@@ -69,22 +48,23 @@ interface RuleCardProps {
   onToggle: (rule: RateLimitRule) => void;
   onShowStats: (rule: RateLimitRule) => void;
 }
-
-function RuleCard({ rule, onEdit, onDuplicate, onDelete, onToggle, onShowStats }: RuleCardProps) {
+function RuleCard({
+  rule,
+  onEdit,
+  onDuplicate,
+  onDelete,
+  onToggle,
+  onShowStats
+}: RuleCardProps) {
   // Format time window for display
   const timeWindowMap: Record<string, string> = {
     'per-second': '/ sec',
     'per-minute': '/ min',
-    'per-hour': '/ hour',
+    'per-hour': '/ hour'
   };
   const timeWindowDisplay = timeWindowMap[rule.timeWindow] || rule.timeWindow;
-
   const isUnused = (rule.packets ?? 0) === 0;
-
-  return (
-    <Card
-      className={`${rule.isDisabled ? 'bg-slate-50 opacity-50 dark:bg-slate-800/50' : ''} ${isUnused ? 'bg-muted/50' : ''}`}
-    >
+  return <Card className={`${rule.isDisabled ? 'bg-slate-50 opacity-50 dark:bg-slate-800/50' : ''} ${isUnused ? 'bg-muted/50' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -95,22 +75,12 @@ function RuleCard({ rule, onEdit, onDuplicate, onDelete, onToggle, onShowStats }
             </CardTitle>
             <div className="flex flex-wrap items-center gap-2">
               <ActionBadge action={rule.action} />
-              {rule.action === 'add-to-list' && rule.addressList && (
-                <Badge
-                  variant="outline"
-                  className="font-mono text-xs"
-                >
+              {rule.action === 'add-to-list' && rule.addressList && <Badge variant="outline" className="font-mono text-xs">
                   {rule.addressList}
-                </Badge>
-              )}
+                </Badge>}
             </div>
           </div>
-          <Switch
-            checked={!rule.isDisabled}
-            onCheckedChange={() => onToggle(rule)}
-            aria-label={rule.isDisabled ? 'Enable rule' : 'Disable rule'}
-            className="ml-2"
-          />
+          <Switch checked={!rule.isDisabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.isDisabled ? 'Enable rule' : 'Disable rule'} className="ml-2" />
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -123,10 +93,7 @@ function RuleCard({ rule, onEdit, onDuplicate, onDelete, onToggle, onShowStats }
         </div>
 
         {/* Triggered Count */}
-        <button
-          onClick={() => onShowStats(rule)}
-          className="flex min-h-[44px] w-full items-center justify-between border-t border-slate-200 py-2 dark:border-slate-700"
-        >
+        <button onClick={() => onShowStats(rule)} className="flex min-h-[44px] w-full items-center justify-between border-t border-slate-200 py-2 dark:border-slate-700">
           <span className="text-sm text-slate-600 dark:text-slate-400">Triggered</span>
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm">{rule.packets ?? 0}</span>
@@ -136,47 +103,27 @@ function RuleCard({ rule, onEdit, onDuplicate, onDelete, onToggle, onShowStats }
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            className="min-h-[44px] flex-1"
-            aria-label="Edit rule"
-          >
+          <Button variant="outline" size="sm" onClick={() => onEdit(rule)} className="min-h-[44px] flex-1" aria-label="Edit rule">
             <Pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            className="min-h-[44px] flex-1"
-            aria-label="Duplicate rule"
-          >
+          <Button variant="outline" size="sm" onClick={() => onDuplicate(rule)} className="min-h-[44px] flex-1" aria-label="Duplicate rule">
             <Copy className="mr-2 h-4 w-4" />
             Copy
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="min-h-[44px] text-red-600 hover:text-red-700 dark:text-red-400"
-            aria-label="Delete rule"
-          >
+          <Button variant="outline" size="sm" onClick={() => onDelete(rule)} className="min-h-[44px] text-red-600 hover:text-red-700 dark:text-red-400" aria-label="Delete rule">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
 
 // ============================================================================
 // Main Mobile Presenter Component
 // ============================================================================
 
-export interface RateLimitRulesTableMobileProps
-  extends Omit<RateLimitRulesTablePresenterProps, 'onReorder' | 'pollingInterval'> {
+export interface RateLimitRulesTableMobileProps extends Omit<RateLimitRulesTablePresenterProps, 'onReorder' | 'pollingInterval'> {
   editingRule: RateLimitRule | null;
   deleteConfirmRule: RateLimitRule | null;
   statsRule: RateLimitRule | null;
@@ -211,79 +158,48 @@ export function RateLimitRulesTableMobile({
   confirmDelete,
   closeEdit,
   closeDelete,
-  closeStats,
+  closeStats
 }: RateLimitRulesTableMobileProps) {
-  const { t } = useTranslation('firewall');
-
   // Loading state
   if (isLoading) {
-    return (
-      <div className={`space-y-4 p-4 ${className || ''}`}>
+    return <div className={`space-y-4 p-4 ${className || ''}`}>
         <Skeleton className="h-40 w-full" />
         <Skeleton className="h-40 w-full" />
         <Skeleton className="h-40 w-full" />
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div className={`p-4 text-red-600 dark:text-red-400 ${className || ''}`}>
+    return <div className={`p-4 text-red-600 dark:text-red-400 ${className || ''}`}>
         <p className="mb-1 text-sm font-semibold">Error loading rate limit rules</p>
         <p className="text-xs">{error.message}</p>
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div className={`p-6 text-center ${className || ''}`}>
+    return <div className={`p-6 text-center ${className || ''}`}>
         <p className="mb-4 text-slate-500 dark:text-slate-400">No rate limit rules found</p>
-        <Button
-          onClick={() => onEdit({} as RateLimitRule)}
-          className="min-h-[44px]"
-        >
+        <Button onClick={() => onEdit({} as RateLimitRule)} className="min-h-[44px]">
           Add Rate Limit Rule
         </Button>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className={`space-y-4 p-4 ${className || ''}`}>
-        {rules.map((rule) => (
-          <RuleCard
-            key={rule.id}
-            rule={rule}
-            onEdit={onEdit}
-            onDuplicate={onDuplicate}
-            onDelete={onDelete}
-            onToggle={onToggle}
-            onShowStats={onShowStats}
-          />
-        ))}
+        {rules.map(rule => <RuleCard key={rule.id} rule={rule} onEdit={onEdit} onDuplicate={onDuplicate} onDelete={onDelete} onToggle={onToggle} onShowStats={onShowStats} />)}
       </div>
 
       {/* Edit/Create Sheet */}
-      <Sheet
-        open={!!editingRule}
-        onOpenChange={(open) => !open && closeEdit()}
-      >
-        <SheetContent
-          side="bottom"
-          className="h-[90vh] overflow-y-auto"
-        >
+      <Sheet open={!!editingRule} onOpenChange={open => !open && closeEdit()}>
+        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
               {editingRule?.id ? 'Edit Rate Limit Rule' : 'Add Rate Limit Rule'}
             </SheetTitle>
             <SheetDescription>
-              {editingRule?.id ?
-                'Modify the rate limit rule configuration'
-              : 'Create a new rate limit rule'}
+              {editingRule?.id ? 'Modify the rate limit rule configuration' : 'Create a new rate limit rule'}
             </SheetDescription>
           </SheetHeader>
           <div className="py-4">
@@ -298,10 +214,7 @@ export function RateLimitRulesTableMobile({
       </Sheet>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && closeDelete()}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && closeDelete()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Rate Limit Rule?</DialogTitle>
@@ -310,18 +223,10 @@ export function RateLimitRulesTableMobile({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-col gap-2">
-            <Button
-              onClick={confirmDelete}
-              variant="destructive"
-              className="min-h-[44px] w-full"
-            >
+            <Button onClick={confirmDelete} variant="destructive" className="min-h-[44px] w-full">
               Delete Rule
             </Button>
-            <Button
-              onClick={closeDelete}
-              variant="outline"
-              className="min-h-[44px] w-full"
-            >
+            <Button onClick={closeDelete} variant="outline" className="min-h-[44px] w-full">
               Cancel
             </Button>
           </DialogFooter>
@@ -329,15 +234,8 @@ export function RateLimitRulesTableMobile({
       </Dialog>
 
       {/* Statistics Panel */}
-      {statsRule && (
-        <Sheet
-          open={!!statsRule}
-          onOpenChange={(open) => !open && closeStats()}
-        >
-          <SheetContent
-            side="bottom"
-            className="h-[60vh]"
-          >
+      {statsRule && <Sheet open={!!statsRule} onOpenChange={open => !open && closeStats()}>
+          <SheetContent side="bottom" className="h-[60vh]">
             <SheetHeader>
               <SheetTitle>Rule Statistics</SheetTitle>
               <SheetDescription>Traffic and trigger statistics</SheetDescription>
@@ -353,8 +251,6 @@ export function RateLimitRulesTableMobile({
               </div>
             </div>
           </SheetContent>
-        </Sheet>
-      )}
-    </>
-  );
+        </Sheet>}
+    </>;
 }

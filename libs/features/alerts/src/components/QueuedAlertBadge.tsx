@@ -17,7 +17,6 @@
 
 import { useMemo, useCallback } from 'react';
 import { AlertCircle, Clock } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { Icon } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
 
@@ -46,10 +45,8 @@ interface QueuedAlertBadgeProps {
 const QueuedAlertBadge = ({
   queuedUntil,
   shouldBypassQuietHours = false,
-  className,
+  className
 }: QueuedAlertBadgeProps) => {
-  const { t } = useTranslation('alerts');
-
   // Memoize hours until delivery calculation
   const hoursUntilDelivery = useMemo(() => {
     if (!queuedUntil) return 0;
@@ -71,59 +68,24 @@ const QueuedAlertBadge = ({
 
   // Show bypassed badge for critical alerts during quiet hours
   if (shouldBypassQuietHours) {
-    return (
-      <div
-        className={cn(
-          'gap-component-sm px-component-sm py-component-xs inline-flex items-center rounded-[var(--semantic-radius-badge)] text-xs font-medium',
-          'bg-warning/10 text-warning border-warning/20 border',
-          className
-        )}
-        aria-label={t('status.bypassedQuietHours')}
-      >
-        <Icon
-          icon={AlertCircle}
-          className="h-3.5 w-3.5"
-          aria-hidden="true"
-        />
-        <span>{t('status.bypassedQuietHours')}</span>
-      </div>
-    );
+    return <div className={cn('gap-component-sm px-component-sm py-component-xs inline-flex items-center rounded-[var(--semantic-radius-badge)] text-xs font-medium', 'bg-warning/10 text-warning border-warning/20 border', className)} aria-label={"status.bypassedQuietHours"}>
+        <Icon icon={AlertCircle} className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{"status.bypassedQuietHours"}</span>
+      </div>;
   }
 
   // Show queued badge with delivery time countdown
   if (queuedUntil) {
-    const hoursText =
-      hoursUntilDelivery === 0 ?
-        t('status.soon')
-      : t('status.hoursUntil', { hours: hoursUntilDelivery });
-
-    return (
-      <div
-        className={cn(
-          'gap-component-sm px-component-sm py-component-xs inline-flex items-center rounded-[var(--semantic-radius-badge)] text-xs font-medium',
-          'bg-info/10 text-info border-info/20 border',
-          className
-        )}
-        title={t('status.queuedTooltip', { time: deliveryTimeFormatted })}
-        aria-label={`${t('status.queued')}: ${hoursText}`}
-        aria-live="polite"
-      >
-        <Icon
-          icon={Clock}
-          className="h-3.5 w-3.5"
-          aria-hidden="true"
-        />
+    const hoursText = hoursUntilDelivery === 0 ? "status.soon" : "status.hoursUntil";
+    return <div className={cn('gap-component-sm px-component-sm py-component-xs inline-flex items-center rounded-[var(--semantic-radius-badge)] text-xs font-medium', 'bg-info/10 text-info border-info/20 border', className)} title={"status.queuedTooltip"} aria-label={`${"status.queued"}: ${hoursText}`} aria-live="polite">
+        <Icon icon={Clock} className="h-3.5 w-3.5" aria-hidden="true" />
         <span>
-          {t('status.queued')} • {hoursText}
+          {"status.queued"} • {hoursText}
         </span>
-      </div>
-    );
+      </div>;
   }
-
   return null;
 };
-
 QueuedAlertBadge.displayName = 'QueuedAlertBadge';
-
 export { QueuedAlertBadge };
 export type { QueuedAlertBadgeProps };

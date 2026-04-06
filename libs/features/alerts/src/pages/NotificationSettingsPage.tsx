@@ -13,21 +13,21 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useNotificationChannels, type ChannelConfig } from '../hooks/useNotificationChannels';
 import { usePushoverUsage } from '../hooks/usePushoverUsage';
 import { NOTIFICATION_CHANNELS } from '../schemas/alert-rule.schema';
-import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { cn } from '@nasnet/ui/utils';
 import { QuietHoursConfig } from '../components/QuietHoursConfig';
 import type { QuietHoursConfigData } from '../components/QuietHoursConfig';
 import { EmailChannelForm } from '../components/EmailChannelForm';
 import type { EmailConfig } from '../schemas/email-config.schema';
-
 type ChannelType = 'email' | 'telegram' | 'pushover' | 'webhook';
-
 interface ChannelFormProps {
   channel: ChannelType;
   onTest: (config: ChannelConfig) => Promise<void>;
   testing: boolean;
-  testResult?: { success: boolean; message: string };
+  testResult?: {
+    success: boolean;
+    message: string;
+  };
 }
 
 /**
@@ -35,7 +35,11 @@ interface ChannelFormProps {
  * Per Task 6.3: Implement Telegram Bot setup with instructions
  * NAS-18.6: Enhanced with multi-chat support via textarea
  */
-function TelegramChannelForm({ onTest, testing, testResult }: Omit<ChannelFormProps, 'channel'>) {
+function TelegramChannelForm({
+  onTest,
+  testing,
+  testResult
+}: Omit<ChannelFormProps, 'channel'>) {
   const [botToken, setBotToken] = useState('');
   const [chatIdsText, setChatIdsText] = useState(''); // Store as newline-separated string for textarea
 
@@ -43,22 +47,13 @@ function TelegramChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
     e.preventDefault();
 
     // Transform textarea to array for GraphQL
-    const chatIDsArray = chatIdsText
-      .split('\n')
-      .map((id) => id.trim())
-      .filter((id) => id !== '');
-
+    const chatIDsArray = chatIdsText.split('\n').map(id => id.trim()).filter(id => id !== '');
     onTest({
       botToken,
-      chatIds: chatIDsArray,
+      chatIds: chatIDsArray
     });
   };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-component-md"
-    >
+  return <form onSubmit={handleSubmit} className="space-y-component-md">
       <div className="p-component-md bg-muted space-y-component-sm rounded-md text-sm">
         <p className="font-medium">Setup Instructions:</p>
         <ol className="text-muted-foreground list-inside list-decimal space-y-1">
@@ -72,53 +67,25 @@ function TelegramChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
       </div>
 
       <div className="space-y-component-sm">
-        <label
-          htmlFor="telegram-bot-token"
-          className="block text-sm font-medium"
-        >
+        <label htmlFor="telegram-bot-token" className="block text-sm font-medium">
           Bot Token *
         </label>
-        <input
-          id="telegram-bot-token"
-          type="text"
-          value={botToken}
-          onChange={(e) => setBotToken(e.target.value)}
-          className="border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
-          aria-label="Telegram bot token"
-          required
-        />
+        <input id="telegram-bot-token" type="text" value={botToken} onChange={e => setBotToken(e.target.value)} className="border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz" aria-label="Telegram bot token" required />
       </div>
 
       <div className="space-y-component-sm">
-        <label
-          htmlFor="telegram-chat-ids"
-          className="block text-sm font-medium"
-        >
+        <label htmlFor="telegram-chat-ids" className="block text-sm font-medium">
           Chat IDs * (one per line)
         </label>
-        <textarea
-          id="telegram-chat-ids"
-          value={chatIdsText}
-          onChange={(e) => setChatIdsText(e.target.value)}
-          className="border-border focus-visible:ring-ring min-h-[110px] w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          placeholder="123456789&#10;-987654321&#10;@mychannel"
-          rows={4}
-          aria-label="Telegram chat IDs, one per line"
-          required
-        />
+        <textarea id="telegram-chat-ids" value={chatIdsText} onChange={e => setChatIdsText(e.target.value)} className="border-border focus-visible:ring-ring min-h-[110px] w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" placeholder="123456789&#10;-987654321&#10;@mychannel" rows={4} aria-label="Telegram chat IDs, one per line" required />
         <p className="text-muted-foreground text-xs">
           Enter one Chat ID per line. Supports user IDs (numeric), group IDs (negative), or channel
           usernames (@channel).
         </p>
       </div>
 
-      <TestButton
-        testing={testing}
-        testResult={testResult}
-      />
-    </form>
-  );
+      <TestButton testing={testing} testResult={testResult} />
+    </form>;
 }
 
 /**
@@ -126,36 +93,43 @@ function TelegramChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
  * Per Task 6.5: Implement Pushover configuration
  * Enhanced with usage tracking, device filter, and validation (NAS-18.2)
  */
-function PushoverChannelForm({ onTest, testing, testResult }: Omit<ChannelFormProps, 'channel'>) {
-  const { t } = useTranslation('alerts');
-  const { usage, percentUsed, isNearLimit, isExceeded, loading: usageLoading } = usePushoverUsage();
-
+function PushoverChannelForm({
+  onTest,
+  testing,
+  testResult
+}: Omit<ChannelFormProps, 'channel'>) {
+  const {
+    usage,
+    percentUsed,
+    isNearLimit,
+    isExceeded,
+    loading: usageLoading
+  } = usePushoverUsage();
   const [config, setConfig] = useState<ChannelConfig>({
     userKey: '',
     apiToken: '',
-    device: '',
+    device: ''
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   const validateField = (name: string, value: string) => {
-    const newErrors = { ...errors };
-
+    const newErrors = {
+      ...errors
+    };
     switch (name) {
       case 'userKey':
         if (value && value.length !== 30) {
-          newErrors.userKey = t('notifications.pushover.validation_user_key_length');
+          newErrors.userKey = "User Key must be exactly 30 characters";
         } else if (value && !/^[a-zA-Z0-9]+$/.test(value)) {
-          newErrors.userKey = t('notifications.pushover.validation_invalid_user');
+          newErrors.userKey = "Invalid Pushover User Key";
         } else {
           delete newErrors.userKey;
         }
         break;
       case 'apiToken':
         if (value && value.length !== 30) {
-          newErrors.apiToken = t('notifications.pushover.validation_api_token_length');
+          newErrors.apiToken = "API Token must be exactly 30 characters";
         } else if (value && !/^[a-zA-Z0-9]+$/.test(value)) {
-          newErrors.apiToken = t('notifications.pushover.validation_invalid_token');
+          newErrors.apiToken = "Invalid Pushover API Token";
         } else {
           delete newErrors.apiToken;
         }
@@ -164,33 +138,28 @@ function PushoverChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
         if (value && value.length > 25) {
           newErrors.device = 'Device name too long (max 25 characters)';
         } else if (value && !/^[a-zA-Z0-9_-]*$/.test(value)) {
-          newErrors.device = t('notifications.pushover.validation_device_format');
+          newErrors.device = "Device name can only contain letters, numbers, hyphens, and underscores";
         } else {
           delete newErrors.device;
         }
         break;
     }
-
     setErrors(newErrors);
   };
-
   const handleChange = (field: string, value: string) => {
-    setConfig({ ...config, [field]: value });
+    setConfig({
+      ...config,
+      [field]: value
+    });
     validateField(field, value);
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (Object.keys(errors).length === 0) {
       onTest(config);
     }
   };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-component-md"
-    >
+  return <form onSubmit={handleSubmit} className="space-y-component-md">
       <div className="p-component-md bg-muted space-y-component-sm rounded-md text-sm">
         <p className="font-medium">Setup Instructions:</p>
         <ol className="text-muted-foreground list-inside list-decimal space-y-1">
@@ -201,190 +170,87 @@ function PushoverChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
       </div>
 
       <div className="space-y-component-sm">
-        <label
-          htmlFor="pushover-user-key"
-          className="block text-sm font-medium"
-        >
-          {t('notifications.pushover.user_key')} *
+        <label htmlFor="pushover-user-key" className="block text-sm font-medium">
+          {"User Key"} *
         </label>
-        <input
-          id="pushover-user-key"
-          type="text"
-          value={config.userKey}
-          onChange={(e) => handleChange('userKey', e.target.value)}
-          className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-            errors.userKey ? 'border-error' : ''
-          }`}
-          placeholder={t('notifications.pushover.user_key_placeholder')}
-          aria-label="Pushover user key"
-          aria-invalid={!!errors.userKey}
-          aria-describedby={errors.userKey ? 'pushover-user-key-error' : undefined}
-          required
-          maxLength={30}
-        />
-        {errors.userKey && (
-          <p
-            id="pushover-user-key-error"
-            className="text-error text-sm"
-            role="alert"
-          >
+        <input id="pushover-user-key" type="text" value={config.userKey} onChange={e => handleChange('userKey', e.target.value)} className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${errors.userKey ? 'border-error' : ''}`} placeholder={"Enter your 30-character user key"} aria-label="Pushover user key" aria-invalid={!!errors.userKey} aria-describedby={errors.userKey ? 'pushover-user-key-error' : undefined} required maxLength={30} />
+        {errors.userKey && <p id="pushover-user-key-error" className="text-error text-sm" role="alert">
             {errors.userKey}
-          </p>
-        )}
-        <p className="text-muted-foreground text-xs">{t('notifications.pushover.user_key_help')}</p>
+          </p>}
+        <p className="text-muted-foreground text-xs">{"Found on your Pushover dashboard"}</p>
       </div>
 
       <div className="space-y-component-sm">
-        <label
-          htmlFor="pushover-api-token"
-          className="block text-sm font-medium"
-        >
-          {t('notifications.pushover.api_token')} *
+        <label htmlFor="pushover-api-token" className="block text-sm font-medium">
+          {"API Token"} *
         </label>
-        <input
-          id="pushover-api-token"
-          type="text"
-          value={config.apiToken}
-          onChange={(e) => handleChange('apiToken', e.target.value)}
-          className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-            errors.apiToken ? 'border-error' : ''
-          }`}
-          placeholder={t('notifications.pushover.api_token_placeholder')}
-          aria-label="Pushover API token"
-          aria-invalid={!!errors.apiToken}
-          aria-describedby={errors.apiToken ? 'pushover-api-token-error' : undefined}
-          required
-          maxLength={30}
-        />
-        {errors.apiToken && (
-          <p
-            id="pushover-api-token-error"
-            className="text-error text-sm"
-            role="alert"
-          >
+        <input id="pushover-api-token" type="text" value={config.apiToken} onChange={e => handleChange('apiToken', e.target.value)} className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${errors.apiToken ? 'border-error' : ''}`} placeholder={"Enter your 30-character application token"} aria-label="Pushover API token" aria-invalid={!!errors.apiToken} aria-describedby={errors.apiToken ? 'pushover-api-token-error' : undefined} required maxLength={30} />
+        {errors.apiToken && <p id="pushover-api-token-error" className="text-error text-sm" role="alert">
             {errors.apiToken}
-          </p>
-        )}
+          </p>}
         <p className="text-muted-foreground text-xs">
-          {t('notifications.pushover.api_token_help')}
+          {"Create an application in your Pushover dashboard"}
         </p>
       </div>
 
       <div className="space-y-component-sm">
-        <label
-          htmlFor="pushover-device"
-          className="block text-sm font-medium"
-        >
-          {t('notifications.pushover.device')}
+        <label htmlFor="pushover-device" className="block text-sm font-medium">
+          {"Device Filter"}
         </label>
-        <input
-          id="pushover-device"
-          type="text"
-          value={config.device || ''}
-          onChange={(e) => handleChange('device', e.target.value)}
-          className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-            errors.device ? 'border-error' : ''
-          }`}
-          placeholder={t('notifications.pushover.device_placeholder')}
-          aria-label="Pushover device name"
-          aria-invalid={!!errors.device}
-          aria-describedby={errors.device ? 'pushover-device-error' : undefined}
-          maxLength={25}
-        />
-        {errors.device && (
-          <p
-            id="pushover-device-error"
-            className="text-error text-sm"
-            role="alert"
-          >
+        <input id="pushover-device" type="text" value={config.device || ''} onChange={e => handleChange('device', e.target.value)} className={`border-border focus-visible:ring-ring min-h-11 w-full rounded-md border px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${errors.device ? 'border-error' : ''}`} placeholder={"Optional: target specific device(s)"} aria-label="Pushover device name" aria-invalid={!!errors.device} aria-describedby={errors.device ? 'pushover-device-error' : undefined} maxLength={25} />
+        {errors.device && <p id="pushover-device-error" className="text-error text-sm" role="alert">
             {errors.device}
-          </p>
-        )}
-        <p className="text-muted-foreground text-xs">{t('notifications.pushover.device_help')}</p>
+          </p>}
+        <p className="text-muted-foreground text-xs">{"Leave empty to send to all devices, or specify a device name"}</p>
       </div>
 
       {/* Usage Display Section */}
-      {usage && !usageLoading && (
-        <div className="space-y-component-sm p-component-md bg-card rounded-md border">
-          <h4 className="text-sm font-medium">{t('notifications.pushover.usage_title')}</h4>
+      {usage && !usageLoading && <div className="space-y-component-sm p-component-md bg-card rounded-md border">
+          <h4 className="text-sm font-medium">{"Monthly Usage"}</h4>
 
           {/* Progress Bar */}
           <div className="bg-muted relative h-2 w-full overflow-hidden rounded-full">
-            <div
-              className={`h-full transition-all duration-300 ${
-                isExceeded ? 'bg-error'
-                : isNearLimit ? 'bg-warning'
-                : 'bg-success'
-              }`}
-              style={{ width: `${percentUsed}%` }}
-              role="progressbar"
-              aria-valuenow={percentUsed}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Pushover usage: ${percentUsed}%`}
-            />
+            <div className={`h-full transition-all duration-300 ${isExceeded ? 'bg-error' : isNearLimit ? 'bg-warning' : 'bg-success'}`} style={{
+          width: `${percentUsed}%`
+        }} role="progressbar" aria-valuenow={percentUsed} aria-valuemin={0} aria-valuemax={100} aria-label={`Pushover usage: ${percentUsed}%`} />
           </div>
 
           {/* Usage Stats */}
           <div className="flex justify-between text-sm">
             <p className="text-muted-foreground">
-              {t('notifications.pushover.usage_remaining', {
-                remaining: usage.remaining,
-                limit: usage.limit,
-              })}
+              {`${usage.remaining} of ${usage.limit} messages remaining`}
             </p>
             <p className="font-medium">{percentUsed}%</p>
           </div>
 
           <p className="text-muted-foreground text-xs">
-            {t('notifications.pushover.usage_resets', {
-              date: format(new Date(usage.resetAt), 'PPP'),
-            })}
+            {`Resets on ${format(new Date(usage.resetAt), 'PPP')}`}
           </p>
 
           {/* Warning Alerts */}
-          {isExceeded && (
-            <div
-              className="bg-error/10 text-error border-error/20 rounded-md border p-3 text-sm"
-              role="alert"
-            >
+          {isExceeded && <div className="bg-error/10 text-error border-error/20 rounded-md border p-3 text-sm" role="alert">
               <p className="font-medium">
                 <span aria-hidden="true">⚠️</span> Limit Exceeded
               </p>
               <p className="mt-1">
-                {t('notifications.pushover.usage_exceeded', {
-                  date: format(new Date(usage.resetAt), 'PPP'),
-                })}
+                {`Monthly message limit exceeded! Usage resets on ${format(new Date(usage.resetAt), 'PPP')}`}
               </p>
-            </div>
-          )}
+            </div>}
 
-          {isNearLimit && !isExceeded && (
-            <div
-              className="bg-warning/10 text-warning border-warning/20 rounded-md border p-3 text-sm"
-              role="alert"
-            >
+          {isNearLimit && !isExceeded && <div className="bg-warning/10 text-warning border-warning/20 rounded-md border p-3 text-sm" role="alert">
               <p className="font-medium">
                 <span aria-hidden="true">⚠️</span>{' '}
-                {t('notifications.pushover.usage_warning', { percent: percentUsed })}
+                {`Approaching monthly message limit (${percentUsed}% used)`}
               </p>
-            </div>
-          )}
-        </div>
-      )}
+            </div>}
+        </div>}
 
-      {usageLoading && (
-        <div className="p-component-md text-muted-foreground text-center text-sm">
-          {t('notifications.pushover.usage_loading')}
-        </div>
-      )}
+      {usageLoading && <div className="p-component-md text-muted-foreground text-center text-sm">
+          {"Loading usage statistics..."}
+        </div>}
 
-      <TestButton
-        testing={testing}
-        testResult={testResult}
-      />
-    </form>
-  );
+      <TestButton testing={testing} testResult={testResult} />
+    </form>;
 }
 
 /**
@@ -393,8 +259,7 @@ function PushoverChannelForm({ onTest, testing, testResult }: Omit<ChannelFormPr
  * The legacy inline form has been replaced with a dedicated route
  */
 function WebhookChannelCard() {
-  return (
-    <div className="space-y-component-md">
+  return <div className="space-y-component-md">
       <div className="p-component-md bg-muted space-y-component-sm rounded-md text-sm">
         <p className="font-medium">
           <span aria-hidden="true">✨</span> Enhanced Webhook Configuration
@@ -412,19 +277,14 @@ function WebhookChannelCard() {
         </ul>
       </div>
 
-      <a
-        href="/settings/notifications/webhooks"
-        className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring block flex min-h-11 w-full items-center justify-center rounded-md px-4 py-3 text-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        aria-label="Configure webhook notification channel"
-      >
+      <a href="/settings/notifications/webhooks" className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring block flex min-h-11 w-full items-center justify-center rounded-md px-4 py-3 text-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Configure webhook notification channel">
         Configure Webhook →
       </a>
 
       <p className="text-muted-foreground text-center text-xs">
         Click above to access the full webhook configuration interface
       </p>
-    </div>
-  );
+    </div>;
 }
 
 /**
@@ -436,41 +296,25 @@ function WebhookChannelCard() {
  */
 const TestButton = React.memo(function TestButton({
   testing,
-  testResult,
+  testResult
 }: {
   testing: boolean;
-  testResult?: { success: boolean; message: string };
+  testResult?: {
+    success: boolean;
+    message: string;
+  };
 }) {
-  return (
-    <div className="space-y-component-md">
-      <button
-        type="submit"
-        disabled={testing}
-        aria-label={testing ? 'Testing notification' : 'Test notification'}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-11 w-full rounded-md px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50"
-        aria-busy={testing}
-      >
+  return <div className="space-y-component-md">
+      <button type="submit" disabled={testing} aria-label={testing ? 'Testing notification' : 'Test notification'} className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-11 w-full rounded-md px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50" aria-busy={testing}>
         {testing ? 'Testing...' : 'Test Notification'}
       </button>
 
-      {testResult && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className={`rounded-md p-3 text-sm ${
-            testResult.success ?
-              'bg-success/10 text-success border-success/20 border'
-            : 'bg-error/10 text-error border-error/20 border'
-          }`}
-        >
+      {testResult && <div role="alert" aria-live="polite" className={`rounded-md p-3 text-sm ${testResult.success ? 'bg-success/10 text-success border-success/20 border' : 'bg-error/10 text-error border-error/20 border'}`}>
           <p className="font-medium">{testResult.success ? '✓ Success' : '✗ Failed'}</p>
           <p className="mt-1">{testResult.message}</p>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 });
-
 TestButton.displayName = 'TestButton';
 
 /**
@@ -482,23 +326,23 @@ TestButton.displayName = 'TestButton';
  * Supports multiple notification backends: Email, Telegram, Pushover, Webhooks.
  */
 function NotificationSettingsPageComponent() {
-  const { testChannel, testResults } = useNotificationChannels();
+  const {
+    testChannel,
+    testResults
+  } = useNotificationChannels();
   const [activeChannel, setActiveChannel] = useState<ChannelType>('email');
   const [testing, setTesting] = useState(false);
   const [quietHours, setQuietHours] = useState<Partial<QuietHoursConfigData>>();
 
   // Memoized test handler with cleanup
-  const handleTest = useCallback(
-    async (channel: ChannelType, config: ChannelConfig) => {
-      setTesting(true);
-      try {
-        await testChannel(channel, config);
-      } finally {
-        setTesting(false);
-      }
-    },
-    [testChannel]
-  );
+  const handleTest = useCallback(async (channel: ChannelType, config: ChannelConfig) => {
+    setTesting(true);
+    try {
+      await testChannel(channel, config);
+    } finally {
+      setTesting(false);
+    }
+  }, [testChannel]);
 
   // Memoized quiet hours handler
   const handleQuietHoursChange = useCallback((config: QuietHoursConfigData) => {
@@ -508,18 +352,24 @@ function NotificationSettingsPageComponent() {
   }, []);
 
   // Memoized channels list
-  const channels = useMemo(
-    () => [
-      { type: 'email' as const, label: 'Email (SMTP)', icon: '📧' },
-      { type: 'telegram' as const, label: 'Telegram Bot', icon: '💬' },
-      { type: 'pushover' as const, label: 'Pushover', icon: '📱' },
-      { type: 'webhook' as const, label: 'Webhook', icon: '🔗' },
-    ],
-    []
-  );
-
-  return (
-    <div className="p-component-lg space-y-component-xl mx-auto max-w-4xl">
+  const channels = useMemo(() => [{
+    type: 'email' as const,
+    label: 'Email (SMTP)',
+    icon: '📧'
+  }, {
+    type: 'telegram' as const,
+    label: 'Telegram Bot',
+    icon: '💬'
+  }, {
+    type: 'pushover' as const,
+    label: 'Pushover',
+    icon: '📱'
+  }, {
+    type: 'webhook' as const,
+    label: 'Webhook',
+    icon: '🔗'
+  }], []);
+  return <div className="p-component-lg space-y-component-xl mx-auto max-w-4xl">
       <div className="space-y-component-sm">
         <h1 className="text-3xl font-bold">Notification Settings</h1>
         <p className="text-muted-foreground">
@@ -529,10 +379,7 @@ function NotificationSettingsPageComponent() {
 
       {/* Quiet Hours Section */}
       <section>
-        <QuietHoursConfig
-          value={quietHours}
-          onChange={handleQuietHoursChange}
-        />
+        <QuietHoursConfig value={quietHours} onChange={handleQuietHoursChange} />
       </section>
 
       {/* Channel Configuration Section */}
@@ -542,75 +389,35 @@ function NotificationSettingsPageComponent() {
       </div>
 
       {/* Channel Tabs */}
-      <div
-        className="gap-component-sm border-border flex border-b"
-        role="tablist"
-        aria-label="Notification channels"
-      >
-        {channels.map((channel) => (
-          <button
-            key={channel.type}
-            role="tab"
-            aria-selected={activeChannel === channel.type}
-            aria-controls={`panel-${channel.type}`}
-            onClick={() => setActiveChannel(channel.type)}
-            className={`px-component-md focus-visible:ring-ring border-b-2 py-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-              activeChannel === channel.type ?
-                'border-primary text-primary'
-              : 'text-muted-foreground hover:text-foreground border-transparent'
-            }`}
-          >
-            <span
-              className="mr-2"
-              aria-hidden="true"
-            >
+      <div className="gap-component-sm border-border flex border-b" role="tablist" aria-label="Notification channels">
+        {channels.map(channel => <button key={channel.type} role="tab" aria-selected={activeChannel === channel.type} aria-controls={`panel-${channel.type}`} onClick={() => setActiveChannel(channel.type)} className={`px-component-md focus-visible:ring-ring border-b-2 py-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${activeChannel === channel.type ? 'border-primary text-primary' : 'text-muted-foreground hover:text-foreground border-transparent'}`}>
+            <span className="mr-2" aria-hidden="true">
               {channel.icon}
             </span>
             {channel.label}
-          </button>
-        ))}
+          </button>)}
       </div>
 
       {/* Channel Forms */}
-      <div
-        className="bg-card border-border p-component-lg rounded-lg border"
-        role="tabpanel"
-        id={`panel-${activeChannel}`}
-      >
-        {activeChannel === 'email' && (
-          <EmailChannelForm
-            onSubmit={async (config: EmailConfig) => {
-              // TODO: Call GraphQL mutation to save email config
-              console.log('Saving email config:', config);
-            }}
-            onTest={async (config: EmailConfig) => {
-              // Map EmailConfig to ChannelConfig for testing
-              await handleTest('email', {
-                host: config.host,
-                port: config.port,
-                username: config.username,
-                password: config.password,
-                from: config.fromAddress,
-                to: config.toAddresses[0] || '', // Use first recipient for legacy test
-                useTLS: config.useTLS,
-              });
-            }}
-          />
-        )}
-        {activeChannel === 'telegram' && (
-          <TelegramChannelForm
-            onTest={(config) => handleTest('telegram', config)}
-            testing={testing}
-            testResult={testResults['telegram']}
-          />
-        )}
-        {activeChannel === 'pushover' && (
-          <PushoverChannelForm
-            onTest={(config) => handleTest('pushover', config)}
-            testing={testing}
-            testResult={testResults['pushover']}
-          />
-        )}
+      <div className="bg-card border-border p-component-lg rounded-lg border" role="tabpanel" id={`panel-${activeChannel}`}>
+        {activeChannel === 'email' && <EmailChannelForm onSubmit={async (config: EmailConfig) => {
+        // TODO: Call GraphQL mutation to save email config
+        console.log('Saving email config:', config);
+      }} onTest={async (config: EmailConfig) => {
+        // Map EmailConfig to ChannelConfig for testing
+        await handleTest('email', {
+          host: config.host,
+          port: config.port,
+          username: config.username,
+          password: config.password,
+          from: config.fromAddress,
+          to: config.toAddresses[0] || '',
+          // Use first recipient for legacy test
+          useTLS: config.useTLS
+        });
+      }} />}
+        {activeChannel === 'telegram' && <TelegramChannelForm onTest={config => handleTest('telegram', config)} testing={testing} testResult={testResults['telegram']} />}
+        {activeChannel === 'pushover' && <PushoverChannelForm onTest={config => handleTest('pushover', config)} testing={testing} testResult={testResults['pushover']} />}
         {activeChannel === 'webhook' && <WebhookChannelCard />}
       </div>
 
@@ -623,10 +430,8 @@ function NotificationSettingsPageComponent() {
           channels can be configured here and selected when creating alert rules.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 }
-
 NotificationSettingsPageComponent.displayName = 'NotificationSettingsPage';
 
 /**

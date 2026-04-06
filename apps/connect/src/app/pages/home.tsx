@@ -1,6 +1,4 @@
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-
 import { useRouterInfo, useRouterResource, useRouterboard } from '@nasnet/api-client/queries';
 import { calculateStatus, formatBytes } from '@nasnet/core/utils';
 import { useConnectionStore } from '@nasnet/state/stores';
@@ -12,15 +10,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@nasnet/ui/primitives'
  * Displays router system information and status overview
  */
 export function HomePage() {
-  const { t } = useTranslation('common');
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
 
   // Fetch router information (identity, model, version, architecture)
   const {
     data: systemInfo,
     isLoading: infoLoading,
     error: infoError,
-    refetch: refetchInfo,
+    refetch: refetchInfo
   } = useRouterInfo(routerIp);
 
   // Fetch resource data (CPU, memory, disk) with 5-second polling
@@ -28,112 +25,75 @@ export function HomePage() {
     data: resourceData,
     isLoading: resourceLoading,
     error: resourceError,
-    dataUpdatedAt,
+    dataUpdatedAt
   } = useRouterResource(routerIp);
 
   // Fetch hardware details (routerboard info)
   const {
     data: hardwareData,
     isLoading: hardwareLoading,
-    error: hardwareError,
+    error: hardwareError
   } = useRouterboard(routerIp);
 
   // Calculate resource metrics
   const cpuPercentage = resourceData?.cpuLoad ?? 0;
   const cpuStatus = calculateStatus(cpuPercentage);
-
   const usedMemory = resourceData ? resourceData.totalMemory - resourceData.freeMemory : 0;
-  const memoryPercentage = resourceData ? (usedMemory / resourceData.totalMemory) * 100 : 0;
+  const memoryPercentage = resourceData ? usedMemory / resourceData.totalMemory * 100 : 0;
   const memoryStatus = calculateStatus(memoryPercentage);
-
   const usedDisk = resourceData ? resourceData.totalHddSpace - resourceData.freeHddSpace : 0;
-  const diskPercentage = resourceData ? (usedDisk / resourceData.totalHddSpace) * 100 : 0;
+  const diskPercentage = resourceData ? usedDisk / resourceData.totalHddSpace * 100 : 0;
   const diskStatus = calculateStatus(diskPercentage);
-
-  return (
-    <div className="bg-background p-component-lg animate-fade-in-up min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
+  return <div className="bg-background p-component-lg animate-fade-in-up min-h-screen">
+      <motion.div initial={{
+      opacity: 0,
+      y: 20
+    }} animate={{
+      opacity: 1,
+      y: 0
+    }} transition={{
+      duration: 0.3
+    }}>
         <div className="mx-auto max-w-4xl space-y-6">
           <div className="brand-gradient-subtle rounded-card-lg border-border/50 border p-6">
             <h1 className="font-display mb-2 text-3xl font-bold tracking-tight">
-              {t('dashboard.title')}
+              {"Title"}
             </h1>
-            <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
+            <p className="text-muted-foreground">{"Subtitle"}</p>
           </div>
 
           {/* System Information Card */}
-          <SystemInfoCard
-            data={systemInfo}
-            isLoading={infoLoading}
-            error={infoError}
-            onRetry={() => refetchInfo()}
-          />
+          <SystemInfoCard data={systemInfo} isLoading={infoLoading} error={infoError} onRetry={() => refetchInfo()} />
 
           {/* System Resources Card */}
           <Card className="border-border shadow-md">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="font-display">{t('dashboard.systemResources')}</CardTitle>
+                <CardTitle className="font-display">{"System Resources"}</CardTitle>
                 <LastUpdated timestamp={dataUpdatedAt} />
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                 {/* CPU Gauge */}
-                <ResourceGauge
-                  label="CPU"
-                  value={cpuPercentage}
-                  status={cpuStatus}
-                  isLoading={resourceLoading}
-                />
+                <ResourceGauge label="CPU" value={cpuPercentage} status={cpuStatus} isLoading={resourceLoading} />
 
                 {/* Memory Gauge */}
-                <ResourceGauge
-                  label="Memory"
-                  value={memoryPercentage}
-                  status={memoryStatus}
-                  subtitle={
-                    resourceData ?
-                      `${formatBytes(usedMemory)} / ${formatBytes(resourceData.totalMemory)}`
-                    : undefined
-                  }
-                  isLoading={resourceLoading}
-                />
+                <ResourceGauge label="Memory" value={memoryPercentage} status={memoryStatus} subtitle={resourceData ? `${formatBytes(usedMemory)} / ${formatBytes(resourceData.totalMemory)}` : undefined} isLoading={resourceLoading} />
 
                 {/* Disk Gauge */}
-                <ResourceGauge
-                  label="Disk"
-                  value={diskPercentage}
-                  status={diskStatus}
-                  subtitle={
-                    resourceData ?
-                      `${formatBytes(usedDisk)} / ${formatBytes(resourceData.totalHddSpace)}`
-                    : undefined
-                  }
-                  isLoading={resourceLoading}
-                />
+                <ResourceGauge label="Disk" value={diskPercentage} status={diskStatus} subtitle={resourceData ? `${formatBytes(usedDisk)} / ${formatBytes(resourceData.totalHddSpace)}` : undefined} isLoading={resourceLoading} />
               </div>
 
               {/* Error state for resources */}
-              {resourceError && (
-                <div className="text-destructive mt-4 text-sm">{t('dashboard.failedToLoad')}</div>
-              )}
+              {resourceError && <div className="text-destructive mt-4 text-sm">{"Failed To Load"}</div>}
             </CardContent>
           </Card>
 
           {/* Hardware Details Card */}
-          <HardwareCard
-            data={hardwareData}
-            isLoading={hardwareLoading}
-            error={hardwareError}
-          />
+          <HardwareCard data={hardwareData} isLoading={hardwareLoading} error={hardwareError} />
         </div>
       </motion.div>
-    </div>
-  );
+    </div>;
 }
 HomePage.displayName = 'HomePage';

@@ -207,7 +207,6 @@ Cross-feature communication goes through shared libs or the app layer.
 | Core Utils                | `@nasnet/core/utils`                    | Pure utility functions                              |
 | Core Constants            | `@nasnet/core/constants`                | App constants, well-known ports, routes             |
 | Core Forms                | `@nasnet/core/forms`                    | Form utilities, validation helpers                  |
-| Core i18n                 | `@nasnet/core/i18n`                     | i18next setup, providers, hooks                     |
 | API Client Core           | `@nasnet/api-client/core`               | Apollo Client setup, links, cache config            |
 | API Client Queries        | `@nasnet/api-client/queries`            | Domain-specific GraphQL hooks                       |
 | API Client Generated      | `@nasnet/api-client/generated`          | Auto-generated types, hooks, Zod schemas            |
@@ -236,7 +235,6 @@ monorepo:
 '@nasnet/core/utils'              → 'libs/core/utils/src'
 '@nasnet/core/constants'          → 'libs/core/constants/src'
 '@nasnet/core/forms'              → 'libs/core/forms/src'
-'@nasnet/core/i18n'               → 'libs/core/i18n/src'
 '@nasnet/ui/layouts'              → 'libs/ui/layouts/src'
 '@nasnet/ui/primitives'           → 'libs/ui/primitives/src'
 '@nasnet/ui/patterns'             → 'libs/ui/patterns/src'

@@ -9,14 +9,13 @@
  * - Tab navigation (Services, Groups)
  * - Context-aware action buttons (Add Service / Create Group)
  * - Responsive layout
- * - Full i18n support
+ * - English-only UI copy
  *
  * @see NAS-7.8: Implement Service Ports Management - Task 8
  * @module @nasnet/features/firewall/pages
  */
 
 import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   Tabs,
   TabsList,
@@ -53,13 +52,11 @@ interface EmptyStateProps {
  * @returns Empty state UI with action button
  */
 function EmptyState({ type, onAction }: EmptyStateProps) {
-  const { t } = useTranslation('firewall');
-
   return (
     <Card className="border-dashed">
       <CardHeader className="text-center">
-        <CardTitle>{t('servicePorts.emptyStates.noGroups')}</CardTitle>
-        <CardDescription>{t('servicePorts.emptyStates.noGroupsDescription')}</CardDescription>
+        <CardTitle>{'No service groups defined'}</CardTitle>
+        <CardDescription>{'Create groups to quickly select multiple services'}</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
         <Button
@@ -70,7 +67,7 @@ function EmptyState({ type, onAction }: EmptyStateProps) {
             className="mr-component-sm h-4 w-4"
             aria-hidden="true"
           />
-          {t('servicePorts.createGroup')}
+          {'Create Group'}
         </Button>
       </CardContent>
     </Card>
@@ -92,7 +89,6 @@ function EmptyState({ type, onAction }: EmptyStateProps) {
  * @returns Service Ports management page
  */
 export function ServicePortsPage() {
-  const { t } = useTranslation('firewall');
   const { serviceGroups } = useCustomServices();
 
   // Dialog state
@@ -109,11 +105,9 @@ export function ServicePortsPage() {
   const handleAddService = useCallback(() => {
     setAddServiceOpen(true);
   }, []);
-
   const handleCreateGroup = useCallback(() => {
     setAddGroupOpen(true);
   }, []);
-
   const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
   }, []);
@@ -126,10 +120,10 @@ export function ServicePortsPage() {
     <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-md space-y-component-md flex h-full flex-col">
       {/* Page Header */}
       <div className="space-y-component-sm">
-        <h1 className="font-display text-3xl font-bold tracking-tight">
-          {t('servicePorts.title')}
-        </h1>
-        <p className="text-muted-foreground text-sm">{t('servicePorts.description')}</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{'Service Ports'}</h1>
+        <p className="text-muted-foreground text-sm">
+          {'Define service names for easier rule creation'}
+        </p>
       </div>
 
       {/* Tabs */}
@@ -141,8 +135,8 @@ export function ServicePortsPage() {
         {/* Tab Header with Action Button */}
         <div className="gap-component-sm border-border pb-component-md flex items-center justify-between border-b">
           <TabsList>
-            <TabsTrigger value="services">{t('servicePorts.tabs.services')}</TabsTrigger>
-            <TabsTrigger value="groups">{t('servicePorts.tabs.groups')}</TabsTrigger>
+            <TabsTrigger value="services">{'Services'}</TabsTrigger>
+            <TabsTrigger value="groups">{'Groups'}</TabsTrigger>
           </TabsList>
 
           {/* Action Button - changes based on active tab */}
@@ -155,7 +149,7 @@ export function ServicePortsPage() {
                 className="mr-component-sm h-4 w-4"
                 aria-hidden="true"
               />
-              {t('servicePorts.addService')}
+              {'Add Service'}
             </Button>
           : <Button
               onClick={handleCreateGroup}
@@ -165,7 +159,7 @@ export function ServicePortsPage() {
                 className="mr-component-sm h-4 w-4"
                 aria-hidden="true"
               />
-              {t('servicePorts.createGroup')}
+              {'Create Group'}
             </Button>
           }
         </div>
@@ -192,15 +186,10 @@ export function ServicePortsPage() {
               <CardContent className="py-component-lg">
                 <div className="space-y-component-sm text-center">
                   <p className="text-muted-foreground text-sm">
-                    {t('servicePorts.groupsTableComingSoon', {
-                      defaultValue: 'Service Groups table coming soon (not in current scope)',
-                    })}
+                    {'Service Groups table coming soon (not in current scope)'}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {t('servicePorts.groupsCount', {
-                      defaultValue: '{{count}} group defined',
-                      count: serviceGroups.length,
-                    })}
+                    {`${serviceGroups.length} group defined`}
                   </p>
                 </div>
               </CardContent>

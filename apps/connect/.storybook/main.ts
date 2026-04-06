@@ -37,7 +37,6 @@ const config: StorybookConfig = {
           '@nasnet/core/utils': resolve(root, 'libs/core/utils/src'),
           '@nasnet/core/constants': resolve(root, 'libs/core/constants/src'),
           '@nasnet/core/forms': resolve(root, 'libs/core/forms/src'),
-          '@nasnet/core/i18n': resolve(root, 'libs/core/i18n/src'),
           '@nasnet/ui/layouts': resolve(root, 'libs/ui/layouts/src'),
           '@nasnet/ui/primitives': resolve(root, 'libs/ui/primitives/src'),
           '@nasnet/ui/patterns': resolve(root, 'libs/ui/patterns/src'),

@@ -30,7 +30,7 @@ type Service struct {
 
 // NewService creates a new digest Service.
 func NewService(cfg ServiceConfig) (*Service, error) {
-	htmlContent, err := alerts.GetTemplate("digest", "digest-email.html.tmpl")
+	htmlContent, err := alerts.GetTemplate("email", "digest-body.html")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load HTML digest template: %w", err)
 	}
@@ -40,7 +40,7 @@ func NewService(cfg ServiceConfig) (*Service, error) {
 		return nil, fmt.Errorf("failed to parse HTML digest template: %w", err)
 	}
 
-	textContent, err := alerts.GetTemplate("digest", "digest-email.txt.tmpl")
+	textContent, err := alerts.GetTemplate("email", "digest-body.txt")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load text digest template: %w", err)
 	}

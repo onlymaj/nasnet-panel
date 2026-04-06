@@ -11,9 +11,7 @@ import * as React from 'react';
 import { useState, useMemo } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { HardDrive, ChevronDown, ChevronUp, Cpu, Upload, ArrowUp, Network } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
 import {
   useServiceInstances,
   useInstanceMutations,
@@ -43,13 +41,11 @@ import {
   Skeleton,
 } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
-
 import { InstallDialog } from '../components/InstallDialog';
 import { StorageSettings } from '../components/storage/StorageSettings';
 import { UpdateAllPanel } from '../components/UpdateAllPanel';
 import { PortRegistryView } from '../components/PortRegistryView';
 import { StopDependentsDialog } from '../components/StopDependentsDialog';
-
 import type { Service, BulkOperation, InstanceFilters, InstanceSort } from '@nasnet/ui/patterns';
 
 /**
@@ -80,8 +76,6 @@ export const ServicesPage = React.memo(function ServicesPage({
   onInstanceClick,
   onImportComplete,
 }: ServicesPageProps) {
-  const { t } = useTranslation();
-
   // Fetch service instances
   const { instances, loading, error, refetch } = useServiceInstances(routerId);
 
@@ -97,10 +91,13 @@ export const ServicesPage = React.memo(function ServicesPage({
 
   // Available updates (NAS-8.7)
   const { updates: updatesData, loading: updatesLoading } = useAvailableUpdates(
-    { routerId },
-    { skip: !routerId }
+    {
+      routerId,
+    },
+    {
+      skip: !routerId,
+    }
   );
-
   const [checkForUpdates] = useCheckForUpdates();
 
   // Instance mutations
@@ -116,7 +113,6 @@ export const ServicesPage = React.memo(function ServicesPage({
   const viewMode = useServiceViewMode();
   const showMetrics = useShowResourceMetrics();
   const selectedIds = useSelectedServices();
-
   const {
     setServiceSearch,
     setCategoryFilter,
@@ -167,7 +163,6 @@ export const ServicesPage = React.memo(function ServicesPage({
   // Map instances to Service type for pattern component
   const services: Service[] = React.useMemo(() => {
     if (!instances) return [];
-
     return instances.map((instance: any) => ({
       id: instance.id,
       name: instance.instanceName,
@@ -175,7 +170,8 @@ export const ServicesPage = React.memo(function ServicesPage({
       category: getCategoryFromFeatureId(instance.featureID),
       status: instance.status as any,
       version: instance.binaryVersion,
-      metrics: undefined, // TODO: Add real-time metrics from subscriptions
+      metrics: undefined,
+      // TODO: Add real-time metrics from subscriptions
       runtime: {
         installedAt: instance.createdAt,
         lastStarted: instance.updatedAt,
@@ -241,35 +237,48 @@ export const ServicesPage = React.memo(function ServicesPage({
         switch (operation) {
           case 'start':
             await Promise.all(
-              instanceIds.map((id) => startInstance({ routerID: routerId, instanceID: id }))
+              instanceIds.map((id) =>
+                startInstance({
+                  routerID: routerId,
+                  instanceID: id,
+                })
+              )
             );
-            toast.success(t('services.bulkOperations.startSuccess', { count: instanceIds.length }));
+            toast.success('services.bulkOperations.startSuccess');
             break;
-
           case 'stop':
             await Promise.all(
-              instanceIds.map((id) => stopInstance({ routerID: routerId, instanceID: id }))
+              instanceIds.map((id) =>
+                stopInstance({
+                  routerID: routerId,
+                  instanceID: id,
+                })
+              )
             );
-            toast.success(t('services.bulkOperations.stopSuccess', { count: instanceIds.length }));
+            toast.success('services.bulkOperations.stopSuccess');
             break;
-
           case 'restart':
             await Promise.all(
-              instanceIds.map((id) => restartInstance({ routerID: routerId, instanceID: id }))
+              instanceIds.map((id) =>
+                restartInstance({
+                  routerID: routerId,
+                  instanceID: id,
+                })
+              )
             );
-            toast.success(
-              t('services.bulkOperations.restartSuccess', { count: instanceIds.length })
-            );
+            toast.success('services.bulkOperations.restartSuccess');
             break;
-
           case 'delete':
             // Confirmation handled by InstanceManager
             await Promise.all(
-              instanceIds.map((id) => deleteInstance({ routerID: routerId, instanceID: id }))
+              instanceIds.map((id) =>
+                deleteInstance({
+                  routerID: routerId,
+                  instanceID: id,
+                })
+              )
             );
-            toast.success(
-              t('services.bulkOperations.deleteSuccess', { count: instanceIds.length })
-            );
+            toast.success('services.bulkOperations.deleteSuccess');
             break;
         }
 
@@ -279,8 +288,8 @@ export const ServicesPage = React.memo(function ServicesPage({
         // Refetch instances
         await refetch();
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : t('common.unknownError');
-        toast.error(t('services.bulkOperations.error', { operation, message: errorMessage }));
+        const errorMessage = err instanceof Error ? err.message : 'common.unknownError';
+        toast.error('services.bulkOperations.error');
       }
     },
     [
@@ -291,7 +300,6 @@ export const ServicesPage = React.memo(function ServicesPage({
       deleteInstance,
       clearServiceSelection,
       refetch,
-      t,
     ]
   );
 
@@ -306,7 +314,6 @@ export const ServicesPage = React.memo(function ServicesPage({
     if (!resourcesData?.systemResources) {
       return null;
     }
-
     const resources = resourcesData.systemResources;
 
     // Map instances to ServiceInstanceResource format
@@ -326,8 +333,10 @@ export const ServicesPage = React.memo(function ServicesPage({
       runningInstances: resourceInstances.filter((i) => i.status === 'running').length,
       stoppedInstances: resourceInstances.filter((i) => i.status === 'stopped').length,
     };
-
-    return { instances: resourceInstances, systemTotals };
+    return {
+      instances: resourceInstances,
+      systemTotals,
+    };
   }, [resourcesData]);
 
   // Handle resource panel instance click
@@ -337,7 +346,6 @@ export const ServicesPage = React.memo(function ServicesPage({
     },
     [onInstanceClick]
   );
-
   return (
     <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-lg space-y-component-lg bg-background">
       {/* Page header */}
@@ -346,11 +354,9 @@ export const ServicesPage = React.memo(function ServicesPage({
           <div className="flex items-center justify-between">
             <div className="gap-component-md flex items-center">
               <div>
-                <h1 className="font-display text-foreground text-2xl">
-                  {t('services.page.title')}
-                </h1>
+                <h1 className="font-display text-foreground text-2xl">{'services.page.title'}</h1>
                 <p className="text-muted-foreground mt-component-sm text-sm">
-                  {t('services.page.subtitle')}
+                  {'services.page.subtitle'}
                 </p>
               </div>
               <Cpu
@@ -363,20 +369,20 @@ export const ServicesPage = React.memo(function ServicesPage({
                 variant="outline"
                 size="lg"
                 onClick={() => setImportDialogOpen(true)}
-                aria-label={t('services.sharing.import.button')}
+                aria-label={'Import'}
                 className="min-h-[44px]"
               >
                 <Upload
                   className="mr-component-sm h-4 w-4"
                   aria-hidden="true"
                 />
-                {t('services.sharing.import.button')}
+                {'Import'}
               </Button>
               <Button
                 variant="default"
                 size="lg"
                 onClick={() => setInstallDialogOpen(true)}
-                aria-label={t('services.actions.install')}
+                aria-label={'services.actions.install'}
                 className="min-h-[44px]"
               >
                 <svg
@@ -403,7 +409,7 @@ export const ServicesPage = React.memo(function ServicesPage({
                     y2="12"
                   />
                 </svg>
-                {t('services.actions.install')}
+                {'services.actions.install'}
               </Button>
             </div>
           </div>
@@ -420,7 +426,7 @@ export const ServicesPage = React.memo(function ServicesPage({
             <CardHeader
               className="hover:bg-muted/50 focus-visible:ring-ring min-h-[44px] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               role="button"
-              aria-label={t('services.sections.resourceOverview.toggle')}
+              aria-label={'services.sections.resourceOverview.toggle'}
               tabIndex={0}
             >
               <div className="flex items-center justify-between">
@@ -429,7 +435,7 @@ export const ServicesPage = React.memo(function ServicesPage({
                     className="text-category-vpn h-5 w-5"
                     aria-hidden="true"
                   />
-                  <CardTitle>{t('services.sections.resourceOverview.title')}</CardTitle>
+                  <CardTitle>{'services.sections.resourceOverview.title'}</CardTitle>
                   {resourcesData && (
                     <span className="px-component-sm py-component-xs bg-category-vpn/10 text-category-vpn rounded-full text-xs">
                       {resourcesData.systemResources.instances.length} instances
@@ -491,7 +497,7 @@ export const ServicesPage = React.memo(function ServicesPage({
               <CardHeader
                 className="hover:bg-muted/50 focus-visible:ring-ring min-h-[44px] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 role="button"
-                aria-label={t('services.sections.updates.toggle')}
+                aria-label={'services.sections.updates.toggle'}
                 tabIndex={0}
               >
                 <div className="flex items-center justify-between">
@@ -500,7 +506,7 @@ export const ServicesPage = React.memo(function ServicesPage({
                       className="text-warning h-5 w-5"
                       aria-hidden="true"
                     />
-                    <CardTitle>{t('services.sections.updates.title')}</CardTitle>
+                    <CardTitle>{'services.sections.updates.title'}</CardTitle>
                     <span className="px-component-sm py-component-xs bg-warning/10 text-warning rounded-full text-xs">
                       {updatesData.length} update{updatesData.length !== 1 ? 's' : ''}
                     </span>
@@ -548,7 +554,7 @@ export const ServicesPage = React.memo(function ServicesPage({
             <CardHeader
               className="hover:bg-muted/50 focus-visible:ring-ring min-h-[44px] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               role="button"
-              aria-label={t('services.sections.storage.toggle')}
+              aria-label={'services.sections.storage.toggle'}
               tabIndex={0}
             >
               <div className="flex items-center justify-between">
@@ -557,7 +563,7 @@ export const ServicesPage = React.memo(function ServicesPage({
                     className="text-category-vpn h-5 w-5"
                     aria-hidden="true"
                   />
-                  <CardTitle>{t('services.sections.storage.title')}</CardTitle>
+                  <CardTitle>{'services.sections.storage.title'}</CardTitle>
                   {storageConfig?.enabled && (
                     <span className="px-component-sm py-component-xs bg-category-vpn/10 text-category-vpn rounded-full text-xs">
                       Configured
@@ -596,7 +602,7 @@ export const ServicesPage = React.memo(function ServicesPage({
             <CardHeader
               className="hover:bg-muted/50 focus-visible:ring-ring min-h-[44px] cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               role="button"
-              aria-label={t('services.sections.ports.toggle')}
+              aria-label={'services.sections.ports.toggle'}
               tabIndex={0}
             >
               <div className="flex items-center justify-between">
@@ -605,7 +611,7 @@ export const ServicesPage = React.memo(function ServicesPage({
                     className="text-category-vpn h-5 w-5"
                     aria-hidden="true"
                   />
-                  <CardTitle>{t('services.sections.ports.title')}</CardTitle>
+                  <CardTitle>{'services.sections.ports.title'}</CardTitle>
                 </div>
                 {portsOpen ?
                   <ChevronUp
@@ -648,16 +654,16 @@ export const ServicesPage = React.memo(function ServicesPage({
         emptyState={
           <div className="py-component-lg bg-muted/30 rounded-[var(--semantic-radius-card)] text-center">
             <h3 className="font-display mb-component-sm text-foreground text-lg">
-              {t('services.empty.title')}
+              {'services.empty.title'}
             </h3>
             <p className="text-muted-foreground mb-component-md text-sm">
-              {t('services.empty.description')}
+              {'services.empty.description'}
             </p>
             <Button
               onClick={() => setInstallDialogOpen(true)}
               className="focus-visible:ring-ring min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-              {t('services.empty.action')}
+              {'services.empty.action'}
             </Button>
           </div>
         }
@@ -696,7 +702,10 @@ export const ServicesPage = React.memo(function ServicesPage({
           dependents={[]}
           onConfirm={async (mode) => {
             if (pendingStopInstance) {
-              await stopInstance({ routerID: routerId, instanceID: pendingStopInstance.id });
+              await stopInstance({
+                routerID: routerId,
+                instanceID: pendingStopInstance.id,
+              });
               setStopDialogOpen(false);
               setPendingStopInstance(null);
               await refetch();
@@ -707,7 +716,6 @@ export const ServicesPage = React.memo(function ServicesPage({
     </div>
   );
 });
-
 ServicesPage.displayName = 'ServicesPage';
 
 /**
@@ -723,7 +731,6 @@ function getCategoryFromFeatureId(featureId: string): Service['category'] {
     psiphon: 'privacy',
     'adguard-home': 'dns',
   };
-
   return categoryMap[featureId] || 'proxy';
 }
 

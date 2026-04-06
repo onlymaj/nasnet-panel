@@ -4,117 +4,61 @@
  */
 
 import React from 'react';
-
 import { Cpu, HardDrive, Clock } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import { type SystemResource } from '@nasnet/core/types';
 import { parseRouterOSUptime, calculateStatus } from '@nasnet/core/utils';
-
 import { cn } from '@nasnet/ui/utils';
-
 interface NetworkStatsGridProps {
   resourceData?: SystemResource;
   isLoading?: boolean;
 }
-
 export const NetworkStatsGrid = React.memo(function NetworkStatsGrid({
   resourceData,
-  isLoading,
+  isLoading
 }: NetworkStatsGridProps) {
-  const { t } = useTranslation('network');
   const memoryUsed = resourceData ? resourceData.totalMemory - resourceData.freeMemory : 0;
-  const memoryPercentage =
-    resourceData ? Math.round((memoryUsed / resourceData.totalMemory) * 100) : 0;
-
+  const memoryPercentage = resourceData ? Math.round(memoryUsed / resourceData.totalMemory * 100) : 0;
   const uptimeFormatted = resourceData?.uptime ? parseRouterOSUptime(resourceData.uptime) : '--';
-
   if (isLoading) {
-    return (
-      <div
-        className="gap-component-sm p-component-md grid animate-pulse grid-cols-3"
-        role="status"
-        aria-label="Loading network stats"
-      >
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-card rounded-card-lg p-component-sm text-center"
-          >
+    return <div className="gap-component-sm p-component-md grid animate-pulse grid-cols-3" role="status" aria-label="Loading network stats">
+        {[1, 2, 3].map(i => <div key={i} className="bg-card rounded-card-lg p-component-sm text-center">
             <div className="bg-muted mx-auto mb-1 h-5 w-12 rounded" />
             <div className="bg-muted mx-auto h-3 w-8 rounded" />
-          </div>
-        ))}
+          </div>)}
         <span className="sr-only">Loading network statistics...</span>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div
-      className="gap-component-sm p-component-md grid grid-cols-3"
-      role="group"
-      aria-label="Network statistics"
-    >
+  return <div className="gap-component-sm p-component-md grid grid-cols-3" role="group" aria-label="Network statistics">
       {/* CPU */}
       <div className="bg-card rounded-card-lg p-component-sm text-center shadow-sm">
         <div className="mb-1 flex items-center justify-center gap-1.5">
-          <Cpu
-            className="text-info h-3.5 w-3.5"
-            aria-hidden="true"
-          />
+          <Cpu className="text-info h-3.5 w-3.5" aria-hidden="true" />
         </div>
-        <p
-          className={cn(
-            'font-mono text-lg font-bold',
-            resourceData?.cpuLoad !== undefined ?
-              calculateStatus(resourceData.cpuLoad) === 'healthy' ? 'text-info'
-              : calculateStatus(resourceData.cpuLoad) === 'warning' ? 'text-warning'
-              : 'text-error'
-            : 'text-foreground'
-          )}
-        >
+        <p className={cn('font-mono text-lg font-bold', resourceData?.cpuLoad !== undefined ? calculateStatus(resourceData.cpuLoad) === 'healthy' ? 'text-info' : calculateStatus(resourceData.cpuLoad) === 'warning' ? 'text-warning' : 'text-error' : 'text-foreground')}>
           {resourceData?.cpuLoad ?? '--'}%
         </p>
-        <p className="text-muted-foreground font-display text-xs">{t('quickStats.cpu')}</p>
+        <p className="text-muted-foreground font-display text-xs">{"quickStats.cpu"}</p>
       </div>
 
       {/* Memory */}
       <div className="bg-card rounded-card-lg p-component-sm text-center shadow-sm">
         <div className="mb-1 flex items-center justify-center gap-1.5">
-          <HardDrive
-            className="text-warning h-3.5 w-3.5"
-            aria-hidden="true"
-          />
+          <HardDrive className="text-warning h-3.5 w-3.5" aria-hidden="true" />
         </div>
-        <p
-          className={cn(
-            'font-mono text-lg font-bold',
-            resourceData ?
-              calculateStatus(memoryPercentage) === 'healthy' ? 'text-warning'
-              : calculateStatus(memoryPercentage) === 'warning' ? 'text-warning'
-              : 'text-error'
-            : 'text-foreground'
-          )}
-        >
+        <p className={cn('font-mono text-lg font-bold', resourceData ? calculateStatus(memoryPercentage) === 'healthy' ? 'text-warning' : calculateStatus(memoryPercentage) === 'warning' ? 'text-warning' : 'text-error' : 'text-foreground')}>
           {memoryPercentage}%
         </p>
-        <p className="text-muted-foreground font-display text-xs">{t('quickStats.memory')}</p>
+        <p className="text-muted-foreground font-display text-xs">{"quickStats.memory"}</p>
       </div>
 
       {/* Uptime */}
       <div className="bg-card rounded-card-lg p-component-sm text-center shadow-sm">
         <div className="mb-1 flex items-center justify-center gap-1.5">
-          <Clock
-            className="text-success h-3.5 w-3.5"
-            aria-hidden="true"
-          />
+          <Clock className="text-success h-3.5 w-3.5" aria-hidden="true" />
         </div>
         <p className="text-success font-mono text-lg font-bold">{uptimeFormatted}</p>
-        <p className="text-muted-foreground font-display text-xs">{t('quickStats.uptime')}</p>
+        <p className="text-muted-foreground font-display text-xs">{"quickStats.uptime"}</p>
       </div>
-    </div>
-  );
+    </div>;
 });
-
 NetworkStatsGrid.displayName = 'NetworkStatsGrid';

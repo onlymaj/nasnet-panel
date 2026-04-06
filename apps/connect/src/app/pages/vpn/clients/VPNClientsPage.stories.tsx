@@ -12,9 +12,7 @@
  */
 
 import { VPNClientsPage } from './VPNClientsPage';
-
 import type { Meta, StoryObj } from '@storybook/react';
-
 const meta: Meta<typeof VPNClientsPage> = {
   title: 'App/Pages/VPNClientsPage',
   component: VPNClientsPage,
@@ -23,15 +21,11 @@ const meta: Meta<typeof VPNClientsPage> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component:
-          'VPN Clients page. Displays all outgoing VPN client connections grouped by protocol ' +
-          'with WireGuard peers, OpenVPN, L2TP, PPTP, SSTP and IKEv2 sections. Supports ' +
-          'protocol-tab filtering, enable/disable toggle, edit and delete actions.',
-      },
-    },
-  },
+        component: 'VPN Clients page. Displays all outgoing VPN client connections grouped by protocol ' + 'with WireGuard peers, OpenVPN, L2TP, PPTP, SSTP and IKEv2 sections. Supports ' + 'protocol-tab filtering, enable/disable toggle, edit and delete actions.'
+      }
+    }
+  }
 };
-
 export default meta;
 type Story = StoryObj<typeof VPNClientsPage>;
 
@@ -40,7 +34,6 @@ type Story = StoryObj<typeof VPNClientsPage>;
 // ---------------------------------------------------------------------------
 
 const PROTOCOLS = ['WireGuard', 'OpenVPN', 'L2TP', 'PPTP', 'SSTP', 'IKEv2'] as const;
-
 interface MockClient {
   id: string;
   name: string;
@@ -53,53 +46,46 @@ interface MockClient {
   tx?: number;
   comment?: string;
 }
-
-const MOCK_CLIENTS: MockClient[] = [
-  {
-    id: 'wg-peer-1',
-    name: 'wg0-peer',
-    protocol: 'WireGuard',
-    connectTo: '203.0.113.10:51820',
-    running: true,
-    disabled: false,
-    rx: 5242880,
-    tx: 2621440,
-  },
-  {
-    id: 'wg-peer-2',
-    name: 'wg1-peer',
-    protocol: 'WireGuard',
-    connectTo: '198.51.100.5:51820',
-    running: false,
-    disabled: false,
-    rx: 0,
-    tx: 0,
-    comment: 'Backup tunnel',
-  },
-  {
-    id: 'ovpn-client-1',
-    name: 'ovpn-us-east',
-    protocol: 'OpenVPN',
-    connectTo: 'vpn.example.com',
-    running: true,
-    disabled: false,
-    uptime: '2d 4h 15m',
-    rx: 10485760,
-    tx: 3145728,
-  },
-  {
-    id: 'l2tp-client-1',
-    name: 'l2tp-office',
-    protocol: 'L2TP',
-    connectTo: '10.0.0.1',
-    running: true,
-    disabled: false,
-    uptime: '6h 30m',
-    rx: 1048576,
-    tx: 524288,
-  },
-];
-
+const MOCK_CLIENTS: MockClient[] = [{
+  id: 'wg-peer-1',
+  name: 'wg0-peer',
+  protocol: 'WireGuard',
+  connectTo: '203.0.113.10:51820',
+  running: true,
+  disabled: false,
+  rx: 5242880,
+  tx: 2621440
+}, {
+  id: 'wg-peer-2',
+  name: 'wg1-peer',
+  protocol: 'WireGuard',
+  connectTo: '198.51.100.5:51820',
+  running: false,
+  disabled: false,
+  rx: 0,
+  tx: 0,
+  comment: 'Backup tunnel'
+}, {
+  id: 'ovpn-client-1',
+  name: 'ovpn-us-east',
+  protocol: 'OpenVPN',
+  connectTo: "Com",
+  running: true,
+  disabled: false,
+  uptime: '2d 4h 15m',
+  rx: 10485760,
+  tx: 3145728
+}, {
+  id: 'l2tp-client-1',
+  name: 'l2tp-office',
+  protocol: 'L2TP',
+  connectTo: '10.0.0.1',
+  running: true,
+  disabled: false,
+  uptime: '6h 30m',
+  rx: 1048576,
+  tx: 524288
+}];
 function formatBytes(bytes: number) {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -112,17 +98,16 @@ function formatBytes(bytes: number) {
 // Shared sub-components
 // ---------------------------------------------------------------------------
 
-function ClientCard({ client }: { client: MockClient }) {
-  return (
-    <div className="bg-card border-border space-y-3 rounded-xl border p-4">
+function ClientCard({
+  client
+}: {
+  client: MockClient;
+}) {
+  return <div className="bg-card border-border space-y-3 rounded-xl border p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-foreground font-semibold">{client.name}</span>
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-              client.running ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
-            }`}
-          >
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${client.running ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
             {client.running ? 'Connected' : 'Disconnected'}
           </span>
           <span className="bg-accent text-accent-foreground rounded-full px-2 py-0.5 text-xs">
@@ -130,12 +115,7 @@ function ClientCard({ client }: { client: MockClient }) {
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            className={`h-6 w-10 rounded-full transition-colors ${
-              !client.disabled ? 'bg-success' : 'bg-muted'
-            }`}
-            aria-label={`Toggle ${client.name}`}
-          />
+          <button className={`h-6 w-10 rounded-full transition-colors ${!client.disabled ? 'bg-success' : 'bg-muted'}`} aria-label={`Toggle ${client.name}`} />
           <button className="text-muted-foreground hover:text-foreground p-1.5">✏️</button>
           <button className="text-muted-foreground hover:text-error p-1.5">🗑️</button>
         </div>
@@ -149,32 +129,25 @@ function ClientCard({ client }: { client: MockClient }) {
         {client.tx != null && <span className="text-primary">↑ {formatBytes(client.tx)}</span>}
         {client.comment && <span className="italic opacity-70">{client.comment}</span>}
       </div>
-    </div>
-  );
+    </div>;
 }
-
-function ProtocolTabs({ active }: { active: string }) {
-  return (
-    <div className="mb-6 flex flex-wrap gap-2">
-      {['All', ...PROTOCOLS].map((p) => (
-        <button
-          key={p}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            p === active ?
-              'bg-primary text-primary-foreground'
-            : 'bg-card border-border text-foreground hover:bg-accent/50 border'
-          }`}
-        >
+function ProtocolTabs({
+  active
+}: {
+  active: string;
+}) {
+  return <div className="mb-6 flex flex-wrap gap-2">
+      {['All', ...PROTOCOLS].map(p => <button key={p} className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${p === active ? 'bg-primary text-primary-foreground' : 'bg-card border-border text-foreground hover:bg-accent/50 border'}`}>
           {p}
-        </button>
-      ))}
-    </div>
-  );
+        </button>)}
+    </div>;
 }
-
-function EmptyProtocolSection({ protocol }: { protocol: string }) {
-  return (
-    <div className="bg-muted/30 rounded-xl py-8 text-center">
+function EmptyProtocolSection({
+  protocol
+}: {
+  protocol: string;
+}) {
+  return <div className="bg-muted/30 rounded-xl py-8 text-center">
       <h3 className="text-foreground mb-2 text-lg font-semibold">
         No {protocol} clients configured
       </h3>
@@ -184,13 +157,14 @@ function EmptyProtocolSection({ protocol }: { protocol: string }) {
       <button className="bg-primary text-primary-foreground mx-auto flex min-h-[44px] items-center gap-2 rounded-md px-4 py-2 text-sm">
         + Add {protocol} Client
       </button>
-    </div>
-  );
+    </div>;
 }
-
-function PageHeader({ isLoading = false }: { isLoading?: boolean }) {
-  return (
-    <div className="flex items-start justify-between">
+function PageHeader({
+  isLoading = false
+}: {
+  isLoading?: boolean;
+}) {
+  return <div className="flex items-start justify-between">
       <div className="flex items-center gap-4">
         <button className="border-border min-h-[44px] rounded-md border p-2 text-sm">← Back</button>
         <div>
@@ -200,15 +174,10 @@ function PageHeader({ isLoading = false }: { isLoading?: boolean }) {
           </p>
         </div>
       </div>
-      <button
-        disabled={isLoading}
-        className="border-border flex min-h-[44px] items-center gap-2 rounded-md border px-3 text-sm disabled:opacity-50"
-        aria-label="Refresh"
-      >
+      <button disabled={isLoading} className="border-border flex min-h-[44px] items-center gap-2 rounded-md border px-3 text-sm disabled:opacity-50" aria-label="Refresh">
         Refresh
       </button>
-    </div>
-  );
+    </div>;
 }
 
 // ---------------------------------------------------------------------------
@@ -220,8 +189,7 @@ function PageHeader({ isLoading = false }: { isLoading?: boolean }) {
  */
 export const AllProtocols: Story = {
   name: 'All protocols – loaded',
-  render: () => (
-    <div className="bg-background min-h-screen">
+  render: () => <div className="bg-background min-h-screen">
       <div className="px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-6xl space-y-6">
           <PageHeader />
@@ -234,12 +202,7 @@ export const AllProtocols: Story = {
               <span className="bg-muted rounded-full px-2 py-0.5 text-xs">2</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {MOCK_CLIENTS.filter((c) => c.protocol === 'WireGuard').map((c) => (
-                <ClientCard
-                  key={c.id}
-                  client={c}
-                />
-              ))}
+              {MOCK_CLIENTS.filter(c => c.protocol === 'WireGuard').map(c => <ClientCard key={c.id} client={c} />)}
             </div>
           </div>
 
@@ -250,12 +213,7 @@ export const AllProtocols: Story = {
               <span className="bg-muted rounded-full px-2 py-0.5 text-xs">1</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {MOCK_CLIENTS.filter((c) => c.protocol === 'OpenVPN').map((c) => (
-                <ClientCard
-                  key={c.id}
-                  client={c}
-                />
-              ))}
+              {MOCK_CLIENTS.filter(c => c.protocol === 'OpenVPN').map(c => <ClientCard key={c.id} client={c} />)}
             </div>
           </div>
 
@@ -266,41 +224,28 @@ export const AllProtocols: Story = {
               <span className="bg-muted rounded-full px-2 py-0.5 text-xs">1</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {MOCK_CLIENTS.filter((c) => c.protocol === 'L2TP').map((c) => (
-                <ClientCard
-                  key={c.id}
-                  client={c}
-                />
-              ))}
+              {MOCK_CLIENTS.filter(c => c.protocol === 'L2TP').map(c => <ClientCard key={c.id} client={c} />)}
             </div>
           </div>
 
           {/* PPTP / SSTP / IKEv2 – empty */}
-          {['PPTP', 'SSTP', 'IKEv2'].map((p) => (
-            <div
-              key={p}
-              className="space-y-2"
-            >
+          {['PPTP', 'SSTP', 'IKEv2'].map(p => <div key={p} className="space-y-2">
               <div className="flex items-center justify-between">
                 <h2 className="text-foreground text-base font-semibold">{p}</h2>
                 <span className="bg-muted rounded-full px-2 py-0.5 text-xs">0</span>
               </div>
               <EmptyProtocolSection protocol={p} />
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
-    </div>
-  ),
+    </div>,
   parameters: {
     docs: {
       description: {
-        story:
-          'All-tab view showing WireGuard (2 peers), OpenVPN (1 client) and L2TP (1 client) ' +
-          'with empty sections for PPTP, SSTP and IKEv2.',
-      },
-    },
-  },
+        story: 'All-tab view showing WireGuard (2 peers), OpenVPN (1 client) and L2TP (1 client) ' + 'with empty sections for PPTP, SSTP and IKEv2.'
+      }
+    }
+  }
 };
 
 /**
@@ -308,8 +253,7 @@ export const AllProtocols: Story = {
  */
 export const WireGuardTab: Story = {
   name: 'WireGuard tab selected',
-  render: () => (
-    <div className="bg-background min-h-screen">
+  render: () => <div className="bg-background min-h-screen">
       <div className="px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-6xl space-y-6">
           <PageHeader />
@@ -320,27 +264,19 @@ export const WireGuardTab: Story = {
               <span className="bg-muted rounded-full px-2 py-0.5 text-xs">2</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {MOCK_CLIENTS.filter((c) => c.protocol === 'WireGuard').map((c) => (
-                <ClientCard
-                  key={c.id}
-                  client={c}
-                />
-              ))}
+              {MOCK_CLIENTS.filter(c => c.protocol === 'WireGuard').map(c => <ClientCard key={c.id} client={c} />)}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  ),
+    </div>,
   parameters: {
     docs: {
       description: {
-        story:
-          'WireGuard tab is active. Shows only the two WireGuard peer cards ' +
-          '(one connected, one disconnected).',
-      },
-    },
-  },
+        story: 'WireGuard tab is active. Shows only the two WireGuard peer cards ' + '(one connected, one disconnected).'
+      }
+    }
+  }
 };
 
 /**
@@ -348,37 +284,28 @@ export const WireGuardTab: Story = {
  */
 export const EmptyAllProtocols: Story = {
   name: 'Empty – no clients',
-  render: () => (
-    <div className="bg-background min-h-screen">
+  render: () => <div className="bg-background min-h-screen">
       <div className="px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-6xl space-y-6">
           <PageHeader />
           <ProtocolTabs active="All" />
-          {PROTOCOLS.map((p) => (
-            <div
-              key={p}
-              className="space-y-2"
-            >
+          {PROTOCOLS.map(p => <div key={p} className="space-y-2">
               <div className="flex items-center justify-between">
                 <h2 className="text-foreground text-base font-semibold">{p}</h2>
                 <span className="bg-muted rounded-full px-2 py-0.5 text-xs">0</span>
               </div>
               <EmptyProtocolSection protocol={p} />
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
-    </div>
-  ),
+    </div>,
   parameters: {
     docs: {
       description: {
-        story:
-          'No client connections configured on any protocol. Every section shows an empty state ' +
-          'with an "Add Client" CTA.',
-      },
-    },
-  },
+        story: 'No client connections configured on any protocol. Every section shows an empty state ' + 'with an "Add Client" CTA.'
+      }
+    }
+  }
 };
 
 /**
@@ -386,46 +313,35 @@ export const EmptyAllProtocols: Story = {
  */
 export const Loading: Story = {
   name: 'Loading state',
-  render: () => (
-    <div className="bg-background min-h-screen">
+  render: () => <div className="bg-background min-h-screen">
       <div className="px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-6xl space-y-6">
           <PageHeader isLoading />
-          <div
-            className="space-y-4"
-            role="status"
-            aria-label="Loading VPN clients"
-          >
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="bg-muted h-32 w-full animate-pulse rounded-xl"
-              />
-            ))}
+          <div className="space-y-4" role="status" aria-label="Loading VPN clients">
+            {[1, 2, 3, 4].map(i => <div key={i} className="bg-muted h-32 w-full animate-pulse rounded-xl" />)}
           </div>
         </div>
       </div>
-    </div>
-  ),
+    </div>,
   parameters: {
     docs: {
       description: {
-        story:
-          'Four skeleton cards are shown while all six protocol queries are in-flight. ' +
-          'Protocol tabs are not yet rendered.',
-      },
-    },
-  },
+        story: 'Four skeleton cards are shown while all six protocol queries are in-flight. ' + 'Protocol tabs are not yet rendered.'
+      }
+    }
+  }
 };
-
 export const Mobile: Story = {
   parameters: {
-    viewport: { defaultViewport: 'mobile1' },
-  },
+    viewport: {
+      defaultViewport: 'mobile1'
+    }
+  }
 };
-
 export const Desktop: Story = {
   parameters: {
-    viewport: { defaultViewport: 'desktop' },
-  },
+    viewport: {
+      defaultViewport: 'desktop'
+    }
+  }
 };

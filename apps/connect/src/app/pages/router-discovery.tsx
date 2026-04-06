@@ -4,27 +4,14 @@
  */
 
 import React, { useState } from 'react';
-
 import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-
 import { storeCredentials as storeApiCredentials } from '@nasnet/api-client/core';
 import { useTestConnection } from '@nasnet/api-client/queries';
 import type { Router, RouterCredentials, ScanResult } from '@nasnet/core/types';
-import {
-  NetworkScanner,
-  ManualRouterEntry,
-  CredentialDialog,
-  RouterList,
-  scanResultToRouter,
-  saveCredentials as persistCredentials,
-  loadCredentials,
-  type CredentialValidationResult,
-} from '@nasnet/features/router-discovery';
+import { NetworkScanner, ManualRouterEntry, CredentialDialog, RouterList, scanResultToRouter, saveCredentials as persistCredentials, loadCredentials, type CredentialValidationResult } from '@nasnet/features/router-discovery';
 import { useRouterStore, useConnectionStore } from '@nasnet/state/stores';
-
 type ViewMode = 'scan' | 'manual' | 'list';
 
 /**
@@ -40,13 +27,20 @@ type ViewMode = 'scan' | 'manual' | 'list';
  * - Scan/Add → Select Router → Enter Credentials → Test → Connect
  */
 export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
-  const { t } = useTranslation('router');
   const navigate = useNavigate();
 
   // Stores
-  const { addRouter, updateRouter, removeRouter, selectRouter, selectedRouterId, getAllRouters } =
-    useRouterStore();
-  const { setCurrentRouter } = useConnectionStore();
+  const {
+    addRouter,
+    updateRouter,
+    removeRouter,
+    selectRouter,
+    selectedRouterId,
+    getAllRouters
+  } = useRouterStore();
+  const {
+    setCurrentRouter
+  } = useConnectionStore();
 
   // Local state
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -60,11 +54,11 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
    * Handles scan completion - converts scan results to routers
    */
   const handleScanComplete = (results: ScanResult[]) => {
-    results.forEach((result) => {
+    results.forEach(result => {
       const router: Router = {
         id: uuidv4(),
         ...scanResultToRouter(result),
-        createdAt: new Date(),
+        createdAt: new Date()
       };
       addRouter(router);
     });
@@ -80,9 +74,8 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
     const router: Router = {
       id: uuidv4(),
       ...scanResultToRouter(result),
-      createdAt: new Date(),
+      createdAt: new Date()
     };
-
     addRouter(router);
     selectRouter(router.id);
     setSelectedRouterForAuth(router);
@@ -92,16 +85,18 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
   /**
    * Handles manual router submission
    */
-  const handleManualSubmit = (data: { ipAddress: string; name?: string }) => {
+  const handleManualSubmit = (data: {
+    ipAddress: string;
+    name?: string;
+  }) => {
     const router: Router = {
       id: uuidv4(),
       ipAddress: data.ipAddress,
       name: data.name,
       connectionStatus: 'unknown',
       discoveryMethod: 'manual',
-      createdAt: new Date(),
+      createdAt: new Date()
     };
-
     addRouter(router);
     selectRouter(router.id);
     setSelectedRouterForAuth(router);
@@ -127,48 +122,50 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
 
     // Check for saved credentials
     const savedCredentials = loadCredentials(router.id);
-
     if (savedCredentials) {
       // Auto-connect with saved credentials
-      updateRouter(router.id, { connectionStatus: 'connecting' });
+      updateRouter(router.id, {
+        connectionStatus: 'connecting'
+      });
+      testConnection.mutate({
+        ipAddress: router.ipAddress,
+        credentials: savedCredentials
+      }, {
+        onSuccess: (result: CredentialValidationResult) => {
+          if (result.isValid) {
+            // Connection successful
+            const updatedRouter: Partial<Router> = {
+              connectionStatus: 'online',
+              lastConnected: new Date(),
+              model: result.routerInfo?.model,
+              routerOsVersion: result.routerInfo?.version,
+              name: router.name || result.routerInfo?.identity || router.ipAddress
+            };
+            updateRouter(router.id, updatedRouter);
 
-      testConnection.mutate(
-        {
-          ipAddress: router.ipAddress,
-          credentials: savedCredentials,
-        },
-        {
-          onSuccess: (result: CredentialValidationResult) => {
-            if (result.isValid) {
-              // Connection successful
-              const updatedRouter: Partial<Router> = {
-                connectionStatus: 'online',
-                lastConnected: new Date(),
-                model: result.routerInfo?.model,
-                routerOsVersion: result.routerInfo?.version,
-                name: router.name || result.routerInfo?.identity || router.ipAddress,
-              };
+            // Update connection store
+            setCurrentRouter(router.id, router.ipAddress);
 
-              updateRouter(router.id, updatedRouter);
-
-              // Update connection store
-              setCurrentRouter(router.id, router.ipAddress);
-
-              // Navigate to main app
-              navigate({ to: `/router/${router.id}` });
-            } else {
-              // Saved credentials invalid - show dialog
-              updateRouter(router.id, { connectionStatus: 'offline' });
-              setCredentialDialogOpen(true);
-            }
-          },
-          onError: () => {
-            // Connection error - show dialog
-            updateRouter(router.id, { connectionStatus: 'offline' });
+            // Navigate to main app
+            navigate({
+              to: `/router/${router.id}`
+            });
+          } else {
+            // Saved credentials invalid - show dialog
+            updateRouter(router.id, {
+              connectionStatus: 'offline'
+            });
             setCredentialDialogOpen(true);
-          },
+          }
+        },
+        onError: () => {
+          // Connection error - show dialog
+          updateRouter(router.id, {
+            connectionStatus: 'offline'
+          });
+          setCredentialDialogOpen(true);
         }
-      );
+      });
     } else {
       // No saved credentials - show dialog
       setCredentialDialogOpen(true);
@@ -189,61 +186,60 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
     if (!selectedRouterForAuth) return;
 
     // Update router status to connecting
-    updateRouter(selectedRouterForAuth.id, { connectionStatus: 'connecting' });
+    updateRouter(selectedRouterForAuth.id, {
+      connectionStatus: 'connecting'
+    });
 
     // Test connection
-    testConnection.mutate(
-      {
-        ipAddress: selectedRouterForAuth.ipAddress,
-        credentials,
-      },
-      {
-        onSuccess: (result: CredentialValidationResult) => {
-          if (result.isValid) {
-            // Connection successful
-            const updatedRouter: Partial<Router> = {
-              connectionStatus: 'online',
-              lastConnected: new Date(),
-              model: result.routerInfo?.model,
-              routerOsVersion: result.routerInfo?.version,
-              name:
-                selectedRouterForAuth.name ||
-                result.routerInfo?.identity ||
-                selectedRouterForAuth.ipAddress,
-            };
+    testConnection.mutate({
+      ipAddress: selectedRouterForAuth.ipAddress,
+      credentials
+    }, {
+      onSuccess: (result: CredentialValidationResult) => {
+        if (result.isValid) {
+          // Connection successful
+          const updatedRouter: Partial<Router> = {
+            connectionStatus: 'online',
+            lastConnected: new Date(),
+            model: result.routerInfo?.model,
+            routerOsVersion: result.routerInfo?.version,
+            name: selectedRouterForAuth.name || result.routerInfo?.identity || selectedRouterForAuth.ipAddress
+          };
+          updateRouter(selectedRouterForAuth.id, updatedRouter);
 
-            updateRouter(selectedRouterForAuth.id, updatedRouter);
-
-            // Save credentials if requested
-            if (saveCredentials) {
-              persistCredentials(selectedRouterForAuth.id, credentials);
-            }
-
-            // Store credentials for API client (required for all authenticated requests)
-            storeApiCredentials({
-              username: credentials.username,
-              password: credentials.password,
-            });
-
-            // Update connection store
-            setCurrentRouter(selectedRouterForAuth.id, selectedRouterForAuth.ipAddress);
-
-            // Close dialog and navigate to main app
-            setCredentialDialogOpen(false);
-            navigate({ to: `/router/${selectedRouterForAuth.id}` });
-          } else {
-            // Connection failed
-            updateRouter(selectedRouterForAuth.id, {
-              connectionStatus: 'offline',
-            });
+          // Save credentials if requested
+          if (saveCredentials) {
+            persistCredentials(selectedRouterForAuth.id, credentials);
           }
-        },
-        onError: () => {
-          // Connection error
-          updateRouter(selectedRouterForAuth.id, { connectionStatus: 'offline' });
-        },
+
+          // Store credentials for API client (required for all authenticated requests)
+          storeApiCredentials({
+            username: credentials.username,
+            password: credentials.password
+          });
+
+          // Update connection store
+          setCurrentRouter(selectedRouterForAuth.id, selectedRouterForAuth.ipAddress);
+
+          // Close dialog and navigate to main app
+          setCredentialDialogOpen(false);
+          navigate({
+            to: `/router/${selectedRouterForAuth.id}`
+          });
+        } else {
+          // Connection failed
+          updateRouter(selectedRouterForAuth.id, {
+            connectionStatus: 'offline'
+          });
+        }
+      },
+      onError: () => {
+        // Connection error
+        updateRouter(selectedRouterForAuth.id, {
+          connectionStatus: 'offline'
+        });
       }
-    );
+    });
   };
 
   /**
@@ -253,146 +249,76 @@ export const RouterDiscoveryPage = React.memo(function RouterDiscoveryPage() {
     setCredentialDialogOpen(false);
     setSelectedRouterForAuth(null);
   };
-
   const allRouters = getAllRouters();
-
-  return (
-    <div className="bg-background animate-fade-in-up min-h-screen">
+  return <div className="bg-background animate-fade-in-up min-h-screen">
       <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop mx-auto max-w-7xl py-12">
         {/* Header */}
         <div className="brand-gradient-subtle rounded-card-lg border-border/30 mb-12 border px-6 py-12 text-center">
-          <img
-            src="/favicon.png"
-            alt="NasNet"
-            className="ring-primary/20 mx-auto mb-6 h-20 w-20 rounded-2xl shadow-lg ring-4"
-          />
+          <img src="/favicon.png" alt="NasNet" className="ring-primary/20 mx-auto mb-6 h-20 w-20 rounded-2xl shadow-lg ring-4" />
           <h1 className="font-display text-foreground mb-4 text-4xl font-bold">
-            {t('discovery.title')}
+            {"Router Discovery"}
           </h1>
-          <p className="text-muted-foreground text-lg">{t('discovery.subtitle')}</p>
+          <p className="text-muted-foreground text-lg">{"Discover and connect to MikroTik routers on your network"}</p>
         </div>
 
         {/* View Mode Tabs */}
         <div className="mb-8 flex justify-center">
           <div className="rounded-card-sm border-border bg-card inline-flex border p-1 shadow-sm">
-            <button
-              onClick={() => setViewMode('scan')}
-              className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                viewMode === 'scan' ?
-                  'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t('discovery.autoScan')}
+            <button onClick={() => setViewMode('scan')} className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${viewMode === 'scan' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              {"Scan network"}
             </button>
-            <button
-              onClick={() => setViewMode('manual')}
-              className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                viewMode === 'manual' ?
-                  'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t('discovery.manualEntry')}
+            <button onClick={() => setViewMode('manual')} className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${viewMode === 'manual' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              {"Add manually"}
             </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                viewMode === 'list' ?
-                  'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t('discovery.myRouters', { count: allRouters.length })}
+            <button onClick={() => setViewMode('list')} className={`px-component-md py-component-sm focus-visible:ring-ring min-h-[44px] rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              {allRouters.length === 1 ? `${allRouters.length} router` : `${allRouters.length} routers`}
             </button>
           </div>
         </div>
 
         {/* Content Area */}
         <div className="mx-auto max-w-4xl">
-          <motion.div
-            key={viewMode}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            {viewMode === 'scan' && (
-              <div className="bg-card rounded-card-lg border-border border p-6 shadow-md">
-                <NetworkScanner
-                  onScanComplete={handleScanComplete}
-                  onRouterSelect={handleRouterSelectFromScan}
-                />
-              </div>
-            )}
+          <motion.div key={viewMode} initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} exit={{
+          opacity: 0,
+          y: -20
+        }}>
+            {viewMode === 'scan' && <div className="bg-card rounded-card-lg border-border border p-6 shadow-md">
+                <NetworkScanner onScanComplete={handleScanComplete} onRouterSelect={handleRouterSelectFromScan} />
+              </div>}
 
-            {viewMode === 'manual' && (
-              <ManualRouterEntry
-                onSubmit={handleManualSubmit}
-                onCancel={() => setViewMode('list')}
-              />
-            )}
+            {viewMode === 'manual' && <ManualRouterEntry onSubmit={handleManualSubmit} onCancel={() => setViewMode('list')} />}
 
-            {viewMode === 'list' && (
-              <div className="bg-card rounded-card-lg border-border border p-6 shadow-md">
-                <RouterList
-                  routers={allRouters}
-                  selectedRouterId={selectedRouterId}
-                  onRouterSelect={(router: Router) => selectRouter(router.id)}
-                  onDoubleClick={handleDoubleClick}
-                  onConnect={handleConnect}
-                  onRemove={handleRemove}
-                  emptyState={
-                    <div className="py-12">
-                      <img
-                        src="/favicon.png"
-                        alt="NasNet"
-                        className="mx-auto h-16 w-16 rounded-xl shadow-md"
-                      />
+            {viewMode === 'list' && <div className="bg-card rounded-card-lg border-border border p-6 shadow-md">
+                <RouterList routers={allRouters} selectedRouterId={selectedRouterId} onRouterSelect={(router: Router) => selectRouter(router.id)} onDoubleClick={handleDoubleClick} onConnect={handleConnect} onRemove={handleRemove} emptyState={<div className="py-12">
+                      <img src="/favicon.png" alt="NasNet" className="mx-auto h-16 w-16 rounded-xl shadow-md" />
                       <h3 className="text-foreground mt-2 text-sm font-medium">
-                        {t('discovery.noRoutersYet')}
+                        {"No routers yet"}
                       </h3>
                       <p className="text-muted-foreground mt-1 text-sm">
-                        {t('discovery.getStarted')}
+                        {"Scan your network or add a router manually to get started"}
                       </p>
                       <div className="gap-component-md mt-6 flex justify-center">
-                        <button
-                          onClick={() => setViewMode('scan')}
-                          className="px-component-md py-component-sm bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                        >
-                          {t('discovery.scanNetwork')}
+                        <button onClick={() => setViewMode('scan')} className="px-component-md py-component-sm bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                          {"Scan network"}
                         </button>
-                        <button
-                          onClick={() => setViewMode('manual')}
-                          className="px-component-md py-component-sm bg-muted text-muted-foreground hover:bg-muted/80 focus-visible:ring-ring min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                        >
-                          {t('discovery.addManually')}
+                        <button onClick={() => setViewMode('manual')} className="px-component-md py-component-sm bg-muted text-muted-foreground hover:bg-muted/80 focus-visible:ring-ring min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                          {"Add manually"}
                         </button>
                       </div>
-                    </div>
-                  }
-                />
-              </div>
-            )}
+                    </div>} />
+              </div>}
           </motion.div>
         </div>
       </div>
 
       {/* Credential Dialog */}
-      <CredentialDialog
-        isOpen={credentialDialogOpen}
-        routerIp={selectedRouterForAuth?.ipAddress || ''}
-        routerName={selectedRouterForAuth?.name}
-        isValidating={testConnection.isPending}
-        validationError={
-          testConnection.isError ? testConnection.error?.message
-          : testConnection.data && !testConnection.data.isValid ?
-            testConnection.data.error
-          : undefined
-        }
-        onSubmit={handleCredentialSubmit}
-        onCancel={handleCredentialCancel}
-      />
-    </div>
-  );
+      <CredentialDialog isOpen={credentialDialogOpen} routerIp={selectedRouterForAuth?.ipAddress || ''} routerName={selectedRouterForAuth?.name} isValidating={testConnection.isPending} validationError={testConnection.isError ? testConnection.error?.message : testConnection.data && !testConnection.data.isValid ? testConnection.data.error : undefined} onSubmit={handleCredentialSubmit} onCancel={handleCredentialCancel} />
+    </div>;
 });
 RouterDiscoveryPage.displayName = 'RouterDiscoveryPage';

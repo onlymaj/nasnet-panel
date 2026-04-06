@@ -5,46 +5,33 @@
  */
 
 import * as React from 'react';
-
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { RefreshCw, Plus, Server } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
-import {
-  useWireGuardInterfaces,
-  useOpenVPNServers,
-  useL2TPServer,
-  usePPTPServer,
-  useSSTPServer,
-  useIPsecPeers,
-  usePPPActive,
-  useToggleVPNInterface,
-} from '@nasnet/api-client/queries';
+import { useWireGuardInterfaces, useOpenVPNServers, useL2TPServer, usePPTPServer, useSSTPServer, useIPsecPeers, usePPPActive, useToggleVPNInterface } from '@nasnet/api-client/queries';
 import type { VPNProtocol } from '@nasnet/core/types';
 import { useConnectionStore } from '@nasnet/state/stores';
-import {
-  VPNServerCard,
-  VPNTypeSection,
-  BackButton,
-  ProtocolIconBadge,
-  getProtocolLabel,
-} from '@nasnet/ui/patterns';
+import { VPNServerCard, VPNTypeSection, BackButton, ProtocolIconBadge, getProtocolLabel } from '@nasnet/ui/patterns';
 import { Button, Skeleton, Tabs, TabsList, TabsTrigger, TabsContent } from '@nasnet/ui/primitives';
-
 const ALL_PROTOCOLS: VPNProtocol[] = ['wireguard', 'openvpn', 'l2tp', 'pptp', 'sstp', 'ikev2'];
 
 /**
  * VPN Servers Page Component
  */
 export function VPNServersPage() {
-  const { t } = useTranslation('vpn');
   const navigate = useNavigate();
-  const { id: routerId } = useParams({ from: '/router/$id/vpn/servers' });
-  const search = useSearch({ from: '/router/$id/vpn/servers' });
-  const initialProtocol = (search as { protocol?: VPNProtocol }).protocol || null;
+  const {
+    id: routerId
+  } = useParams({
+    from: '/router/$id/vpn/servers'
+  });
+  const search = useSearch({
+    from: '/router/$id/vpn/servers'
+  });
+  const initialProtocol = (search as {
+    protocol?: VPNProtocol;
+  }).protocol || null;
   const [activeTab, setActiveTab] = React.useState<VPNProtocol | 'all'>(initialProtocol || 'all');
-
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
 
   // Fetch data for all protocols
   const wireguardQuery = useWireGuardInterfaces(routerIp);
@@ -59,21 +46,8 @@ export function VPNServersPage() {
   const toggleMutation = useToggleVPNInterface();
 
   // Combined loading state
-  const isLoading =
-    wireguardQuery.isLoading ||
-    openvpnServersQuery.isLoading ||
-    l2tpServerQuery.isLoading ||
-    pptpServerQuery.isLoading ||
-    sstpServerQuery.isLoading ||
-    ipsecPeersQuery.isLoading;
-
-  const isFetching =
-    wireguardQuery.isFetching ||
-    openvpnServersQuery.isFetching ||
-    l2tpServerQuery.isFetching ||
-    pptpServerQuery.isFetching ||
-    sstpServerQuery.isFetching ||
-    ipsecPeersQuery.isFetching;
+  const isLoading = wireguardQuery.isLoading || openvpnServersQuery.isLoading || l2tpServerQuery.isLoading || pptpServerQuery.isLoading || sstpServerQuery.isLoading || ipsecPeersQuery.isLoading;
+  const isFetching = wireguardQuery.isFetching || openvpnServersQuery.isFetching || l2tpServerQuery.isFetching || pptpServerQuery.isFetching || sstpServerQuery.isFetching || ipsecPeersQuery.isFetching;
 
   // Refetch all
   const refetchAll = () => {
@@ -93,13 +67,13 @@ export function VPNServersPage() {
       id,
       name,
       protocol,
-      disabled: !enabled,
+      disabled: !enabled
     });
   };
 
   // Get connected count from PPP active
   const getPPPConnectedCount = (service: string) => {
-    return pppActiveQuery.data?.filter((c) => c.service === service).length || 0;
+    return pppActiveQuery.data?.filter(c => c.service === service).length || 0;
   };
 
   // WireGuard Servers
@@ -118,218 +92,78 @@ export function VPNServersPage() {
   const sstpServer = sstpServerQuery.data;
 
   // IPsec Peers (servers = passive mode)
-  const ipsecServerPeers = ipsecPeersQuery.data?.filter((p) => p.isPassive) || [];
+  const ipsecServerPeers = ipsecPeersQuery.data?.filter(p => p.isPassive) || [];
 
   // Render server section based on protocol
   const renderProtocolSection = (protocol: VPNProtocol) => {
     switch (protocol) {
       case 'wireguard':
-        return (
-          <VPNTypeSection
-            type="WireGuard"
-            count={wireguardServers.length}
-            defaultExpanded={activeTab === 'wireguard' || activeTab === 'all'}
-          >
-            {wireguardServers.length > 0 ?
-              <div className="gap-component-md grid md:grid-cols-2">
-                {wireguardServers.map((server) => (
-                  <VPNServerCard
-                    key={server.id}
-                    id={server.id}
-                    name={server.name}
-                    protocol="wireguard"
-                    isDisabled={server.isDisabled}
-                    isRunning={server.isRunning}
-                    port={server.listenPort}
-                    rx={server.rx}
-                    tx={server.tx}
-                    onToggle={(id, enabled) => handleToggle(id, server.name, 'wireguard', enabled)}
-                    onEdit={() =>
-                      navigate({ to: `/vpn/servers/wireguard/${server.id}/edit` as '/' })
-                    }
-                    onDelete={() => {
-                      /* TODO: Delete confirmation */
-                    }}
-                    onViewDetails={() =>
-                      navigate({ to: `/vpn/servers/wireguard/${server.id}` as '/' })
-                    }
-                    isToggling={toggleMutation.isPending}
-                  />
-                ))}
-              </div>
-            : <EmptyState
-                protocol="wireguard"
-                onAdd={() => navigate({ to: '/vpn/servers/wireguard/add' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="WireGuard" count={wireguardServers.length} defaultExpanded={activeTab === 'wireguard' || activeTab === 'all'}>
+            {wireguardServers.length > 0 ? <div className="gap-component-md grid md:grid-cols-2">
+                {wireguardServers.map(server => <VPNServerCard key={server.id} id={server.id} name={server.name} protocol="wireguard" isDisabled={server.isDisabled} isRunning={server.isRunning} port={server.listenPort} rx={server.rx} tx={server.tx} onToggle={(id, enabled) => handleToggle(id, server.name, 'wireguard', enabled)} onEdit={() => navigate({
+              to: `/vpn/servers/wireguard/${server.id}/edit` as '/'
+            })} onDelete={() => {
+              /* TODO: Delete confirmation */
+            }} onViewDetails={() => navigate({
+              to: `/vpn/servers/wireguard/${server.id}` as '/'
+            })} isToggling={toggleMutation.isPending} />)}
+              </div> : <EmptyState protocol="wireguard" onAdd={() => navigate({
+            to: '/vpn/servers/wireguard/add' as '/'
+          })} />}
+          </VPNTypeSection>;
       case 'openvpn':
-        return (
-          <VPNTypeSection
-            type="OpenVPN"
-            count={openvpnServers.length}
-            defaultExpanded={activeTab === 'openvpn' || activeTab === 'all'}
-          >
-            {openvpnServers.length > 0 ?
-              <div className="gap-component-md grid md:grid-cols-2">
-                {openvpnServers.map((server) => (
-                  <VPNServerCard
-                    key={server.id}
-                    id={server.id}
-                    name={server.name}
-                    protocol="openvpn"
-                    isDisabled={server.isDisabled}
-                    isRunning={server.isRunning}
-                    port={server.port}
-                    connectedClients={getPPPConnectedCount('ovpn')}
-                    comment={server.comment}
-                    onToggle={(id, enabled) => handleToggle(id, server.name, 'openvpn', enabled)}
-                    onEdit={() => navigate({ to: `/vpn/servers/openvpn/${server.id}/edit` as '/' })}
-                    onDelete={() => {
-                      /* TODO: Delete confirmation */
-                    }}
-                    isToggling={toggleMutation.isPending}
-                  />
-                ))}
-              </div>
-            : <EmptyState
-                protocol="openvpn"
-                onAdd={() => navigate({ to: '/vpn/servers/openvpn/add' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="OpenVPN" count={openvpnServers.length} defaultExpanded={activeTab === 'openvpn' || activeTab === 'all'}>
+            {openvpnServers.length > 0 ? <div className="gap-component-md grid md:grid-cols-2">
+                {openvpnServers.map(server => <VPNServerCard key={server.id} id={server.id} name={server.name} protocol="openvpn" isDisabled={server.isDisabled} isRunning={server.isRunning} port={server.port} connectedClients={getPPPConnectedCount('ovpn')} comment={server.comment} onToggle={(id, enabled) => handleToggle(id, server.name, 'openvpn', enabled)} onEdit={() => navigate({
+              to: `/vpn/servers/openvpn/${server.id}/edit` as '/'
+            })} onDelete={() => {
+              /* TODO: Delete confirmation */
+            }} isToggling={toggleMutation.isPending} />)}
+              </div> : <EmptyState protocol="openvpn" onAdd={() => navigate({
+            to: '/vpn/servers/openvpn/add' as '/'
+          })} />}
+          </VPNTypeSection>;
       case 'l2tp':
-        return (
-          <VPNTypeSection
-            type="L2TP"
-            count={l2tpServer ? 1 : 0}
-            defaultExpanded={activeTab === 'l2tp' || activeTab === 'all'}
-          >
-            {l2tpServer ?
-              <VPNServerCard
-                id={l2tpServer.id}
-                name={l2tpServer.name}
-                protocol="l2tp"
-                isDisabled={l2tpServer.isDisabled}
-                isRunning={l2tpServer.isRunning}
-                connectedClients={getPPPConnectedCount('l2tp')}
-                comment={l2tpServer.comment}
-                onToggle={(id, enabled) => handleToggle(id, l2tpServer.name, 'l2tp', enabled)}
-                onEdit={() => navigate({ to: '/vpn/servers/l2tp/edit' as '/' })}
-                isToggling={toggleMutation.isPending}
-              />
-            : <EmptyState
-                protocol="l2tp"
-                onAdd={() => navigate({ to: '/vpn/servers/l2tp/enable' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="L2TP" count={l2tpServer ? 1 : 0} defaultExpanded={activeTab === 'l2tp' || activeTab === 'all'}>
+            {l2tpServer ? <VPNServerCard id={l2tpServer.id} name={l2tpServer.name} protocol="l2tp" isDisabled={l2tpServer.isDisabled} isRunning={l2tpServer.isRunning} connectedClients={getPPPConnectedCount('l2tp')} comment={l2tpServer.comment} onToggle={(id, enabled) => handleToggle(id, l2tpServer.name, 'l2tp', enabled)} onEdit={() => navigate({
+            to: '/vpn/servers/l2tp/edit' as '/'
+          })} isToggling={toggleMutation.isPending} /> : <EmptyState protocol="l2tp" onAdd={() => navigate({
+            to: '/vpn/servers/l2tp/enable' as '/'
+          })} />}
+          </VPNTypeSection>;
       case 'pptp':
-        return (
-          <VPNTypeSection
-            type="PPTP"
-            count={pptpServer ? 1 : 0}
-            defaultExpanded={activeTab === 'pptp' || activeTab === 'all'}
-          >
-            {pptpServer ?
-              <VPNServerCard
-                id={pptpServer.id}
-                name={pptpServer.name}
-                protocol="pptp"
-                isDisabled={pptpServer.isDisabled}
-                isRunning={pptpServer.isRunning}
-                connectedClients={getPPPConnectedCount('pptp')}
-                comment={pptpServer.comment}
-                onToggle={(id, enabled) => handleToggle(id, pptpServer.name, 'pptp', enabled)}
-                onEdit={() => navigate({ to: '/vpn/servers/pptp/edit' as '/' })}
-                isToggling={toggleMutation.isPending}
-              />
-            : <EmptyState
-                protocol="pptp"
-                onAdd={() => navigate({ to: '/vpn/servers/pptp/enable' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="PPTP" count={pptpServer ? 1 : 0} defaultExpanded={activeTab === 'pptp' || activeTab === 'all'}>
+            {pptpServer ? <VPNServerCard id={pptpServer.id} name={pptpServer.name} protocol="pptp" isDisabled={pptpServer.isDisabled} isRunning={pptpServer.isRunning} connectedClients={getPPPConnectedCount('pptp')} comment={pptpServer.comment} onToggle={(id, enabled) => handleToggle(id, pptpServer.name, 'pptp', enabled)} onEdit={() => navigate({
+            to: '/vpn/servers/pptp/edit' as '/'
+          })} isToggling={toggleMutation.isPending} /> : <EmptyState protocol="pptp" onAdd={() => navigate({
+            to: '/vpn/servers/pptp/enable' as '/'
+          })} />}
+          </VPNTypeSection>;
       case 'sstp':
-        return (
-          <VPNTypeSection
-            type="SSTP"
-            count={sstpServer ? 1 : 0}
-            defaultExpanded={activeTab === 'sstp' || activeTab === 'all'}
-          >
-            {sstpServer ?
-              <VPNServerCard
-                id={sstpServer.id}
-                name={sstpServer.name}
-                protocol="sstp"
-                isDisabled={sstpServer.isDisabled}
-                isRunning={sstpServer.isRunning}
-                port={sstpServer.port}
-                connectedClients={getPPPConnectedCount('sstp')}
-                comment={sstpServer.comment}
-                onToggle={(id, enabled) => handleToggle(id, sstpServer.name, 'sstp', enabled)}
-                onEdit={() => navigate({ to: '/vpn/servers/sstp/edit' as '/' })}
-                isToggling={toggleMutation.isPending}
-              />
-            : <EmptyState
-                protocol="sstp"
-                onAdd={() => navigate({ to: '/vpn/servers/sstp/enable' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="SSTP" count={sstpServer ? 1 : 0} defaultExpanded={activeTab === 'sstp' || activeTab === 'all'}>
+            {sstpServer ? <VPNServerCard id={sstpServer.id} name={sstpServer.name} protocol="sstp" isDisabled={sstpServer.isDisabled} isRunning={sstpServer.isRunning} port={sstpServer.port} connectedClients={getPPPConnectedCount('sstp')} comment={sstpServer.comment} onToggle={(id, enabled) => handleToggle(id, sstpServer.name, 'sstp', enabled)} onEdit={() => navigate({
+            to: '/vpn/servers/sstp/edit' as '/'
+          })} isToggling={toggleMutation.isPending} /> : <EmptyState protocol="sstp" onAdd={() => navigate({
+            to: '/vpn/servers/sstp/enable' as '/'
+          })} />}
+          </VPNTypeSection>;
       case 'ikev2':
-        return (
-          <VPNTypeSection
-            type="IKEv2/IPsec"
-            count={ipsecServerPeers.length}
-            defaultExpanded={activeTab === 'ikev2' || activeTab === 'all'}
-          >
-            {ipsecServerPeers.length > 0 ?
-              <div className="gap-component-md grid md:grid-cols-2">
-                {ipsecServerPeers.map((peer) => (
-                  <VPNServerCard
-                    key={peer.id}
-                    id={peer.id}
-                    name={peer.name}
-                    protocol="ikev2"
-                    isDisabled={peer.isDisabled}
-                    isRunning={!peer.isDisabled}
-                    port={peer.port}
-                    comment={peer.comment}
-                    onToggle={(id, enabled) => handleToggle(id, peer.name, 'ikev2', enabled)}
-                    onEdit={() => navigate({ to: `/vpn/servers/ikev2/${peer.id}/edit` as '/' })}
-                    onDelete={() => {
-                      /* TODO: Delete confirmation */
-                    }}
-                    isToggling={toggleMutation.isPending}
-                  />
-                ))}
-              </div>
-            : <EmptyState
-                protocol="ikev2"
-                onAdd={() => navigate({ to: '/vpn/servers/ikev2/add' as '/' })}
-              />
-            }
-          </VPNTypeSection>
-        );
-
+        return <VPNTypeSection type="IKEv2/IPsec" count={ipsecServerPeers.length} defaultExpanded={activeTab === 'ikev2' || activeTab === 'all'}>
+            {ipsecServerPeers.length > 0 ? <div className="gap-component-md grid md:grid-cols-2">
+                {ipsecServerPeers.map(peer => <VPNServerCard key={peer.id} id={peer.id} name={peer.name} protocol="ikev2" isDisabled={peer.isDisabled} isRunning={!peer.isDisabled} port={peer.port} comment={peer.comment} onToggle={(id, enabled) => handleToggle(id, peer.name, 'ikev2', enabled)} onEdit={() => navigate({
+              to: `/vpn/servers/ikev2/${peer.id}/edit` as '/'
+            })} onDelete={() => {
+              /* TODO: Delete confirmation */
+            }} isToggling={toggleMutation.isPending} />)}
+              </div> : <EmptyState protocol="ikev2" onAdd={() => navigate({
+            to: '/vpn/servers/ikev2/add' as '/'
+          })} />}
+          </VPNTypeSection>;
       default:
         return null;
     }
   };
-
-  return (
-    <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-lg animate-fade-in-up">
+  return <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-component-lg animate-fade-in-up">
       <div className="space-y-component-lg mx-auto max-w-6xl">
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -337,95 +171,51 @@ export function VPNServersPage() {
             <BackButton to={routerId ? `/router/${routerId}/vpn` : '/vpn'} />
             <div>
               <h1 className="font-display text-foreground mb-1 text-2xl font-bold sm:text-3xl">
-                {t('servers.title')}
+                {"VPN Servers"}
               </h1>
-              <p className="text-muted-foreground text-sm">{t('servers.overview')}</p>
+              <p className="text-muted-foreground text-sm">{"Server overview"}</p>
             </div>
           </div>
           <div className="gap-component-sm flex items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refetchAll}
-              disabled={isLoading || isFetching}
-              className="focus-visible:ring-ring min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            >
+            <Button variant="outline" size="sm" onClick={refetchAll} disabled={isLoading || isFetching} className="focus-visible:ring-ring min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
               <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{t('button.refresh', { ns: 'common' })}</span>
+              <span className="hidden sm:inline">{"Refresh"}</span>
             </Button>
           </div>
         </div>
 
         {/* Loading State */}
-        {isLoading && (
-          <div className="space-y-component-md">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton
-                key={i}
-                className="rounded-card-sm h-32 w-full"
-              />
-            ))}
-          </div>
-        )}
+        {isLoading && <div className="space-y-component-md">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="rounded-card-sm h-32 w-full" />)}
+          </div>}
 
         {/* Content */}
-        {!isLoading && (
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as VPNProtocol | 'all')}
-          >
+        {!isLoading && <Tabs value={activeTab} onValueChange={v => setActiveTab(v as VPNProtocol | 'all')}>
             {/* Protocol Tabs */}
             <TabsList className="gap-component-sm mb-component-lg h-auto w-full flex-wrap bg-transparent p-0">
-              <TabsTrigger
-                value="all"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
+              <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Server className="mr-2 h-4 w-4" />
-                {t('button.all', { ns: 'common' })}
+                {"All"}
               </TabsTrigger>
-              {ALL_PROTOCOLS.map((protocol) => (
-                <TabsTrigger
-                  key={protocol}
-                  value={protocol}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <ProtocolIconBadge
-                    protocol={protocol}
-                    variant="sm"
-                    className="mr-2"
-                  />
+              {ALL_PROTOCOLS.map(protocol => <TabsTrigger key={protocol} value={protocol} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <ProtocolIconBadge protocol={protocol} variant="sm" className="mr-2" />
                   {getProtocolLabel(protocol)}
-                </TabsTrigger>
-              ))}
+                </TabsTrigger>)}
             </TabsList>
 
             {/* All Protocols Tab */}
-            <TabsContent
-              value="all"
-              className="space-y-component-lg mt-0"
-            >
-              {ALL_PROTOCOLS.map((protocol) => (
-                <div key={protocol}>{renderProtocolSection(protocol)}</div>
-              ))}
+            <TabsContent value="all" className="space-y-component-lg mt-0">
+              {ALL_PROTOCOLS.map(protocol => <div key={protocol}>{renderProtocolSection(protocol)}</div>)}
             </TabsContent>
 
             {/* Individual Protocol Tabs */}
-            {ALL_PROTOCOLS.map((protocol) => (
-              <TabsContent
-                key={protocol}
-                value={protocol}
-                className="mt-0"
-              >
+            {ALL_PROTOCOLS.map(protocol => <TabsContent key={protocol} value={protocol} className="mt-0">
                 {renderProtocolSection(protocol)}
-              </TabsContent>
-            ))}
-          </Tabs>
-        )}
+              </TabsContent>)}
+          </Tabs>}
       </div>
-    </div>
-  );
+    </div>;
 }
-
 VPNServersPage.displayName = 'VPNServersPage';
 
 /**
@@ -435,29 +225,21 @@ interface EmptyStateProps {
   protocol: VPNProtocol;
   onAdd: () => void;
 }
-
-function EmptyState({ protocol, onAdd }: EmptyStateProps) {
-  const { t } = useTranslation('vpn');
-  return (
-    <div className="py-component-lg bg-muted/30 rounded-card-sm text-center">
-      <ProtocolIconBadge
-        protocol={protocol}
-        variant="lg"
-        className="mx-auto mb-4"
-      />
+function EmptyState({
+  protocol,
+  onAdd
+}: EmptyStateProps) {
+  return <div className="py-component-lg bg-muted/30 rounded-card-sm text-center">
+      <ProtocolIconBadge protocol={protocol} variant="lg" className="mx-auto mb-4" />
       <h3 className="font-display text-foreground mb-2 text-lg font-semibold">
-        {t('servers.noServersConfigured', { protocol: getProtocolLabel(protocol) })}
+        {"No VPN servers configured"}
       </h3>
       <p className="text-muted-foreground mb-4 text-sm">
-        {t('servers.getStartedAddFirst', { protocol: getProtocolLabel(protocol) })}
+        {"Get started by adding your first VPN server."}
       </p>
-      <Button
-        onClick={onAdd}
-        className="focus-visible:ring-ring min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-      >
+      <Button onClick={onAdd} className="focus-visible:ring-ring min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
         <Plus className="mr-2 h-4 w-4" />
-        {t('servers.addServer', { protocol: getProtocolLabel(protocol) })}
+        {"Add Server"}
       </Button>
-    </div>
-  );
+    </div>;
 }

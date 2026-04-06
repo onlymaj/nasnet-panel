@@ -991,7 +991,7 @@ func provideResourceLimiter(
 ) (*resources.ResourceLimiter, error) {
 	return resources.NewResourceLimiter(resources.ResourceLimiterConfig{
 		EventBus: eventBus,
-		Logger:   sugar.Desugar(),
+		Logger:   sugar,
 	})
 }
 
@@ -1428,6 +1428,7 @@ func provideUpdateService(
 ) (*updates.UpdateService, error) {
 	return updates.NewUpdateService(updates.UpdateServiceConfig{
 		GitHubClient: githubClient,
+		ManifestRepo: defaultManifestRepo,
 	})
 }
 

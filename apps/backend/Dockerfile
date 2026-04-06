@@ -58,10 +58,6 @@ COPY apps/backend/ ./
 # Copy built frontend into cmd/nnc/dist/ (so //go:embed dist/** works from cmd/nnc/)
 COPY --from=frontend /workspace/dist/apps/connect ./cmd/nnc/dist
 
-# Pre-compress JS/CSS assets for smaller embedded binary (~70-80% size reduction)
-# gzip replaces originals; static handler serves .gz with Content-Encoding: gzip
-RUN find cmd/nnc/dist -type f \( -name "*.js" -o -name "*.css" \) -exec gzip -9 {} \;
-
 # Build static binary from cmd/nnc/ entry point; compress with upx if available
 RUN set -eux; \
     if [ "$TARGETARCH" = "arm" ] && [ -n "$TARGETVARIANT" ]; then export GOARM=${TARGETVARIANT#v}; fi; \
@@ -116,7 +112,6 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD ["/app","-healthcheck"]
 
 ENTRYPOINT ["/app"]
-
 
 
 

@@ -48,13 +48,13 @@
           "auto_detect_interface": true
         }
       },
-      "memoryLimitMB": "{{MEMORY_LIMIT}}",
+      "memoryLimitMB": 128,
       "cpuShares": 1024,
       "requiresBridge": true,
       "portMappings": [
         {
-          "internal": "{{PROXY_PORT}}",
-          "external": "{{PROXY_PORT}}",
+          "internal": 7890,
+          "external": 7890,
           "protocol": "tcp",
           "purpose": "sing-box mixed proxy"
         }

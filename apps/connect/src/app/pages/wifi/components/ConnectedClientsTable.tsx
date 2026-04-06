@@ -4,87 +4,75 @@
  */
 
 import React, { useMemo } from 'react';
-
 import { Signal, Clock, ArrowDown, ArrowUp } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import type { WirelessClient } from '@nasnet/core/types';
 import { formatBytes } from '@nasnet/core/utils';
-
 import { SectionHeader } from '../../network/components/SectionHeader';
-
 interface ConnectedClientsTableProps {
   clients: WirelessClient[];
   isLoading?: boolean;
 }
-
 function getSignalIcon(signalDbm: number) {
-  if (signalDbm >= -50) return { color: 'text-success', bars: 4 };
-  if (signalDbm >= -60) return { color: 'text-success', bars: 3 };
-  if (signalDbm >= -70) return { color: 'text-warning', bars: 2 };
-  return { color: 'text-error', bars: 1 };
+  if (signalDbm >= -50) return {
+    color: 'text-success',
+    bars: 4
+  };
+  if (signalDbm >= -60) return {
+    color: 'text-success',
+    bars: 3
+  };
+  if (signalDbm >= -70) return {
+    color: 'text-warning',
+    bars: 2
+  };
+  return {
+    color: 'text-error',
+    bars: 1
+  };
 }
-
-function SignalBars({ signal }: { signal: number }) {
-  const { color, bars } = getSignalIcon(signal);
-  return (
-    <div className="flex h-4 items-end gap-0.5">
-      {[1, 2, 3, 4].map((bar) => (
-        <div
-          key={bar}
-          className={`w-1 rounded-sm ${bar <= bars ? color : 'bg-muted'}`}
-          style={{ height: `${bar * 25}%` }}
-        />
-      ))}
-    </div>
-  );
+function SignalBars({
+  signal
+}: {
+  signal: number;
+}) {
+  const {
+    color,
+    bars
+  } = getSignalIcon(signal);
+  return <div className="flex h-4 items-end gap-0.5">
+      {[1, 2, 3, 4].map(bar => <div key={bar} className={`w-1 rounded-sm ${bar <= bars ? color : 'bg-muted'}`} style={{
+      height: `${bar * 25}%`
+    }} />)}
+    </div>;
 }
-
 export const ConnectedClientsTable = React.memo(function ConnectedClientsTable({
   clients,
-  isLoading,
+  isLoading
 }: ConnectedClientsTableProps) {
-  const { t } = useTranslation('wifi');
   const sortedClients = useMemo(() => {
     return [...clients].sort((a, b) => b.signalStrength - a.signalStrength);
   }, [clients]);
-
   if (isLoading) {
-    return (
-      <section>
-        <SectionHeader title={t('clients.title')} />
+    return <section>
+        <SectionHeader title={"Connected Clients"} />
         <div className="bg-card rounded-card-sm border-border p-component-md animate-pulse border">
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-muted h-12 rounded"
-              />
-            ))}
+            {[1, 2, 3].map(i => <div key={i} className="bg-muted h-12 rounded" />)}
           </div>
         </div>
-      </section>
-    );
+      </section>;
   }
-
   if (clients.length === 0) {
-    return (
-      <section>
-        <SectionHeader title={t('clients.title')} />
+    return <section>
+        <SectionHeader title={"Connected Clients"} />
         <div className="bg-card rounded-card-sm border-border p-component-lg border text-center">
           <Signal className="text-muted-foreground mx-auto mb-3 h-10 w-10" />
-          <p className="text-muted-foreground text-sm">{t('status.noClientsConnected')}</p>
+          <p className="text-muted-foreground text-sm">{"No Clients Connected"}</p>
         </div>
-      </section>
-    );
+      </section>;
   }
-
-  return (
-    <section>
-      <SectionHeader
-        title={t('clients.title')}
-        count={clients.length}
-      />
+  return <section>
+      <SectionHeader title={"Connected Clients"} count={clients.length} />
       <div className="bg-card rounded-card-sm border-border overflow-hidden border shadow-sm">
         {/* Desktop Table */}
         <div className="hidden overflow-x-auto md:block">
@@ -92,31 +80,27 @@ export const ConnectedClientsTable = React.memo(function ConnectedClientsTable({
             <thead>
               <tr className="border-border border-b">
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.macAddress')}
+                  {"MAC Address"}
                 </th>
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.interface')}
+                  {"Interface"}
                 </th>
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.signal')}
+                  {"Signal"}
                 </th>
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.rate')}
+                  {"Rate"}
                 </th>
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.traffic')}
+                  {"Traffic"}
                 </th>
                 <th className="font-display text-muted-foreground p-component-md text-left text-xs font-medium uppercase tracking-wide">
-                  {t('clients.uptime')}
+                  {"Connected For"}
                 </th>
               </tr>
             </thead>
             <tbody className="divide-border divide-y">
-              {sortedClients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-muted transition-colors"
-                >
+              {sortedClients.map(client => <tr key={client.id} className="hover:bg-muted transition-colors">
                   <td className="p-component-md">
                     <span className="text-foreground font-mono text-sm">{client.macAddress}</span>
                   </td>
@@ -151,19 +135,14 @@ export const ConnectedClientsTable = React.memo(function ConnectedClientsTable({
                       {client.uptime}
                     </div>
                   </td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
           </table>
         </div>
 
         {/* Mobile Cards */}
         <div className="divide-border divide-y md:hidden">
-          {sortedClients.map((client) => (
-            <div
-              key={client.id}
-              className="p-component-md space-y-2"
-            >
+          {sortedClients.map(client => <div key={client.id} className="p-component-md space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-foreground font-display font-mono text-sm">
                   {client.macAddress}
@@ -186,12 +165,9 @@ export const ConnectedClientsTable = React.memo(function ConnectedClientsTable({
                   {client.uptime}
                 </div>
               </div>
-            </div>
-          ))}
+            </div>)}
         </div>
       </div>
-    </section>
-  );
+    </section>;
 });
-
 ConnectedClientsTable.displayName = 'ConnectedClientsTable';

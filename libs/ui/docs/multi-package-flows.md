@@ -1133,30 +1133,26 @@ export function useHelpMode(): UseHelpModeReturn {
 }
 ```
 
-### Stage 3 — useFieldHelp loads i18n content
+### Stage 3 — useFieldHelp builds help content
 
 ```ts
 // libs/ui/patterns/src/help/use-field-help.ts  [patterns]
-import { useTranslation } from '@nasnet/core/i18n';
 import { useHelpMode } from './use-help-mode'; // [patterns]
 
 export function useFieldHelp(config: FieldHelpConfig): UseFieldHelpReturn {
   const { field, mode: propMode } = config;
-  const { t, ready } = useTranslation('network');
+  const ready = true;
   const { mode: globalMode, toggleMode } = useHelpMode(); // [patterns]
 
   const mode: HelpMode = propMode ?? globalMode; // prop overrides global
 
-  // Load content from i18n namespace 'network'
-  // Key structure: help.<field>.title.<mode>, help.<field>.description.<mode>
+  // Build content from the field key and current help mode
   const content = useMemo<HelpContent>(() => {
     if (!ready) return DEFAULT_HELP_CONTENT;
 
     return {
-      title: t(`help.${field}.title.${mode}`, {
-        defaultValue: t(`help.${field}.title.simple`, { defaultValue: field }),
-      }),
-      description: t(`help.${field}.description.${mode}`, {
+      title: field,
+      description: mode === 'technical' ? 'Technical details are not available for this field yet.' : '',
         defaultValue: t(`help.${field}.description.simple`, { defaultValue: '' }),
       }),
       examples: t(`help.${field}.examples`, { returnObjects: true, defaultValue: [] }),

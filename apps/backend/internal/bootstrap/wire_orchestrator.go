@@ -94,7 +94,7 @@ func provideResourceLimiter(
 ) (*resources.ResourceLimiter, error) {
 	return resources.NewResourceLimiter(resources.ResourceLimiterConfig{
 		EventBus: eventBus,
-		Logger:   sugar.Desugar(),
+		Logger:   sugar,
 	})
 }
 

@@ -63,18 +63,15 @@ function defaultTranslate(key: string, params?: Record<string, string | number>)
 }
 
 /**
- * Creates a custom Zod error map that integrates with i18n.
+ * Creates a custom Zod error map that supports a caller-provided message formatter.
  *
  * @param t - Translation function (defaults to built-in messages)
  * @returns Zod error map
  *
  * @example
  * ```typescript
- * // With react-i18next
- * import { useTranslation } from 'react-i18next';
- *
  * function Form() {
- *   const { t } = useTranslation('validation');
+ *   const t = (key: string) => key;
  *   const errorMap = createZodErrorMap(t);
  *
  *   // Use globally

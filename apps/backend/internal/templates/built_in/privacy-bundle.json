@@ -64,7 +64,7 @@
       "portMappings": [
         {
           "internal": 10808,
-          "external": "{{XRAY_EXTERNAL_PORT}}",
+          "external": 10808,
           "protocol": "tcp",
           "purpose": "Xray SOCKS5 proxy"
         }

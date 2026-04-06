@@ -138,8 +138,10 @@ function FormDebugInfo() {
 A wrapper around React Hook Form that integrates Zod schema validation:
 
 ```typescript
-interface UseZodFormOptions<T extends ZodSchema>
-  extends Omit<UseFormProps<z.infer<T>>, 'resolver'> {
+interface UseZodFormOptions<T extends ZodSchema> extends Omit<
+  UseFormProps<z.infer<T>>,
+  'resolver'
+> {
   /** Zod schema for validation */
   readonly schema: T;
 }
@@ -1155,16 +1157,15 @@ if (!result.isValid) {
 
 ---
 
-## Error Messages & i18n
+## Error Messages
 
-Custom Zod error messages with i18n support:
+Custom Zod error messages with a pluggable translation function:
 
 ```typescript
 import { createZodErrorMap, setGlobalErrorMap } from '@nasnet/core/forms';
-import { useTranslation } from '@nasnet/core/i18n';
 
 function FormSetup() {
-  const { t } = useTranslation('validation');
+  const t = (key: string) => key;
 
   // Create error map with translations
   const errorMap = createZodErrorMap(t);

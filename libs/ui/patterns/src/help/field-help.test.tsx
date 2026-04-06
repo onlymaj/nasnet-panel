@@ -35,37 +35,6 @@ vi.mock('@nasnet/ui/layouts', () => ({
   usePlatform: vi.fn(() => 'desktop'),
 }));
 
-// Mock useTranslation hook
-vi.mock('@nasnet/core/i18n', () => ({
-  useTranslation: () => ({
-    t: (key: string, options?: { defaultValue?: string; returnObjects?: boolean }) => {
-      const translations: Record<string, string | string[]> = {
-        'help.ip.title.simple': 'IP Address',
-        'help.ip.title.technical': 'IPv4/IPv6 Address',
-        'help.ip.description.simple':
-          'The unique address that identifies this device on the network',
-        'help.ip.description.technical': 'A 32-bit (IPv4) or 128-bit (IPv6) network layer address',
-        'help.ip.examples': ['192.168.1.1', '10.0.0.1'],
-        'help.ip.link': 'https://wiki.mikrotik.com/wiki/Manual:IP/Address',
-        'help.gateway.title.simple': 'Gateway',
-        'help.gateway.title.technical': 'Default Route',
-        'help.gateway.description.simple': 'The router that connects your network to the internet',
-        'help.gateway.description.technical':
-          'The next-hop address for packets destined outside the local subnet',
-        'help.gateway.examples': ['192.168.1.1'],
-        'help.gateway.link': 'https://wiki.mikrotik.com/wiki/Manual:IP/Route',
-      };
-
-      if (options?.returnObjects && key.includes('examples')) {
-        return translations[key] || [];
-      }
-
-      return translations[key] || options?.defaultValue || key;
-    },
-    ready: true,
-  }),
-}));
-
 // Mock Zustand store
 const mockHelpModeStore = {
   mode: 'simple' as 'simple' | 'technical',
@@ -92,15 +61,13 @@ describe('useFieldHelp Hook', () => {
     vi.clearAllMocks();
   });
 
-  it('should return content from i18n based on field key', () => {
+  it('should return default content based on field key', () => {
     const { result } = renderHook(() => useFieldHelp({ field: 'ip' }));
 
-    expect(result.current.content.title).toBe('IP Address');
-    expect(result.current.content.description).toBe(
-      'The unique address that identifies this device on the network'
-    );
-    expect(result.current.content.examples).toEqual(['192.168.1.1', '10.0.0.1']);
-    expect(result.current.content.link).toBe('https://wiki.mikrotik.com/wiki/Manual:IP/Address');
+    expect(result.current.content.title).toBe('ip');
+    expect(result.current.content.description).toBe('');
+    expect(result.current.content.examples).toEqual([]);
+    expect(result.current.content.link).toBeUndefined();
   });
 
   it('should use global mode from store by default', () => {
@@ -139,7 +106,7 @@ describe('useFieldHelp Hook', () => {
     expect(result.current.ariaLabel).toBe('Help for IP Address field');
   });
 
-  it('should indicate when i18n is ready', () => {
+  it('should indicate when help content is ready', () => {
     const { result } = renderHook(() => useFieldHelp({ field: 'ip' }));
 
     expect(result.current.isReady).toBe(true);

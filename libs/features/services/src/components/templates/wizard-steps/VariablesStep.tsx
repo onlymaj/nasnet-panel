@@ -21,24 +21,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  Switch,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@nasnet/ui/primitives';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, Input, Switch, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
 import type { ServiceTemplate, TemplateVariable } from '@nasnet/api-client/generated';
 
@@ -65,21 +48,15 @@ export interface VariablesStepProps {
  */
 function buildValidationSchema(variables: readonly TemplateVariable[]): z.ZodObject<any> {
   const shape: Record<string, z.ZodTypeAny> = {};
-
   for (const variable of variables) {
     let schema: z.ZodTypeAny;
-
     switch (variable.type) {
       case 'STRING':
         schema = z.string();
         if (variable.validationPattern) {
-          schema = (schema as z.ZodString).regex(
-            new RegExp(variable.validationPattern),
-            `Invalid format for ${variable.label}`
-          );
+          schema = (schema as z.ZodString).regex(new RegExp(variable.validationPattern), `Invalid format for ${variable.label}`);
         }
         break;
-
       case 'NUMBER':
         schema = z.coerce.number();
         if (variable.minValue !== null && variable.minValue !== undefined) {
@@ -89,19 +66,17 @@ function buildValidationSchema(variables: readonly TemplateVariable[]): z.ZodObj
           schema = (schema as z.ZodNumber).max(variable.maxValue);
         }
         break;
-
       case 'PORT':
         schema = z.coerce.number().min(1).max(65535);
         break;
-
       case 'IP':
-        schema = z.string().ip({ version: 'v4' });
+        schema = z.string().ip({
+          version: 'v4'
+        });
         break;
-
       case 'BOOLEAN':
         schema = z.boolean();
         break;
-
       case 'ENUM':
         if (variable.enumValues && variable.enumValues.length > 0) {
           schema = z.enum([...variable.enumValues] as unknown as [string, ...string[]]);
@@ -109,7 +84,6 @@ function buildValidationSchema(variables: readonly TemplateVariable[]): z.ZodObj
           schema = z.string();
         }
         break;
-
       default:
         schema = z.string();
     }
@@ -121,7 +95,6 @@ function buildValidationSchema(variables: readonly TemplateVariable[]): z.ZodObj
       shape[variable.name] = schema.optional();
     }
   }
-
   return z.object(shape);
 }
 
@@ -139,132 +112,75 @@ function VariablesStepComponent({
   template,
   variables,
   onVariablesChange,
-  className,
+  className
 }: VariablesStepProps) {
-  const { t } = useTranslation('services');
-
   // Build schema once and memoize
-  const schema = useMemo(
-    () => buildValidationSchema(template.configVariables),
-    [template.configVariables]
-  );
-
+  const schema = useMemo(() => buildValidationSchema(template.configVariables), [template.configVariables]);
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: variables,
-    mode: 'onChange',
+    mode: 'onChange'
   });
 
   // Memoize watch callback to prevent unnecessary re-renders
-  const handleFormChange = useCallback(
-    (value: unknown) => {
-      onVariablesChange(value as Record<string, unknown>);
-    },
-    [onVariablesChange]
-  );
+  const handleFormChange = useCallback((value: unknown) => {
+    onVariablesChange(value as Record<string, unknown>);
+  }, [onVariablesChange]);
 
   // Watch for form changes and propagate up
   useEffect(() => {
     const subscription = form.watch(handleFormChange);
     return () => subscription.unsubscribe();
   }, [form, handleFormChange]);
-
-  return (
-    <div className={cn('space-y-component-lg', className)}>
+  return <div className={cn('space-y-component-lg', className)}>
       <div>
         <h2 className="text-lg font-semibold">
-          {t('wizard.configureVariables', 'Configure Template Variables')}
+          {"Configure Template Variables"}
         </h2>
         <p className="text-muted-foreground mt-component-sm text-sm">
-          {t('wizard.configureVariablesDesc', 'Fill in the configuration values for your template')}
+          {"Fill in the configuration values for your template"}
         </p>
       </div>
 
       <Form {...form}>
         <form className="space-y-component-md">
-          {template.configVariables.map((variable) => (
-            <FormField
-              key={variable.name}
-              control={form.control}
-              name={variable.name}
-              render={({ field }) => (
-                <FormItem>
+          {template.configVariables.map(variable => <FormField key={variable.name} control={form.control} name={variable.name} render={({
+          field
+        }) => <FormItem>
                   <FormLabel>
                     {variable.label}
-                    {variable.required && (
-                      <span
-                        className="text-error ml-1"
-                        aria-label="required"
-                      >
+                    {variable.required && <span className="text-error ml-1" aria-label="required">
                         *
-                      </span>
-                    )}
+                      </span>}
                   </FormLabel>
                   <FormControl>
-                    {variable.type === 'BOOLEAN' ?
-                      <div className="space-x-component-sm flex items-center">
-                        <Switch
-                          checked={field.value as boolean}
-                          onCheckedChange={field.onChange}
-                        />
+                    {variable.type === 'BOOLEAN' ? <div className="space-x-component-sm flex items-center">
+                        <Switch checked={field.value as boolean} onCheckedChange={field.onChange} />
                         <span className="text-sm">{field.value ? 'Enabled' : 'Disabled'}</span>
-                      </div>
-                    : variable.type === 'ENUM' && variable.enumValues ?
-                      <Select
-                        value={field.value as string}
-                        onValueChange={field.onChange}
-                      >
+                      </div> : variable.type === 'ENUM' && variable.enumValues ? <Select value={field.value as string} onValueChange={field.onChange}>
                         <SelectTrigger>
-                          <SelectValue
-                            placeholder={t('common.selectPlaceholder', `Select ${variable.label}`)}
-                          />
+                          <SelectValue placeholder={"common.selectPlaceholder"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {variable.enumValues.map((value) => (
-                            <SelectItem
-                              key={String(value)}
-                              value={String(value)}
-                            >
+                          {variable.enumValues.map(value => <SelectItem key={String(value)} value={String(value)}>
                               {String(value)}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    : <Input
-                        type={
-                          variable.type === 'NUMBER' || variable.type === 'PORT' ? 'number' : 'text'
-                        }
-                        placeholder={variable.default ? String(variable.default) : ''}
-                        {...field}
-                        value={field.value as string | number}
-                        className={
-                          variable.type === 'PORT' || variable.type === 'NUMBER' ? 'font-mono' : ''
-                        }
-                      />
-                    }
+                      </Select> : <Input type={variable.type === 'NUMBER' || variable.type === 'PORT' ? 'number' : 'text'} placeholder={variable.default ? String(variable.default) : ''} {...field} value={field.value as string | number} className={variable.type === 'PORT' || variable.type === 'NUMBER' ? 'font-mono' : ''} />}
                   </FormControl>
-                  {variable.description && (
-                    <FormDescription>{variable.description}</FormDescription>
-                  )}
+                  {variable.description && <FormDescription>{variable.description}</FormDescription>}
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+                </FormItem>} />)}
 
-          {template.configVariables.length === 0 && (
-            <div className="py-component-lg text-muted-foreground text-center">
-              <p>{t('wizard.noVariables', 'This template has no configurable variables')}</p>
+          {template.configVariables.length === 0 && <div className="py-component-lg text-muted-foreground text-center">
+              <p>{"This template has no configurable variables"}</p>
               <p className="mt-component-sm text-sm">
-                {t('wizard.clickNext', 'Click Next to continue')}
+                {"Click Next to continue"}
               </p>
-            </div>
-          )}
+            </div>}
         </form>
       </Form>
-    </div>
-  );
+    </div>;
 }
-
 export const VariablesStep = React.memo(VariablesStepComponent);
 VariablesStep.displayName = 'VariablesStep';

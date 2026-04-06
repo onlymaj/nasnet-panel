@@ -42,7 +42,14 @@ export interface ConnectionBannerProps {
 export const ConnectionBanner = memo(function ConnectionBanner({
   className,
 }: ConnectionBannerProps = {}) {
-  const state = useConnectionStore((store) => store.state);
+  const { state, currentRouterIp } = useConnectionStore((store) => ({
+    state: store.state,
+    currentRouterIp: store.currentRouterIp,
+  }));
+
+  if (!currentRouterIp) {
+    return null;
+  }
 
   // Don't render when connected
   if (state === 'connected') {

@@ -396,14 +396,13 @@ function createZodErrorMap(t: TranslateFunction = defaultTranslate): ZodErrorMap
 type TranslateFunction = (key: string, params?: Record<string, string | number>) => string;
 ```
 
-**Usage with react-i18next:**
+**Usage with a custom translation function:**
 
 ```typescript
-import { useTranslation } from 'react-i18next';
 import { createZodErrorMap } from '@nasnet/core/forms';
 
 function MyForm() {
-  const { t } = useTranslation('validation');
+  const t = (key: string) => key;
 
   // Option 1: Use locally
   const schema = z
@@ -453,7 +452,7 @@ defaultTranslate('validation.string.min', { min: 5 });
 ### setGlobalErrorMap()
 
 Sets the global Zod error map for all future schemas. Useful when you want all validation errors to
-use i18n.
+use the same message formatter.
 
 ```typescript
 function setGlobalErrorMap(t?: TranslateFunction): void;
@@ -463,11 +462,10 @@ function setGlobalErrorMap(t?: TranslateFunction): void;
 
 ```typescript
 import { setGlobalErrorMap } from '@nasnet/core/forms';
-import { useTranslation } from 'react-i18next';
 
 // In your app initialization
 function App() {
-  const { t } = useTranslation('validation');
+  const t = (key: string) => key;
 
   // Set once at app startup
   setGlobalErrorMap(t);

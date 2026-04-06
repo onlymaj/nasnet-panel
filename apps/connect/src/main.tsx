@@ -5,10 +5,6 @@ import * as ReactDOM from 'react-dom/client';
 
 import { routeTree } from './routeTree.gen';
 
-// Initialize i18n before app render - must be imported early
-// @see NAS-4.22: Implement Internationalization (i18n) Setup
-import '@nasnet/core/i18n';
-
 import './styles.css';
 
 // Initialize XState Inspector in development mode

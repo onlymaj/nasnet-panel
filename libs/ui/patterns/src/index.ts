@@ -172,10 +172,6 @@ export type { WireGuardCardProps } from './wireguard-card';
 export { ThemeToggle } from './theme-toggle';
 export type { ThemeToggleProps } from './theme-toggle';
 
-// LanguageSwitcher - Language selection dropdown (NAS-4.22)
-export { LanguageSwitcher } from './language-switcher';
-export type { LanguageSwitcherProps } from './language-switcher';
-
 // HardwareCard - Routerboard hardware details with copy-to-clipboard
 export { HardwareCard } from './hardware-card';
 export type { HardwareCardProps } from './hardware-card';

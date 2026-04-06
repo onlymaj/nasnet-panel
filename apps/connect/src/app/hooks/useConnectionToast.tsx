@@ -1,6 +1,4 @@
 import { useEffect, useRef } from 'react';
-
-import { useTranslation } from '@nasnet/core/i18n';
 import {
   useConnectionStore,
   type ConnectionState,
@@ -31,25 +29,40 @@ import { useToast } from '@nasnet/ui/primitives';
  * - Requires shadcn/ui Toast provider to be configured
  */
 export function useConnectionToast() {
-  const { t } = useTranslation('common');
   const state = useConnectionStore((store: ConnectionState & ConnectionActions) => store.state);
+  const currentRouterIp = useConnectionStore(
+    (store: ConnectionState & ConnectionActions) => store.currentRouterIp
+  );
   const { toast } = useToast();
   const previousStateRef = useRef(state);
-
+  const hasEstablishedConnectionRef = useRef(false);
   useEffect(() => {
     const previousState = previousStateRef.current;
 
     // Show success toast when transitioning from reconnecting to connected
-    if (previousState === 'reconnecting' && state === 'connected') {
+    if (
+      currentRouterIp &&
+      hasEstablishedConnectionRef.current &&
+      previousState === 'reconnecting' &&
+      state === 'connected'
+    ) {
       toast({
-        title: t('status.reconnected'),
-        description: t('status.reconnectedDescription'),
+        title: 'Reconnected',
+        description: 'Successfully reconnected to router',
         variant: 'default',
         duration: 3000,
       });
     }
 
+    if (currentRouterIp && state === 'connected') {
+      hasEstablishedConnectionRef.current = true;
+    }
+
+    if (!currentRouterIp) {
+      hasEstablishedConnectionRef.current = false;
+    }
+
     // Update previous state ref
     previousStateRef.current = state;
-  }, [state, toast, t]);
+  }, [currentRouterIp, state, toast]);
 }

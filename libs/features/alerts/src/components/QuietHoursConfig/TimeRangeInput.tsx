@@ -5,7 +5,6 @@
  */
 
 import { memo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Input, Label, Alert, AlertDescription } from '@nasnet/ui/primitives';
 import { Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
@@ -39,92 +38,44 @@ function TimeRangeInputComponent({
   endTime,
   onChange,
   disabled = false,
-  className,
+  className
 }: TimeRangeInputProps) {
-  const { t } = useTranslation('alerts');
-
-  const handleStartChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(e.target.value, endTime);
-    },
-    [endTime, onChange]
-  );
-
-  const handleEndChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(startTime, e.target.value);
-    },
-    [startTime, onChange]
-  );
-
+  const handleStartChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value, endTime);
+  }, [endTime, onChange]);
+  const handleEndChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(startTime, e.target.value);
+  }, [startTime, onChange]);
   const crossingMidnight = crossesMidnight(startTime, endTime);
-
-  return (
-    <div className={cn('space-y-component-md', className)}>
+  return <div className={cn('space-y-component-md', className)}>
       <div className="gap-component-md grid grid-cols-1 sm:grid-cols-2">
         {/* Start Time */}
         <div className="space-y-component-xs">
-          <Label
-            htmlFor="start-time"
-            className="gap-component-sm flex items-center"
-          >
-            <Clock
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
-            {t('quietHours.startTime')}
+          <Label htmlFor="start-time" className="gap-component-sm flex items-center">
+            <Clock className="h-4 w-4" aria-hidden="true" />
+            {"Start Time"}
           </Label>
-          <Input
-            id="start-time"
-            type="time"
-            value={startTime}
-            onChange={handleStartChange}
-            disabled={disabled}
-            className="focus-visible:ring-ring min-h-[44px] font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
-            aria-label={t('quietHours.startTime')}
-          />
+          <Input id="start-time" type="time" value={startTime} onChange={handleStartChange} disabled={disabled} className="focus-visible:ring-ring min-h-[44px] font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
+        aria-label={"Start Time"} />
         </div>
 
         {/* End Time */}
         <div className="space-y-component-xs">
-          <Label
-            htmlFor="end-time"
-            className="gap-component-sm flex items-center"
-          >
-            <Clock
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
-            {t('quietHours.endTime')}
+          <Label htmlFor="end-time" className="gap-component-sm flex items-center">
+            <Clock className="h-4 w-4" aria-hidden="true" />
+            {"End Time"}
           </Label>
-          <Input
-            id="end-time"
-            type="time"
-            value={endTime}
-            onChange={handleEndChange}
-            disabled={disabled}
-            className="focus-visible:ring-ring min-h-[44px] font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
-            aria-label={t('quietHours.endTime')}
-          />
+          <Input id="end-time" type="time" value={endTime} onChange={handleEndChange} disabled={disabled} className="focus-visible:ring-ring min-h-[44px] font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
+        aria-label={"End Time"} />
         </div>
       </div>
 
       {/* Midnight crossing warning */}
-      {crossingMidnight && (
-        <Alert
-          variant="default"
-          className="border-info bg-info/10"
-        >
-          <AlertCircle
-            className="text-info h-4 w-4"
-            aria-hidden="true"
-          />
-          <AlertDescription>{t('quietHours.midnightWarning')}</AlertDescription>
-        </Alert>
-      )}
-    </div>
-  );
+      {crossingMidnight && <Alert variant="default" className="border-info bg-info/10">
+          <AlertCircle className="text-info h-4 w-4" aria-hidden="true" />
+          <AlertDescription>{"quietHours.midnightWarning"}</AlertDescription>
+        </Alert>}
+    </div>;
 }
-
 export const TimeRangeInput = memo(TimeRangeInputComponent);
 TimeRangeInput.displayName = 'TimeRangeInput';

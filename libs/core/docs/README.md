@@ -41,7 +41,6 @@ The following aliases are configured in `apps/connect/vite.config.ts`:
 | `@nasnet/core/utils`      | `libs/core/utils/src`            | Pure utility functions (validation, formatting, device detection) |
 | `@nasnet/core/constants`  | `libs/core/constants/src`        | Application constants (routes, API endpoints, socket events)      |
 | `@nasnet/core/forms`      | `libs/core/forms/src`            | React Hook Form integration, validation, form utilities           |
-| `@nasnet/core/i18n`       | `libs/core/i18n/src`             | Internationalization, locale providers, translation hooks         |
 | `@nasnet/core/validation` | `libs/core/utils/src/validation` | Zod schemas and custom validators                                 |
 
 ## Sub-Libraries
@@ -159,33 +158,6 @@ const form = useZodForm(schema);
 
 ---
 
-### 5. **i18n** (`libs/core/i18n/src`)
-
-Internationalization infrastructure with i18next and RTL support.
-
-**Key Exports:**
-
-- **`I18nProvider`** - i18next provider with language detection
-- **`DirectionProvider`** - RTL/LTR direction management
-- **`useTranslation`** - Hook for accessing translation function
-- **`i18n.ts`** - i18next configuration and initialization
-- **`locales/`** - Translation files (.json per language)
-
-**Usage:**
-
-```typescript
-import { useTranslation } from '@nasnet/core/i18n';
-
-function MyComponent() {
-  const { t, i18n } = useTranslation();
-  return <div>{t('auth.login')}</div>;
-}
-```
-
-**See:** [i18n.md](./sub-libraries/i18n.md) (coming in Wave 2D)
-
----
-
 ## Quick Reference Table
 
 | Sub-Library    | Import Path                     | Key Exports                              | Purpose                     |
@@ -194,7 +166,6 @@ function MyComponent() {
 | **utils**      | `@nasnet/core/utils`            | Validators, formatters, helpers          | Pure utility functions      |
 | **constants**  | `@nasnet/core/constants`        | ROUTES, API_ENDPOINTS, socket events     | Static app constants        |
 | **forms**      | `@nasnet/core/forms`            | Form hooks, validation, schema utilities | React Hook Form integration |
-| **i18n**       | `@nasnet/core/i18n`             | Providers, hooks, translations           | Internationalization        |
 | **validation** | `@nasnet/core/utils/validation` | Zod schemas, custom validators           | Form & data validation      |
 
 ---
@@ -206,7 +177,7 @@ function MyComponent() {
 - **types/** - Pure TypeScript interfaces (zero dependencies)
 - **utils/** - Pure functions with minimal external dependencies
 - **constants/** - Static objects with no runtime behavior
-- **Exception:** forms/ and i18n/ are React-focused libraries
+- **Exception:** forms/ is a React-focused library
 
 This separation allows:
 
@@ -268,16 +239,10 @@ These guides explain how core libraries work with other parts of the system:
 - Device Detection Pipeline (see Docs/architecture/novel-pattern-designs.md) - Browser/device/OS
   detection
 
-### Localization
-
-- Internationalization Flow (see
-  Docs/architecture/implementation-patterns/17-localization-patterns.md) - i18next integration, RTL
-  support
-
 ### Error Handling & Integration
 
 - **[error-handling-patterns.md](./guides/error-handling-patterns.md)** - Error type hierarchy,
-  backend error mapping, i18n error messages
+  backend error mapping, validation error messages
 - **[graphql-integration-guide.md](./guides/graphql-integration-guide.md)** - Type flow, code
   generation, Apollo Client patterns
 
@@ -316,7 +281,6 @@ Detailed documentation for each sub-library:
 | **[constants.md](./sub-libraries/constants.md)** | Complete | Routes, API endpoints, socket events, ports     |
 | **[utils.md](./sub-libraries/utils.md)**         | Complete | 50+ utility functions with examples             |
 | **[forms.md](./sub-libraries/forms.md)**         | Wave 2D  | React Hook Form, validation strategies, hooks   |
-| **[i18n.md](./sub-libraries/i18n.md)**           | Wave 2D  | i18next setup, translation flow, RTL support    |
 
 ---
 
@@ -393,12 +357,9 @@ npm install  # Already includes core dependencies
 
 ```typescript
 import { ROUTES, validateIPv4 } from '@nasnet/core/constants';
-import { useTranslation } from '@nasnet/core/i18n';
 import type { FilterRule } from '@nasnet/core/types';
 
 function MyComponent() {
-  const { t } = useTranslation();
-
   const handleRuleCreate = (rule: FilterRule) => {
     if (!validateIPv4(rule.srcAddr)) {
       throw new Error('Invalid IP');

@@ -83,7 +83,6 @@ rollupOptions: {
       ],
       'vendor-table': ['@tanstack/react-table', '@tanstack/react-virtual'],
       'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-      'vendor-i18n':  ['i18next', 'react-i18next', 'i18next-http-backend', 'i18next-browser-languagedetector'],
     },
   },
 },

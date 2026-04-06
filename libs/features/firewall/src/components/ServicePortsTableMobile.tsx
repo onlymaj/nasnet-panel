@@ -14,7 +14,6 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useCustomServices } from '../hooks/useCustomServices';
 import type {
   ServicePortDefinition,
@@ -49,6 +48,14 @@ import { Pencil, Trash2, Search, MoreVertical } from 'lucide-react';
 import { Icon } from '@nasnet/ui/primitives/icon';
 import { cn } from '@nasnet/ui/utils';
 
+function getProtocolLabel(protocol: ServicePortProtocol) {
+  return protocol === 'both' ? 'TCP/UDP' : protocol.toUpperCase();
+}
+
+function getTypeLabel(isBuiltIn: boolean) {
+  return isBuiltIn ? 'Built-in' : 'Custom';
+}
+
 // ============================================================================
 // Protocol Badge Component
 // ============================================================================
@@ -56,23 +63,19 @@ import { cn } from '@nasnet/ui/utils';
 interface ProtocolBadgeProps {
   protocol: ServicePortProtocol;
 }
-
 const ProtocolBadge = React.memo(function ProtocolBadge({ protocol }: ProtocolBadgeProps) {
   const variantMap: Record<ServicePortProtocol, 'default' | 'info' | 'success'> = {
     tcp: 'info',
     udp: 'success',
     both: 'default',
   };
-
   const variant = variantMap[protocol];
-  const { t } = useTranslation('firewall');
-
   return (
     <Badge
       variant={variant}
       className="text-xs uppercase"
     >
-      {t(`servicePorts.protocols.${protocol}`)}
+      {getProtocolLabel(protocol)}
     </Badge>
   );
 });
@@ -85,16 +88,13 @@ ProtocolBadge.displayName = 'ProtocolBadge';
 interface TypeBadgeProps {
   isBuiltIn: boolean;
 }
-
 const TypeBadge = React.memo(function TypeBadge({ isBuiltIn }: TypeBadgeProps) {
-  const { t } = useTranslation('firewall');
-
   return (
     <Badge
       variant={isBuiltIn ? 'default' : 'warning'}
       className="text-xs"
     >
-      {t(`servicePorts.types.${isBuiltIn ? 'builtIn' : 'custom'}`)}
+      {getTypeLabel(isBuiltIn)}
     </Badge>
   );
 });
@@ -126,7 +126,6 @@ interface EmptyStateProps {
   message: string;
   description?: string;
 }
-
 const EmptyState = React.memo(function EmptyState({ message, description }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -148,22 +147,17 @@ interface ServiceCardProps {
   onEdit: (service: ServicePortDefinition) => void;
   onDelete: (service: ServicePortDefinition) => void;
 }
-
 const ServiceCard = React.memo(function ServiceCard({
   service,
   onEdit,
   onDelete,
 }: ServiceCardProps) {
-  const { t } = useTranslation('firewall');
-
   const handleEditClick = useCallback(() => {
     onEdit(service);
   }, [onEdit, service]);
-
   const handleDeleteClick = useCallback(() => {
     onDelete(service);
   }, [onDelete, service]);
-
   return (
     <Card>
       <CardHeader className="pb-component-sm">
@@ -184,7 +178,7 @@ const ServiceCard = React.memo(function ServiceCard({
                 size="icon"
                 className="h-[44px] w-[44px]"
                 disabled={service.isBuiltIn}
-                aria-label={t('servicePorts.actions', 'Actions')}
+                aria-label={'Actions'}
               >
                 <MoreVertical className="h-5 w-5" />
               </Button>
@@ -195,7 +189,7 @@ const ServiceCard = React.memo(function ServiceCard({
                 disabled={service.isBuiltIn}
               >
                 <Pencil className="mr-component-sm h-4 w-4" />
-                {t('servicePorts.editService')}
+                {'Edit Service'}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={handleDeleteClick}
@@ -203,7 +197,7 @@ const ServiceCard = React.memo(function ServiceCard({
                 className="text-error"
               >
                 <Trash2 className="mr-component-sm h-4 w-4" />
-                {t('servicePorts.deleteService')}
+                {'Delete Service'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -212,14 +206,14 @@ const ServiceCard = React.memo(function ServiceCard({
       <CardContent className="pb-component-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-muted-foreground text-xs">{t('servicePorts.fields.port')}</p>
+            <p className="text-muted-foreground text-xs">{'Port'}</p>
             <p className="font-mono text-lg font-semibold tabular-nums">{service.port}</p>
           </div>
           <TypeBadge isBuiltIn={service.isBuiltIn} />
         </div>
         {service.isBuiltIn && (
           <p className="mt-component-md text-muted-foreground text-xs">
-            {t('servicePorts.tooltips.builtInReadOnly')}
+            {'Built-in services cannot be edited or deleted'}
           </p>
         )}
       </CardContent>
@@ -236,11 +230,9 @@ export interface ServicePortsTableMobileProps {
   /** Optional CSS class name */
   className?: string;
 }
-
 export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobile({
   className,
 }: ServicePortsTableMobileProps) {
-  const { t } = useTranslation('firewall');
   const { services, deleteService } = useCustomServices();
 
   // Local state
@@ -275,7 +267,6 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
     if (categoryFilter !== 'all') {
       result = result.filter((service) => service.category === categoryFilter);
     }
-
     return result;
   }, [services, searchQuery, protocolFilter, categoryFilter]);
 
@@ -284,7 +275,6 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
     setServiceToDelete(service);
     setDeleteDialogOpen(true);
   }, []);
-
   const handleDeleteConfirm = useCallback(() => {
     if (serviceToDelete) {
       try {
@@ -296,7 +286,6 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
       }
     }
   }, [serviceToDelete, deleteService]);
-
   const handleEditClick = useCallback((service: ServicePortDefinition) => {
     // TODO: Open edit dialog (Task 6)
     console.log('Edit service:', service);
@@ -318,7 +307,6 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
     ],
     []
   );
-
   return (
     <div className={cn('space-y-component-md', className)}>
       {/* Search and Filters */}
@@ -326,7 +314,7 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
         <div className="relative">
           <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
-            placeholder={t('servicePorts.placeholders.searchServices')}
+            placeholder={'Search by name or port...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -339,15 +327,13 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
             onValueChange={setProtocolFilter}
           >
             <SelectTrigger className="min-h-[44px] flex-1">
-              <SelectValue placeholder={t('servicePorts.fields.protocol')} />
+              <SelectValue placeholder={'Protocol'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                {t('servicePorts.protocols.all', 'All Protocols')}
-              </SelectItem>
-              <SelectItem value="tcp">{t('servicePorts.protocols.tcp')}</SelectItem>
-              <SelectItem value="udp">{t('servicePorts.protocols.udp')}</SelectItem>
-              <SelectItem value="both">{t('servicePorts.protocols.both')}</SelectItem>
+              <SelectItem value="all">{'All Protocols'}</SelectItem>
+              <SelectItem value="tcp">{'TCP'}</SelectItem>
+              <SelectItem value="udp">{'UDP'}</SelectItem>
+              <SelectItem value="both">{'TCP & UDP'}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -356,12 +342,10 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
             onValueChange={setCategoryFilter}
           >
             <SelectTrigger className="min-h-[44px] flex-1">
-              <SelectValue placeholder={t('servicePorts.fields.category')} />
+              <SelectValue placeholder={'Category'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                {t('servicePorts.categories.all', 'All Categories')}
-              </SelectItem>
+              <SelectItem value="all">{'All Categories'}</SelectItem>
               {CATEGORIES.map((category) => (
                 <SelectItem
                   key={category}
@@ -382,12 +366,12 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
         <EmptyState
           message={
             searchQuery || protocolFilter !== 'all' || categoryFilter !== 'all' ?
-              t('servicePorts.emptyStates.noServices')
-            : t('servicePorts.emptyStates.noServices')
+              'No custom services defined'
+            : 'No custom services defined'
           }
           description={
             searchQuery || protocolFilter !== 'all' || categoryFilter !== 'all' ?
-              t('servicePorts.emptyStates.noServicesDescription')
+              'Add custom services to use in firewall rules'
             : undefined
           }
         />
@@ -410,9 +394,9 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('servicePorts.confirmations.deleteService')}</DialogTitle>
+            <DialogTitle>{'Delete this service?'}</DialogTitle>
             <DialogDescription>
-              {t('servicePorts.confirmations.deleteServiceDescription')}
+              {'This action cannot be undone. The service will be removed from your custom list.'}
               {serviceToDelete && (
                 <div className="mt-component-md bg-muted p-component-sm rounded-md">
                   <p className="font-medium">
@@ -428,14 +412,14 @@ export const ServicePortsTableMobile = React.memo(function ServicePortsTableMobi
               onClick={() => setDeleteDialogOpen(false)}
               className="min-h-[44px]"
             >
-              {t('servicePorts.buttons.cancel', 'Cancel')}
+              {'Cancel'}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteConfirm}
               className="min-h-[44px]"
             >
-              {t('servicePorts.deleteService')}
+              {'Delete Service'}
             </Button>
           </DialogFooter>
         </DialogContent>

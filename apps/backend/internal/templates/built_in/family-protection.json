@@ -53,19 +53,19 @@
           "enabled": false
         }
       },
-      "memoryLimitMB": "{{MEMORY_LIMIT}}",
+      "memoryLimitMB": 256,
       "cpuShares": 512,
       "requiresBridge": false,
       "portMappings": [
         {
-          "internal": "{{WEB_PORT}}",
-          "external": "{{WEB_PORT}}",
+          "internal": 3000,
+          "external": 3000,
           "protocol": "tcp",
           "purpose": "AdGuard Home web interface"
         },
         {
-          "internal": "{{DNS_PORT}}",
-          "external": "{{DNS_PORT}}",
+          "internal": 53,
+          "external": 53,
           "protocol": "udp",
           "purpose": "DNS server"
         }

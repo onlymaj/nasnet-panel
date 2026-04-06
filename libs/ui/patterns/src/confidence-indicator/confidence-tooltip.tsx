@@ -9,15 +9,10 @@
  */
 
 import * as React from 'react';
-
 import { Info, Pencil } from 'lucide-react';
 import { Button, cn, Icon } from '@nasnet/ui/primitives';
-import { useTranslation } from '@nasnet/core/i18n';
-
 import { ConfidenceIndicatorBase, ConfidenceLevelLabel } from './confidence-indicator-base';
-
 import type { UseConfidenceIndicatorReturn } from './confidence-indicator.types';
-
 export interface ConfidenceTooltipContentProps {
   /**
    * Computed state from the headless hook
@@ -51,7 +46,7 @@ export interface ConfidenceTooltipContentProps {
 const LEVEL_EXPLANATIONS = {
   high: 'The system is highly confident this value is correct. You can proceed with this setting.',
   medium: 'The system has moderate confidence. Consider reviewing before proceeding.',
-  low: 'The system has low confidence in this value. Manual verification is recommended.',
+  low: 'The system has low confidence in this value. Manual verification is recommended.'
 } as const;
 
 /**
@@ -78,7 +73,7 @@ export function ConfidenceTooltipContent({
   onOverride,
   onClose,
   className,
-  compact = false,
+  compact = false
 }: ConfidenceTooltipContentProps) {
   const handleOverride = () => {
     if (onOverride) {
@@ -88,51 +83,30 @@ export function ConfidenceTooltipContent({
     }
     onClose?.();
   };
-
-  return (
-    <div className={cn('flex flex-col gap-3', className)}>
+  return <div className={cn('flex flex-col gap-3', className)}>
       {/* Header with indicator and level */}
       <div className="flex items-center gap-2">
-        <ConfidenceIndicatorBase
-          state={state}
-          size="sm"
-        />
-        <ConfidenceLevelLabel
-          state={state}
-          size="sm"
-          showPercentage
-        />
+        <ConfidenceIndicatorBase state={state} size="sm" />
+        <ConfidenceLevelLabel state={state} size="sm" showPercentage />
       </div>
 
       {/* Detection method */}
-      {state.method && (
-        <div className="text-muted-foreground flex items-start gap-2 text-sm">
+      {state.method && <div className="text-muted-foreground flex items-start gap-2 text-sm">
           <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <span>{state.method}</span>
-        </div>
-      )}
+        </div>}
 
       {/* Explanation (only in non-compact mode) */}
-      {!compact && (
-        <p className="text-muted-foreground text-xs leading-relaxed">
+      {!compact && <p className="text-muted-foreground text-xs leading-relaxed">
           {LEVEL_EXPLANATIONS[state.level]}
-        </p>
-      )}
+        </p>}
 
       {/* Override action */}
-      {state.canOverride && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleOverride}
-          className="w-full justify-start gap-2"
-        >
+      {state.canOverride && <Button variant="outline" size="sm" onClick={handleOverride} className="w-full justify-start gap-2">
           <Pencil className="h-3.5 w-3.5" />
           Edit manually
-        </Button>
-      )}
-    </div>
-  );
+        </Button>}
+    </div>;
 }
 
 /**
@@ -141,17 +115,9 @@ export function ConfidenceTooltipContent({
 export function ConfidenceTooltipCompact({
   state,
   onOverride,
-  onClose,
+  onClose
 }: Omit<ConfidenceTooltipContentProps, 'compact' | 'className'>) {
-  return (
-    <ConfidenceTooltipContent
-      state={state}
-      onOverride={onOverride}
-      onClose={onClose}
-      compact
-      className="min-w-[200px] max-w-[280px]"
-    />
-  );
+  return <ConfidenceTooltipContent state={state} onOverride={onOverride} onClose={onClose} compact className="min-w-[200px] max-w-[280px]" />;
 }
 
 /**
@@ -160,15 +126,7 @@ export function ConfidenceTooltipCompact({
 export function ConfidenceTooltipFull({
   state,
   onOverride,
-  onClose,
+  onClose
 }: Omit<ConfidenceTooltipContentProps, 'compact' | 'className'>) {
-  return (
-    <ConfidenceTooltipContent
-      state={state}
-      onOverride={onOverride}
-      onClose={onClose}
-      compact={false}
-      className="p-1"
-    />
-  );
+  return <ConfidenceTooltipContent state={state} onOverride={onOverride} onClose={onClose} compact={false} className="p-1" />;
 }

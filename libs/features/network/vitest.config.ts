@@ -44,7 +44,6 @@ export default defineConfig({
       '@nasnet/core/types': path.resolve(__dirname, '../../core/types/src'),
       '@nasnet/core/utils': path.resolve(__dirname, '../../core/utils/src'),
       '@nasnet/core/constants': path.resolve(__dirname, '../../core/constants/src'),
-      '@nasnet/core/i18n': path.resolve(__dirname, '../../core/i18n/src'),
       '@nasnet/state/stores': path.resolve(__dirname, '../../state/stores/src'),
       '@nasnet/api-client/core': path.resolve(__dirname, '../../api-client/core/src'),
       '@nasnet/api-client/queries': path.resolve(__dirname, '../../api-client/queries/src'),

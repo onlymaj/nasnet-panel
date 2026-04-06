@@ -119,10 +119,8 @@ It runs as a single Docker container embedded on the MikroTik router itself (`<1
 - [Services / Plugins](./feature-modules/services.md) — Feature marketplace, install/manage Tor,
   sing-box, etc.
 
-### [09 — i18n & Accessibility](./i18n-accessibility/i18n.md)
+### [09 — Accessibility](./i18n-accessibility/accessibility.md)
 
-- [i18n](./i18n-accessibility/i18n.md) — i18next, language detection, lazy loading
-- [i18n](./i18n-accessibility/i18n.md) — DirectionProvider, RTL layout, Tailwind RTL
 - [Accessibility](./i18n-accessibility/accessibility.md) — WCAG AAA checklist, axe-core integration
 
 ### [10 — Testing](./testing/overview.md)

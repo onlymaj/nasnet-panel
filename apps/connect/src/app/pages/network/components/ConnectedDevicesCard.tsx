@@ -4,69 +4,53 @@
  */
 
 import React, { useMemo } from 'react';
-
 import { Users, CheckCircle, AlertCircle, XCircle, ChevronRight } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import { type ARPEntry } from '@nasnet/core/types';
 import { formatMACAddress } from '@nasnet/core/utils';
-
 import { cn } from '@nasnet/ui/utils';
-
 interface ConnectedDevicesCardProps {
   entries: ARPEntry[];
   isLoading?: boolean;
   error?: Error | null;
 }
-
 export const ConnectedDevicesCard = React.memo(function ConnectedDevicesCard({
   entries,
   isLoading,
-  error,
+  error
 }: ConnectedDevicesCardProps) {
-  const { t } = useTranslation('network');
   const stats = useMemo(() => {
-    const complete = entries.filter((e) => e.status === 'complete').length;
-    const incomplete = entries.filter((e) => e.status === 'incomplete').length;
-    const failed = entries.filter((e) => e.status === 'failed').length;
-    return { total: entries.length, complete, incomplete, failed };
+    const complete = entries.filter(e => e.status === 'complete').length;
+    const incomplete = entries.filter(e => e.status === 'incomplete').length;
+    const failed = entries.filter(e => e.status === 'failed').length;
+    return {
+      total: entries.length,
+      complete,
+      incomplete,
+      failed
+    };
   }, [entries]);
-
   const recentDevices = entries.slice(0, 5);
-
   if (isLoading) {
-    return (
-      <div className="bg-card border-border animate-pulse rounded-2xl border p-4">
+    return <div className="bg-card border-border animate-pulse rounded-2xl border p-4">
         <div className="mb-4 flex items-center gap-2">
           <div className="bg-muted h-8 w-8 rounded-lg" />
           <div className="bg-muted h-5 w-32 rounded" />
         </div>
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="bg-muted h-12 rounded-lg"
-            />
-          ))}
+          {[1, 2, 3].map(i => <div key={i} className="bg-muted h-12 rounded-lg" />)}
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error) {
-    return (
-      <div className="bg-card border-destructive/30 rounded-2xl border p-4">
+    return <div className="bg-card border-destructive/30 rounded-2xl border p-4">
         <div className="text-destructive flex items-center gap-2">
           <XCircle className="h-5 w-5" />
-          <span className="text-sm font-medium">{t('connectedDevices.loadError')}</span>
+          <span className="text-sm font-medium">{"connectedDevices.loadError"}</span>
         </div>
         <p className="text-destructive/70 mt-1 text-xs">{error.message}</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="bg-card border-border rounded-2xl border p-4 shadow-sm">
+  return <div className="bg-card border-border rounded-2xl border p-4 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="bg-info/15 flex h-8 w-8 items-center justify-center rounded-lg">
@@ -74,10 +58,10 @@ export const ConnectedDevicesCard = React.memo(function ConnectedDevicesCard({
           </div>
           <div>
             <h3 className="font-display text-foreground text-sm font-semibold">
-              {t('connectedDevices.title')}
+              {"Connected Devices"}
             </h3>
             <p className="text-muted-foreground text-xs">
-              {stats.total} {t('connectedDevices.inArp')}
+              {stats.total} {"connectedDevices.inArp"}
             </p>
           </div>
         </div>
@@ -89,50 +73,30 @@ export const ConnectedDevicesCard = React.memo(function ConnectedDevicesCard({
         <div className="flex items-center gap-1.5">
           <CheckCircle className="text-success h-3.5 w-3.5" />
           <span className="text-muted-foreground text-xs">
-            {stats.complete} {t('arp.statusComplete').toLowerCase()}
+            {stats.complete} {"Complete".toLowerCase()}
           </span>
         </div>
-        {stats.incomplete > 0 && (
-          <div className="flex items-center gap-1.5">
+        {stats.incomplete > 0 && <div className="flex items-center gap-1.5">
             <AlertCircle className="text-warning h-3.5 w-3.5" />
             <span className="text-muted-foreground text-xs">
-              {stats.incomplete} {t('arp.statusIncomplete').toLowerCase()}
+              {stats.incomplete} {"Incomplete".toLowerCase()}
             </span>
-          </div>
-        )}
-        {stats.failed > 0 && (
-          <div className="flex items-center gap-1.5">
+          </div>}
+        {stats.failed > 0 && <div className="flex items-center gap-1.5">
             <XCircle className="text-destructive h-3.5 w-3.5" />
             <span className="text-muted-foreground text-xs">
-              {stats.failed} {t('arp.statusFailed').toLowerCase()}
+              {stats.failed} {"Failed".toLowerCase()}
             </span>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Recent Devices List */}
       <div className="space-y-2">
-        {recentDevices.length === 0 ?
-          <div className="py-4 text-center">
-            <p className="text-muted-foreground text-sm">{t('connectedDevices.noDevices')}</p>
-          </div>
-        : recentDevices.map((device) => (
-            <div
-              key={device.id}
-              className={cn(
-                'rounded-card-sm flex items-center justify-between p-2',
-                'bg-muted hover:bg-muted/80 border-border/50 border transition-colors'
-              )}
-            >
+        {recentDevices.length === 0 ? <div className="py-4 text-center">
+            <p className="text-muted-foreground text-sm">{"No connected devices"}</p>
+          </div> : recentDevices.map(device => <div key={device.id} className={cn('rounded-card-sm flex items-center justify-between p-2', 'bg-muted hover:bg-muted/80 border-border/50 border transition-colors')}>
               <div className="flex items-center gap-3">
-                <span
-                  className={cn(
-                    'h-2 w-2 rounded-full',
-                    device.status === 'complete' ? 'bg-success'
-                    : device.status === 'incomplete' ? 'bg-warning'
-                    : 'bg-destructive'
-                  )}
-                />
+                <span className={cn('h-2 w-2 rounded-full', device.status === 'complete' ? 'bg-success' : device.status === 'incomplete' ? 'bg-warning' : 'bg-destructive')} />
                 <div>
                   <p className="text-foreground font-mono text-sm font-semibold">
                     {device.ipAddress}
@@ -143,19 +107,13 @@ export const ConnectedDevicesCard = React.memo(function ConnectedDevicesCard({
                 </div>
               </div>
               <span className="text-muted-foreground font-mono text-xs">{device.interface}</span>
-            </div>
-          ))
-        }
+            </div>)}
       </div>
 
-      {entries.length > 5 && (
-        <button className="text-primary hover:text-primary/90 focus-visible:ring-ring mt-3 flex w-full items-center justify-center gap-1 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
-          {t('connectedDevices.viewAll', { count: entries.length })}
+      {entries.length > 5 && <button className="text-primary hover:text-primary/90 focus-visible:ring-ring mt-3 flex w-full items-center justify-center gap-1 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+          {"connectedDevices.viewAll"}
           <ChevronRight className="h-3 w-3" />
-        </button>
-      )}
-    </div>
-  );
+        </button>}
+    </div>;
 });
-
 ConnectedDevicesCard.displayName = 'ConnectedDevicesCard';

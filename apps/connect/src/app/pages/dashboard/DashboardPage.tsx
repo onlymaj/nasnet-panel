@@ -6,8 +6,6 @@
 
 import { useNavigate } from '@tanstack/react-router';
 import { Wifi, Network, Shield, Settings, AlertCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import { useRouterInfo, useRouterResource, useRouterboard } from '@nasnet/api-client/queries';
 import { calculateStatus, formatBytes, parseRouterOSUptime } from '@nasnet/core/utils';
 import { useConnectionStore } from '@nasnet/state/stores';
@@ -26,9 +24,10 @@ import {
  * Displays system information and resource monitoring for connected router
  */
 export function DashboardPage() {
-  const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const currentRouterId = useConnectionStore((state) => state.currentRouterId);
+  const connectionState = useConnectionStore((state) => state.state);
 
   // Fetch router information
   const { data, isLoading, error, refetch } = useRouterInfo(routerIp);
@@ -71,21 +70,23 @@ export function DashboardPage() {
 
   // Determine overall network status
   const getNetworkStatus = () => {
-    if (isLoading || resourceLoading) return 'loading';
-    if (error || resourceError) return 'error';
+    if (!resourceData) {
+      if (isLoading || resourceLoading || connectionState === 'reconnecting') return 'loading';
+      if (resourceError || connectionState === 'disconnected') return 'error';
+    }
+
     if (cpuStatus === 'critical' || memoryStatus === 'critical' || diskStatus === 'critical')
       return 'error';
     if (cpuStatus === 'warning' || memoryStatus === 'warning' || diskStatus === 'warning')
       return 'warning';
     return 'healthy';
   };
-
   const networkStatus = getNetworkStatus();
   const statusMessage =
-    networkStatus === 'healthy' ? t('routerHealth.allOnline')
-    : networkStatus === 'warning' ? t('routerHealth.attentionNeeded')
-    : networkStatus === 'error' ? t('routerHealth.issuesDetected')
-    : t('common.loading');
+    networkStatus === 'healthy' ? 'All systems operational'
+    : networkStatus === 'warning' ? 'Attention needed'
+    : networkStatus === 'error' ? 'Issues detected'
+    : 'Loading...';
 
   // Get device count (placeholder - would come from actual API)
   const deviceCount = 12; // TODO: Get from actual connected devices API
@@ -95,13 +96,19 @@ export function DashboardPage() {
 
   // Status card metrics
   const statusMetrics = [
-    { value: deviceCount, label: t('quickActions.devices') },
+    {
+      value: deviceCount,
+      label: 'Devices',
+    },
     {
       value: resourceData?.cpuLoad ? Math.round(100 - resourceData.cpuLoad) : '--',
-      label: t('quickActions.available'),
+      label: 'Available',
       unit: '%',
     },
-    { value: uptimeFormatted, label: t('quickActions.uptime') },
+    {
+      value: uptimeFormatted,
+      label: 'Uptime',
+    },
   ];
 
   // VPN status (placeholder - would integrate with actual VPN state)
@@ -109,14 +116,13 @@ export function DashboardPage() {
     console.log('VPN toggle:', enabled);
     // TODO: Integrate with actual VPN control
   };
-
   return (
     <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop animate-fade-in-up space-y-6 py-6">
       {/* Hero Status Card - Clean Minimal Design */}
       <StatusCard
         status={networkStatus}
         message={statusMessage}
-        subtitle={t('overview.status')}
+        subtitle={'Status'}
         metrics={statusMetrics}
       />
 
@@ -134,36 +140,60 @@ export function DashboardPage() {
       {/* Quick Actions Grid */}
       <div>
         <p className="font-display text-muted-foreground mb-3 text-sm font-semibold uppercase tracking-wider">
-          {t('quickActions.title')}
+          {'Quick Actions'}
         </p>
         <div className="gap-component-md stagger-children grid grid-cols-5">
           <QuickActionButton
             icon={Wifi}
-            label={t('quickActions.wifi')}
-            onClick={() => navigate({ to: '/wifi' })}
+            label={'WiFi'}
+            onClick={() =>
+              currentRouterId ?
+                navigate({
+                  to: '/router/$id/wifi',
+                  params: { id: currentRouterId },
+                })
+              : navigate({
+                  to: '/routers',
+                })
+            }
           />
           <QuickActionButton
             icon={Network}
-            label={t('quickActions.network')}
-            onClick={() => navigate({ to: '/network' })}
+            label={'Network'}
+            onClick={() =>
+              navigate({
+                to: '/network',
+              })
+            }
           />
           <QuickActionButton
             icon={Shield}
-            label={t('quickActions.firewall')}
-            onClick={() => navigate({ to: '/firewall' as '/' })}
+            label={'Firewall'}
+            onClick={() =>
+              navigate({
+                to: '/firewall' as '/',
+              })
+            }
           />
           <QuickActionButton
             icon={Settings}
-            label={t('quickActions.settings')}
-            onClick={() => navigate({ to: '/settings' as '/' })}
+            label={'Settings'}
+            onClick={() =>
+              navigate({
+                to: '/settings' as '/',
+              })
+            }
           />
           <QuickActionButton
             icon={AlertCircle}
-            label={t('quickActions.troubleshoot')}
+            label={'Troubleshoot'}
             onClick={() =>
               navigate({
                 to: '/dashboard/troubleshoot',
-                search: { routerId: routerIp, autoStart: false },
+                search: {
+                  routerId: routerIp,
+                  autoStart: false,
+                },
               })
             }
           />
@@ -174,7 +204,7 @@ export function DashboardPage() {
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-foreground text-lg font-semibold">
-            {t('resources.title')}
+            {'System Resources'}
           </h2>
           <LastUpdated timestamp={dataUpdatedAt} />
         </div>
@@ -217,9 +247,7 @@ export function DashboardPage() {
 
       {/* Hardware Details Section */}
       <div>
-        <h2 className="font-display text-foreground mb-4 text-lg font-semibold">
-          {t('overview.hardware')}
-        </h2>
+        <h2 className="font-display text-foreground mb-4 text-lg font-semibold">{'Hardware'}</h2>
         <div className="gap-component-md bg-card rounded-card-lg p-component-md border-border grid grid-cols-1 border shadow-sm md:grid-cols-2 lg:grid-cols-4">
           <HardwareCard
             data={hardwareData}

@@ -25,7 +25,7 @@
 - Form state management with React Hook Form
 - Zod validation using `ServiceGroupInputSchema`
 - Integration with `useCustomServices` hook
-- i18n support with react-i18next
+- English-only labels and messages
 - Accessibility features (ARIA labels, roles)
 
 ### 2. Test Suite

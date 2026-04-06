@@ -16,53 +16,15 @@
  */
 
 import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useSearch } from '@tanstack/react-router';
 import { cn } from '@nasnet/ui/utils';
 import { useConnectionStore } from '@nasnet/state/stores';
-import {
-  useFilterRules,
-  useDeleteFilterRule,
-  useToggleFilterRule,
-  useMoveFilterRule,
-  useCreateFilterRule,
-  useUpdateFilterRule,
-} from '@nasnet/api-client/queries/firewall';
+import { useFilterRules, useDeleteFilterRule, useToggleFilterRule, useMoveFilterRule, useCreateFilterRule, useUpdateFilterRule } from '@nasnet/api-client/queries/firewall';
 import type { FilterRule, FilterRuleInput, FilterChain } from '@nasnet/core/types';
 import { CounterCell, FilterRuleEditor, RuleStatisticsPanel } from '@nasnet/ui/patterns';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Button,
-  Badge,
-  Switch,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Badge, Switch, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Pencil, Copy, Trash2, GripVertical } from 'lucide-react';
 import { useCounterSettingsStore } from '@nasnet/features/firewall';
@@ -84,7 +46,11 @@ const MIN_TOUCH_TARGET_SPACING = 8;
 /**
  * @description Displays the action type (accept, drop, etc.) with semantic color coding
  */
-const ActionBadge = memo(function ActionBadge({ action }: { action: string }) {
+const ActionBadge = memo(function ActionBadge({
+  action
+}: {
+  action: string;
+}) {
   // Map actions to Badge semantic variants
   const VARIANT_MAP: Record<string, 'default' | 'success' | 'error' | 'warning' | 'info'> = {
     accept: 'success',
@@ -93,11 +59,9 @@ const ActionBadge = memo(function ActionBadge({ action }: { action: string }) {
     log: 'info',
     jump: 'warning',
     tarpit: 'error',
-    passthrough: 'default',
+    passthrough: 'default'
   };
-
   const variant = VARIANT_MAP[action] || 'default';
-
   return <Badge variant={variant}>{action}</Badge>;
 });
 ActionBadge.displayName = 'ActionBadge';
@@ -109,15 +73,14 @@ ActionBadge.displayName = 'ActionBadge';
 /**
  * @description Displays the filter chain name (forward, input, output, etc.)
  */
-const ChainBadge = memo(function ChainBadge({ chain }: { chain: string }) {
-  return (
-    <Badge
-      variant="secondary"
-      className="font-mono text-xs"
-    >
+const ChainBadge = memo(function ChainBadge({
+  chain
+}: {
+  chain: string;
+}) {
+  return <Badge variant="secondary" className="font-mono text-xs">
       {chain}
-    </Badge>
-  );
+    </Badge>;
 });
 ChainBadge.displayName = 'ChainBadge';
 
@@ -128,9 +91,12 @@ ChainBadge.displayName = 'ChainBadge';
 /**
  * @description Displays a condensed summary of rule matching criteria (protocol, addresses, ports, etc.)
  */
-const MatchersSummary = memo(function MatchersSummary({ rule }: { rule: FilterRule }) {
+const MatchersSummary = memo(function MatchersSummary({
+  rule
+}: {
+  rule: FilterRule;
+}) {
   const matchers: string[] = [];
-
   if (rule.protocol && rule.protocol !== 'all') matchers.push(`proto:${rule.protocol}`);
   if (rule.srcAddress) matchers.push(`src:${rule.srcAddress}`);
   if (rule.dstAddress) matchers.push(`dst:${rule.dstAddress}`);
@@ -141,26 +107,18 @@ const MatchersSummary = memo(function MatchersSummary({ rule }: { rule: FilterRu
   if (rule.connectionState && rule.connectionState.length > 0) {
     matchers.push(`state:${rule.connectionState.join(',')}`);
   }
-
   if (matchers.length === 0) {
     return <span className="text-muted-foreground">any</span>;
   }
-
   if (matchers.length <= 2) {
     return <span className="font-mono text-sm">{matchers.join(', ')}</span>;
   }
-
-  return (
-    <span className="font-mono text-sm">
+  return <span className="font-mono text-sm">
       {matchers.slice(0, 2).join(', ')}
-      <Badge
-        variant="outline"
-        className="ml-component-sm text-xs"
-      >
+      <Badge variant="outline" className="ml-component-sm text-xs">
         +{matchers.length - 2} more
       </Badge>
-    </span>
-  );
+    </span>;
 });
 MatchersSummary.displayName = 'MatchersSummary';
 
@@ -192,52 +150,39 @@ const SortableRow = memo(function SortableRow({
   onToggle,
   onShowStats,
   isHighlighted,
-  highlightRef,
+  highlightRef
 }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: rule.id!,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: rule.id!
   });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? DRAG_OPACITY_ACTIVE : 1,
+    opacity: isDragging ? DRAG_OPACITY_ACTIVE : 1
   };
-
   const isUnused = (rule.packets ?? 0) === 0;
-  const showRelativeBar = useCounterSettingsStore((state) => state.showRelativeBar);
-  const showRate = useCounterSettingsStore((state) => state.showRate);
+  const showRelativeBar = useCounterSettingsStore(state => state.showRelativeBar);
+  const showRate = useCounterSettingsStore(state => state.showRate);
 
   // Calculate percentage of max for progress bar
-  const percentOfMax = maxBytes > 0 ? ((rule.bytes ?? 0) / maxBytes) * 100 : 0;
-
-  const rowClassName = cn(
-    rule.disabled && 'bg-muted opacity-50',
-    isUnused && 'bg-muted/50 opacity-60',
-    isHighlighted && 'animate-highlight bg-warning/20'
-  );
-
-  return (
-    <TableRow
-      ref={(node) => {
-        setNodeRef(node);
-        if (isHighlighted && highlightRef) {
-          (highlightRef as React.MutableRefObject<HTMLTableRowElement | null>).current = node;
-        }
-      }}
-      style={style}
-      className={rowClassName}
-    >
+  const percentOfMax = maxBytes > 0 ? (rule.bytes ?? 0) / maxBytes * 100 : 0;
+  const rowClassName = cn(rule.disabled && 'bg-muted opacity-50', isUnused && 'bg-muted/50 opacity-60', isHighlighted && 'animate-highlight bg-warning/20');
+  return <TableRow ref={node => {
+    setNodeRef(node);
+    if (isHighlighted && highlightRef) {
+      (highlightRef as React.MutableRefObject<HTMLTableRowElement | null>).current = node;
+    }
+  }} style={style} className={rowClassName}>
       {/* Drag handle */}
-      <TableCell
-        className="w-8 cursor-grab"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical
-          className="text-muted-foreground h-4 w-4"
-          aria-hidden="true"
-        />
+      <TableCell className="w-8 cursor-grab" {...attributes} {...listeners}>
+        <GripVertical className="text-muted-foreground h-4 w-4" aria-hidden="true" />
       </TableCell>
 
       {/* Position */}
@@ -259,82 +204,32 @@ const SortableRow = memo(function SortableRow({
       </TableCell>
 
       {/* Traffic (Counter Cell) */}
-      <TableCell
-        className="hover:bg-muted/50 cursor-pointer transition-colors"
-        onClick={() => onShowStats(rule)}
-        role="button"
-        tabIndex={0}
-        aria-label={`View traffic statistics for rule ${rule.order ?? ''}`}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') onShowStats(rule);
-        }}
-      >
-        <CounterCell
-          packets={rule.packets ?? 0}
-          bytes={rule.bytes ?? 0}
-          percentOfMax={percentOfMax}
-          isUnused={isUnused}
-          showRate={showRate}
-          showBar={showRelativeBar}
-        />
+      <TableCell className="hover:bg-muted/50 cursor-pointer transition-colors" onClick={() => onShowStats(rule)} role="button" tabIndex={0} aria-label={`View traffic statistics for rule ${rule.order ?? ''}`} onKeyDown={e => {
+      if (e.key === 'Enter' || e.key === ' ') onShowStats(rule);
+    }}>
+        <CounterCell packets={rule.packets ?? 0} bytes={rule.bytes ?? 0} percentOfMax={percentOfMax} isUnused={isUnused} showRate={showRate} showBar={showRelativeBar} />
       </TableCell>
 
       {/* Enabled Toggle */}
       <TableCell>
-        <Switch
-          checked={!rule.disabled}
-          onCheckedChange={() => onToggle(rule)}
-          aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'}
-        />
+        <Switch checked={!rule.disabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'} />
       </TableCell>
 
       {/* Actions */}
       <TableCell>
-        <div
-          className="gap-component-xs flex"
-          role="group"
-          aria-label="Rule actions"
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            aria-label="Edit rule"
-            className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            <Pencil
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+        <div className="gap-component-xs flex" role="group" aria-label="Rule actions">
+          <Button variant="ghost" size="sm" onClick={() => onEdit(rule)} aria-label="Edit rule" className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2">
+            <Pencil className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            aria-label="Duplicate rule"
-            className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
-            <Copy
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="ghost" size="sm" onClick={() => onDuplicate(rule)} aria-label="Duplicate rule" className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2">
+            <Copy className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="hover:text-error focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2"
-            aria-label="Delete rule"
-          >
-            <Trash2
-              className="text-error h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="ghost" size="sm" onClick={() => onDelete(rule)} className="hover:text-error focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Delete rule">
+            <Trash2 className="text-error h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 });
 SortableRow.displayName = 'SortableRow';
 
@@ -368,43 +263,41 @@ export interface FilterRulesTableDesktopProps {
  */
 export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
   className,
-  chain,
+  chain
 }: FilterRulesTableDesktopProps) {
-  const { t } = useTranslation('firewall');
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
-  const pollingInterval = useCounterSettingsStore((state) => state.pollingInterval);
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
+  const pollingInterval = useCounterSettingsStore(state => state.pollingInterval);
 
   // Get highlight parameter from URL search params
-  const searchParams = useSearch({ strict: false }) as { highlight?: string };
+  const searchParams = useSearch({
+    strict: false
+  }) as {
+    highlight?: string;
+  };
   const highlightRuleId = searchParams.highlight;
   const highlightRef = useRef<HTMLTableRowElement | null>(null);
-
   const {
     data: rules,
     isLoading,
-    error,
+    error
   } = useFilterRules(routerIp, {
     chain,
-    refetchInterval: pollingInterval || false,
+    refetchInterval: pollingInterval || false
   });
   const deleteFilterRule = useDeleteFilterRule(routerIp);
   const toggleFilterRule = useToggleFilterRule(routerIp);
   const moveFilterRule = useMoveFilterRule(routerIp);
   const createFilterRule = useCreateFilterRule(routerIp);
   const updateFilterRule = useUpdateFilterRule(routerIp);
-
   const [editingRule, setEditingRule] = useState<FilterRule | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteConfirmRule, setDeleteConfirmRule] = useState<FilterRule | null>(null);
   const [statsRule, setStatsRule] = useState<FilterRule | null>(null);
 
   // Drag-drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
 
   // Sort rules by order
   const sortedRules = rules ? [...rules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) : [];
@@ -412,85 +305,73 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
   // Calculate max bytes for relative bar
   const maxBytes = useMemo(() => {
     if (!sortedRules || sortedRules.length === 0) return 0;
-    return Math.max(...sortedRules.map((r) => r.bytes ?? 0));
+    return Math.max(...sortedRules.map(r => r.bytes ?? 0));
   }, [sortedRules]);
 
   // Handlers (wrapped with useCallback for stable references)
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-
-      if (over && active.id !== over.id) {
-        const oldIndex = sortedRules.findIndex((r) => r.id === active.id);
-        const newIndex = sortedRules.findIndex((r) => r.id === over.id);
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const rule = sortedRules[oldIndex];
-          moveFilterRule.mutate({
-            ruleId: rule.id!,
-            destination: newIndex,
-          });
-        }
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const {
+      active,
+      over
+    } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = sortedRules.findIndex(r => r.id === active.id);
+      const newIndex = sortedRules.findIndex(r => r.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const rule = sortedRules[oldIndex];
+        moveFilterRule.mutate({
+          ruleId: rule.id!,
+          destination: newIndex
+        });
       }
-    },
-    [sortedRules, moveFilterRule]
-  );
-
+    }
+  }, [sortedRules, moveFilterRule]);
   const handleEdit = useCallback((rule: FilterRule) => {
     setEditingRule(rule);
     setIsEditorOpen(true);
   }, []);
-
   const handleDuplicate = useCallback((rule: FilterRule) => {
-    const duplicatedRule = { ...rule, id: undefined, order: undefined };
+    const duplicatedRule = {
+      ...rule,
+      id: undefined,
+      order: undefined
+    };
     setEditingRule(duplicatedRule);
     setIsEditorOpen(true);
   }, []);
-
-  const handleSaveRule = useCallback(
-    async (ruleInput: FilterRuleInput) => {
-      if (editingRule?.id) {
-        // Update existing rule
-        await updateFilterRule.mutateAsync({
-          ruleId: editingRule.id,
-          updates: ruleInput,
-        });
-      } else {
-        // Create new rule
-        await createFilterRule.mutateAsync(ruleInput);
-      }
-      setIsEditorOpen(false);
-      setEditingRule(null);
-    },
-    [editingRule?.id, updateFilterRule, createFilterRule]
-  );
-
+  const handleSaveRule = useCallback(async (ruleInput: FilterRuleInput) => {
+    if (editingRule?.id) {
+      // Update existing rule
+      await updateFilterRule.mutateAsync({
+        ruleId: editingRule.id,
+        updates: ruleInput
+      });
+    } else {
+      // Create new rule
+      await createFilterRule.mutateAsync(ruleInput);
+    }
+    setIsEditorOpen(false);
+    setEditingRule(null);
+  }, [editingRule?.id, updateFilterRule, createFilterRule]);
   const handleCloseEditor = useCallback(() => {
     setIsEditorOpen(false);
     setEditingRule(null);
   }, []);
-
   const handleDelete = useCallback((rule: FilterRule) => {
     setDeleteConfirmRule(rule);
   }, []);
-
-  const handleToggle = useCallback(
-    (rule: FilterRule) => {
-      toggleFilterRule.mutate({
-        ruleId: rule.id!,
-        disabled: !rule.disabled,
-      });
-    },
-    [toggleFilterRule]
-  );
-
+  const handleToggle = useCallback((rule: FilterRule) => {
+    toggleFilterRule.mutate({
+      ruleId: rule.id!,
+      disabled: !rule.disabled
+    });
+  }, [toggleFilterRule]);
   const handleConfirmDelete = useCallback(() => {
     if (deleteConfirmRule) {
       deleteFilterRule.mutate(deleteConfirmRule.id!);
       setDeleteConfirmRule(null);
     }
   }, [deleteConfirmRule, deleteFilterRule]);
-
   const handleShowStats = useCallback((rule: FilterRule) => {
     setStatsRule(rule);
   }, []);
@@ -502,10 +383,9 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
       const timer = setTimeout(() => {
         highlightRef.current?.scrollIntoView({
           behavior: 'smooth',
-          block: 'center',
+          block: 'center'
         });
       }, HIGHLIGHT_ANIMATION_DELAY_MS);
-
       return () => clearTimeout(timer);
     }
     return undefined;
@@ -513,89 +393,55 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
 
   // Loading state
   if (isLoading) {
-    return (
-      <div
-        className={cn('p-component-md', className)}
-        role="status"
-        aria-live="polite"
-      >
+    return <div className={cn('p-component-md', className)} role="status" aria-live="polite">
         <div className="space-y-component-lg">
           {/* Table header skeleton */}
           <div className="bg-muted h-10 animate-pulse rounded" />
           {/* Row skeletons */}
-          {[...Array(3)].map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-muted/60 h-12 animate-pulse rounded"
-            />
-          ))}
+          {[...Array(3)].map((_, idx) => <div key={idx} className="bg-muted/60 h-12 animate-pulse rounded" />)}
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div
-        className={cn('p-component-xl', className)}
-        role="alert"
-        aria-live="assertive"
-      >
+    return <div className={cn('p-component-xl', className)} role="alert" aria-live="assertive">
         <div className="bg-error/10 p-component-md border-error/20 rounded-md border">
           <h3 className="text-error mb-component-sm font-semibold">Failed to load filter rules</h3>
           <p className="text-error/80 text-sm">
-            {error.message ||
-              'An error occurred while retrieving filter rules. Please check your connection and try again.'}
+            {error.message || 'An error occurred while retrieving filter rules. Please check your connection and try again.'}
           </p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div className={cn('p-component-xl text-center', className)}>
+    return <div className={cn('p-component-xl text-center', className)}>
         <div className="space-y-component-md">
           <p className="text-muted-foreground font-medium">
             {chain ? `No rules in ${chain} chain` : 'No filter rules found'}
           </p>
           <p className="text-muted-foreground text-sm">
-            {chain ?
-              `Add the first rule to the ${chain} chain to get started.`
-            : 'Create filter rules to manage traffic on your router.'}
+            {chain ? `Add the first rule to the ${chain} chain to get started.` : 'Create filter rules to manage traffic on your router.'}
           </p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className={className}>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <Table aria-label={chain ? `Filter rules in ${chain} chain` : 'Filter rules'}>
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="w-8"
-                  scope="col"
-                >
+                <TableHead className="w-8" scope="col">
                   <span className="sr-only">Drag handle</span>
                 </TableHead>
                 <TableHead scope="col">#</TableHead>
                 <TableHead scope="col">Chain</TableHead>
                 <TableHead scope="col">Action</TableHead>
                 <TableHead scope="col">Matchers</TableHead>
-                <TableHead
-                  scope="col"
-                  className="hidden lg:table-cell"
-                >
+                <TableHead scope="col" className="hidden lg:table-cell">
                   Traffic
                 </TableHead>
                 <TableHead scope="col">Enabled</TableHead>
@@ -605,24 +451,8 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <SortableContext
-                items={sortedRules.map((r) => r.id!)}
-                strategy={verticalListSortingStrategy}
-              >
-                {sortedRules.map((rule) => (
-                  <SortableRow
-                    key={rule.id}
-                    rule={rule}
-                    maxBytes={maxBytes}
-                    onEdit={handleEdit}
-                    onDuplicate={handleDuplicate}
-                    onDelete={handleDelete}
-                    onToggle={handleToggle}
-                    onShowStats={handleShowStats}
-                    isHighlighted={highlightRuleId === rule.id}
-                    highlightRef={highlightRuleId === rule.id ? highlightRef : undefined}
-                  />
-                ))}
+              <SortableContext items={sortedRules.map(r => r.id!)} strategy={verticalListSortingStrategy}>
+                {sortedRules.map(rule => <SortableRow key={rule.id} rule={rule} maxBytes={maxBytes} onEdit={handleEdit} onDuplicate={handleDuplicate} onDelete={handleDelete} onToggle={handleToggle} onShowStats={handleShowStats} isHighlighted={highlightRuleId === rule.id} highlightRef={highlightRuleId === rule.id ? highlightRef : undefined} />)}
               </SortableContext>
             </TableBody>
           </Table>
@@ -630,23 +460,10 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
       </div>
 
       {/* Edit/Create Filter Rule Editor */}
-      <FilterRuleEditor
-        routerId={routerIp}
-        initialRule={editingRule || undefined}
-        open={isEditorOpen}
-        onClose={handleCloseEditor}
-        onSave={handleSaveRule}
-        onDelete={editingRule?.id ? () => handleDelete(editingRule) : undefined}
-        isSaving={createFilterRule.isPending || updateFilterRule.isPending}
-        isDeleting={deleteFilterRule.isPending}
-        mode={editingRule?.id ? 'edit' : 'create'}
-      />
+      <FilterRuleEditor routerId={routerIp} initialRule={editingRule || undefined} open={isEditorOpen} onClose={handleCloseEditor} onSave={handleSaveRule} onDelete={editingRule?.id ? () => handleDelete(editingRule) : undefined} isSaving={createFilterRule.isPending || updateFilterRule.isPending} isDeleting={deleteFilterRule.isPending} mode={editingRule?.id ? 'edit' : 'create'} />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && setDeleteConfirmRule(null)}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && setDeleteConfirmRule(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Filter Rule?</DialogTitle>
@@ -667,16 +484,10 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
             </ul>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirmRule(null)}
-            >
+            <Button variant="outline" onClick={() => setDeleteConfirmRule(null)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-            >
+            <Button variant="destructive" onClick={handleConfirmDelete}>
               Delete Rule
             </Button>
           </DialogFooter>
@@ -684,20 +495,10 @@ export const FilterRulesTableDesktop = memo(function FilterRulesTableDesktop({
       </Dialog>
 
       {/* Statistics Panel */}
-      {statsRule && (
-        <RuleStatisticsPanel
-          isOpen={!!statsRule}
-          onClose={() => setStatsRule(null)}
-          rule={statsRule}
-          historyData={[]}
-          onExportCsv={() => {
-            // TODO: Implement CSV export using counterHistoryStorage.exportToCsv
-            console.log('Export CSV for rule:', statsRule.id);
-          }}
-        />
-      )}
-    </>
-  );
+      {statsRule && <RuleStatisticsPanel isOpen={!!statsRule} onClose={() => setStatsRule(null)} rule={statsRule} historyData={[]} onExportCsv={() => {
+      // TODO: Implement CSV export using counterHistoryStorage.exportToCsv
+      console.log('Export CSV for rule:', statsRule.id);
+    }} />}
+    </>;
 });
-
 FilterRulesTableDesktop.displayName = 'FilterRulesTableDesktop';

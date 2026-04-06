@@ -134,7 +134,7 @@ single layout that serves both users well. See
 | Forms         | React Hook Form + Zod          | Form state, validation, schema inference        |
 | Styling       | Tailwind CSS 4                 | Utility classes with 200+ design tokens         |
 | Animation     | Framer Motion                  | Page transitions, gesture-based interactions    |
-| i18n          | i18next + react-i18next        | Multi-language support, RTL                     |
+| Text          | Inline English strings         | Single-language UI copy                         |
 | Testing       | Vitest + React Testing Library | Unit and component tests                        |
 | E2E           | Playwright                     | Multi-browser end-to-end tests                  |
 | Storybook     | Storybook 10                   | Component development and documentation         |

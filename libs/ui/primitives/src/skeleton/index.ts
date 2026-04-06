@@ -5,7 +5,7 @@ export {
   SkeletonTable,
   SkeletonChart,
   SkeletonAvatar,
-} from './skeleton';
+} from './Skeleton';
 
 export type {
   SkeletonProps,
@@ -14,4 +14,4 @@ export type {
   SkeletonTableProps,
   SkeletonChartProps,
   SkeletonAvatarProps,
-} from './skeleton';
+} from './Skeleton';

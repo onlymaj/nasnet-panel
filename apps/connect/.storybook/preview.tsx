@@ -1,6 +1,5 @@
 import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nProvider } from '@nasnet/core/i18n';
 import { MockApolloProvider } from '@nasnet/api-client/core';
 import { PlatformProvider } from '@nasnet/ui/layouts';
 import { AnimationProvider, ToastProvider } from '@nasnet/ui/patterns';
@@ -57,22 +56,20 @@ const preview: Preview = {
       return (
         <MockApolloProvider>
           <QueryClientProvider client={queryClient}>
-            <I18nProvider>
-              <PlatformProvider>
-                <AnimationProvider>
-                  <ToastProvider>
-                    <div
-                      className={isDark ? 'dark' : ''}
-                      data-theme={isDark ? 'dark' : 'light'}
-                    >
-                      <div className="bg-background text-foreground min-h-screen p-4">
-                        <Story />
-                      </div>
+            <PlatformProvider>
+              <AnimationProvider>
+                <ToastProvider>
+                  <div
+                    className={isDark ? 'dark' : ''}
+                    data-theme={isDark ? 'dark' : 'light'}
+                  >
+                    <div className="bg-background text-foreground min-h-screen p-4">
+                      <Story />
                     </div>
-                  </ToastProvider>
-                </AnimationProvider>
-              </PlatformProvider>
-            </I18nProvider>
+                  </div>
+                </ToastProvider>
+              </AnimationProvider>
+            </PlatformProvider>
           </QueryClientProvider>
         </MockApolloProvider>
       );

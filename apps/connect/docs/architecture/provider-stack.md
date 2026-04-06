@@ -51,60 +51,15 @@ reverse.
 
 ## Provider Reference
 
-### 1. I18nProvider
-
-**Source:** `@nasnet/core/i18n` (`libs/core/i18n/src`)
-
-**Purpose:** Bootstraps react-i18next and manages lazy loading of language packs.
-
-**What it does:**
-
-- Initializes i18next with HTTP backend (language files fetched at runtime)
-- Wraps children in a `React.Suspense` boundary; shows `I18nLoadingFallback` while the initial
-  language bundle downloads
-- Makes the `useTranslation` hook available throughout the tree
-
-**Why it's outermost:** Every other provider may render translated text. If i18n were nested inside
-another provider, that provider's own UI (e.g., a loading spinner with a text label) could not be
-translated.
-
-**Loading fallback:**
-
-```tsx
-function I18nLoadingFallback() {
-  return (
-    <div className="bg-background flex h-screen w-screen items-center justify-center">
-      <div className="text-muted-foreground animate-pulse">Loading...</div>
-    </div>
-  );
-}
-```
-
----
-
-### 2. DirectionProvider
-
-**Source:** `@nasnet/core/i18n` (`libs/core/i18n/src`)
-
-**Purpose:** Detects the text direction of the active language and applies it to the document.
-
-**What it does:**
-
-- Reads the current language from i18next (available because `I18nProvider` is already mounted)
-- Sets `document.documentElement.dir` to `"rtl"` or `"ltr"`
-- Sets `document.documentElement.lang` to the current locale
-- Exposes the `useDirection()` hook for direction-aware components
-
-**Why it's second:** Requires i18n to be ready (needs the active language). Must be above
-ThemeProvider and everything else that might render directional text.
-
----
-
-### 3. ThemeProvider
+### 1. ThemeProvider
 
 **Source:** `apps/connect/src/app/providers/ThemeProvider.tsx`
 
 **Purpose:** Applies the active theme to the document root so Tailwind dark-mode utilities work.
+
+---
+
+The application is now English-only and no longer includes separate i18n or direction providers.
 
 **What it does:**
 
@@ -295,13 +250,11 @@ function RootInner() {
 
 | #   | Provider            | Source                            | Key Context                                               |
 | --- | ------------------- | --------------------------------- | --------------------------------------------------------- |
-| 1   | I18nProvider        | `@nasnet/core/i18n`               | `useTranslation()`                                        |
-| 2   | DirectionProvider   | `@nasnet/core/i18n`               | `useDirection()`                                          |
-| 3   | ThemeProvider       | `apps/connect/src/app/providers/` | Applies `.dark` class to `<html>`                         |
-| 4   | PlatformProvider    | `@nasnet/ui/layouts`              | `usePlatform()` → `"mobile"` \| `"tablet"` \| `"desktop"` |
-| 5   | AnimationProvider   | `@nasnet/ui/patterns`             | `getVariant()`, `getTransition()`, reduced-motion         |
-| 6   | ApolloProvider      | `@nasnet/api-client/core`         | `useQuery()`, `useMutation()`, `useSubscription()`        |
-| 7   | QueryClientProvider | `@tanstack/react-query`           | `useQuery()`, `useMutation()` (REST)                      |
+| 1   | ThemeProvider       | `apps/connect/src/app/providers/` | Applies `.dark` class to `<html>`                         |
+| 2   | PlatformProvider    | `@nasnet/ui/layouts`              | `usePlatform()` → `"mobile"` \| `"tablet"` \| `"desktop"` |
+| 3   | AnimationProvider   | `@nasnet/ui/patterns`             | `getVariant()`, `getTransition()`, reduced-motion         |
+| 4   | ApolloProvider      | `@nasnet/api-client/core`         | `useQuery()`, `useMutation()`, `useSubscription()`        |
+| 5   | QueryClientProvider | `@tanstack/react-query`           | `useQuery()`, `useMutation()` (REST)                      |
 | 8   | ToastProvider       | `@nasnet/ui/patterns`             | Sonner toaster, `NotificationManager`                     |
 
 ## Related Documents

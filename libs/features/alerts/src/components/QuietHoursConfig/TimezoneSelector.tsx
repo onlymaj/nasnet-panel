@@ -5,18 +5,7 @@
  */
 
 import { memo, useState, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-  Input,
-  Label,
-} from '@nasnet/ui/primitives';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Input, Label } from '@nasnet/ui/primitives';
 import { Globe, Search } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
 import type { TimezoneSelectorProps } from './types';
@@ -24,35 +13,20 @@ import type { TimezoneSelectorProps } from './types';
 /**
  * Common timezones for quick access
  */
-const COMMON_TIMEZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
-  'Asia/Dubai',
-  'Australia/Sydney',
-  'Pacific/Auckland',
-];
+const COMMON_TIMEZONES = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland'];
 
 /**
  * Group timezones by region
  */
 function groupTimezones(timezones: string[]): Record<string, string[]> {
   const groups: Record<string, string[]> = {};
-
-  timezones.forEach((tz) => {
+  timezones.forEach(tz => {
     const region = tz.split('/')[0];
     if (!groups[region]) {
       groups[region] = [];
     }
     groups[region].push(tz);
   });
-
   return groups;
 }
 
@@ -84,9 +58,8 @@ function TimezoneSelectorComponent({
   value,
   onChange,
   disabled = false,
-  className,
+  className
 }: TimezoneSelectorProps) {
-  const { t } = useTranslation('alerts');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get all timezones
@@ -96,102 +69,58 @@ function TimezoneSelectorComponent({
   const filteredTimezones = useMemo(() => {
     if (!searchQuery) return allTimezones;
     const query = searchQuery.toLowerCase();
-    return allTimezones.filter((tz) => tz.toLowerCase().includes(query));
+    return allTimezones.filter(tz => tz.toLowerCase().includes(query));
   }, [allTimezones, searchQuery]);
 
   // Group filtered timezones
   const groupedTimezones = useMemo(() => groupTimezones(filteredTimezones), [filteredTimezones]);
-
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
-
-  return (
-    <div className={cn('space-y-component-xs', className)}>
-      <Label
-        htmlFor="timezone"
-        className="gap-component-sm flex items-center"
-      >
-        <Globe
-          className="h-4 w-4"
-          aria-hidden="true"
-        />
-        {t('quietHours.timezone')}
+  return <div className={cn('space-y-component-xs', className)}>
+      <Label htmlFor="timezone" className="gap-component-sm flex items-center">
+        <Globe className="h-4 w-4" aria-hidden="true" />
+        {"Timezone"}
       </Label>
 
-      <Select
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-      >
-        <SelectTrigger
-          id="timezone"
-          className="focus-visible:ring-ring h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
-          aria-label={t('quietHours.timezone')}
-        >
-          <SelectValue placeholder={t('quietHours.selectTimezone')} />
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger id="timezone" className="focus-visible:ring-ring h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" // WCAG AAA touch target
+      aria-label={"Timezone"}>
+          <SelectValue placeholder={"quietHours.selectTimezone"} />
         </SelectTrigger>
 
         <SelectContent className="max-h-[300px]">
           {/* Search input */}
           <div className="p-component-xs border-border border-b">
             <div className="relative">
-              <Search
-                className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2"
-                aria-hidden="true"
-              />
-              <Input
-                placeholder={t('quietHours.searchTimezone')}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-component-xl border-border focus-visible:ring-ring h-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-              />
+              <Search className="text-muted-foreground absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2" aria-hidden="true" />
+              <Input placeholder={"Search timezone..."} value={searchQuery} onChange={handleSearchChange} className="pl-component-xl border-border focus-visible:ring-ring h-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" />
             </div>
           </div>
 
           {/* Common timezones */}
-          {!searchQuery && (
-            <SelectGroup>
-              <SelectLabel>{t('quietHours.commonTimezones')}</SelectLabel>
-              {COMMON_TIMEZONES.map((tz) => (
-                <SelectItem
-                  key={tz}
-                  value={tz}
-                >
+          {!searchQuery && <SelectGroup>
+              <SelectLabel>{"quietHours.commonTimezones"}</SelectLabel>
+              {COMMON_TIMEZONES.map(tz => <SelectItem key={tz} value={tz}>
                   {tz.replace(/_/g, ' ')}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
+                </SelectItem>)}
+            </SelectGroup>}
 
           {/* Grouped timezones */}
-          {Object.entries(groupedTimezones)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([region, timezones]) => (
-              <SelectGroup key={region}>
+          {Object.entries(groupedTimezones).sort(([a], [b]) => a.localeCompare(b)).map(([region, timezones]) => <SelectGroup key={region}>
                 <SelectLabel>{region}</SelectLabel>
-                {timezones.sort().map((tz) => (
-                  <SelectItem
-                    key={tz}
-                    value={tz}
-                  >
+                {timezones.sort().map(tz => <SelectItem key={tz} value={tz}>
                     {tz.split('/').slice(1).join('/').replace(/_/g, ' ')}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
+                  </SelectItem>)}
+              </SelectGroup>)}
 
           {/* No results */}
-          {filteredTimezones.length === 0 && (
-            <div className="p-component-md text-muted-foreground text-center text-sm">
-              {t('quietHours.noTimezones')}
-            </div>
-          )}
+          {filteredTimezones.length === 0 && <div className="p-component-md text-muted-foreground text-center text-sm">
+              {"quietHours.noTimezones"}
+            </div>}
         </SelectContent>
       </Select>
-    </div>
-  );
+    </div>;
 }
-
 export const TimezoneSelector = memo(TimezoneSelectorComponent);
 TimezoneSelector.displayName = 'TimezoneSelector';

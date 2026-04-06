@@ -16,36 +16,13 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useConnectionStore } from '@nasnet/state/stores';
 import { cn } from '@nasnet/ui/utils';
-import {
-  useMangleRules,
-  useDeleteMangleRule,
-  useToggleMangleRule,
-} from '@nasnet/api-client/queries/firewall';
+import { useMangleRules, useDeleteMangleRule, useToggleMangleRule } from '@nasnet/api-client/queries/firewall';
 import { useMangleRuleTable } from '@nasnet/ui/patterns/mangle-rule-table';
 import { MangleRuleEditor } from '@nasnet/ui/patterns/mangle-rule-editor';
 import type { MangleRule } from '@nasnet/core/types';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Button,
-  Badge,
-  Switch,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@nasnet/ui/primitives';
+import { Card, CardContent, CardHeader, Button, Badge, Switch, Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@nasnet/ui/primitives';
 import { Pencil, Copy, Trash2 } from 'lucide-react';
 
 // ============================================================================
@@ -56,9 +33,12 @@ import { Pencil, Copy, Trash2 } from 'lucide-react';
  * ActionBadge Component
  * Displays mangle action type with semantic color coding
  */
-const ActionBadge = React.memo(function ActionBadgeComponent({ action }: { action: string }) {
+const ActionBadge = React.memo(function ActionBadgeComponent({
+  action
+}: {
+  action: string;
+}) {
   ActionBadge.displayName = 'ActionBadge';
-
   const ACTION_COLORS: Record<string, string> = {
     'mark-connection': 'bg-info/10 text-info',
     'mark-packet': 'bg-primary/10 text-primary',
@@ -69,19 +49,12 @@ const ActionBadge = React.memo(function ActionBadgeComponent({ action }: { actio
     accept: 'bg-success/10 text-success',
     drop: 'bg-error/10 text-error',
     jump: 'bg-primary/10 text-primary',
-    log: 'bg-muted text-muted-foreground',
+    log: 'bg-muted text-muted-foreground'
   };
-
   const colorClass = ACTION_COLORS[action] || 'bg-muted text-muted-foreground';
-
-  return (
-    <Badge
-      variant="outline"
-      className={cn(colorClass, 'text-xs')}
-    >
+  return <Badge variant="outline" className={cn(colorClass, 'text-xs')}>
       {action}
-    </Badge>
-  );
+    </Badge>;
 });
 
 // ============================================================================
@@ -107,25 +80,17 @@ const RuleCard = React.memo(function RuleCardComponent({
   onDuplicate,
   onDelete,
   onToggle,
-  className,
+  className
 }: RuleCardProps) {
   RuleCard.displayName = 'RuleCard';
-  const { t } = useTranslation('firewall');
-
   const isUnused = useMemo(() => (rule.packets ?? 0) === 0, [rule.packets]);
-  const markValue = useMemo(
-    () => rule.newConnectionMark || rule.newPacketMark || rule.newRoutingMark,
-    [rule.newConnectionMark, rule.newPacketMark, rule.newRoutingMark]
-  );
-
+  const markValue = useMemo(() => rule.newConnectionMark || rule.newPacketMark || rule.newRoutingMark, [rule.newConnectionMark, rule.newPacketMark, rule.newRoutingMark]);
   const matchers: string[] = [];
   if (rule.protocol) matchers.push(`${rule.protocol}`);
   if (rule.srcAddress) matchers.push(`${rule.srcAddress}`);
   if (rule.dstAddress) matchers.push(`→ ${rule.dstAddress}`);
   if (rule.srcPort) matchers.push(`:${rule.srcPort}`);
-
-  return (
-    <Card className={rule.disabled ? 'opacity-50' : ''}>
+  return <Card className={rule.disabled ? 'opacity-50' : ''}>
       <CardHeader className="pb-component-md">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -133,102 +98,55 @@ const RuleCard = React.memo(function RuleCardComponent({
               <span className="text-muted-foreground font-mono text-xs tabular-nums">
                 #{rule.position}
               </span>
-              <Badge
-                variant="secondary"
-                className="font-mono text-xs"
-              >
+              <Badge variant="secondary" className="font-mono text-xs">
                 {rule.chain}
               </Badge>
               <ActionBadge action={rule.action} />
             </div>
-            {markValue && (
-              <div className="mt-component-xs font-mono text-sm font-semibold tabular-nums">
+            {markValue && <div className="mt-component-xs font-mono text-sm font-semibold tabular-nums">
                 {markValue}
-              </div>
-            )}
+              </div>}
           </div>
-          <Switch
-            checked={!rule.disabled}
-            onCheckedChange={() => onToggle(rule)}
-            aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'}
-          />
+          <Switch checked={!rule.disabled} onCheckedChange={() => onToggle(rule)} aria-label={rule.disabled ? 'Enable rule' : 'Disable rule'} />
         </div>
       </CardHeader>
 
       <CardContent className="pt-0">
         {/* Matchers */}
-        {matchers.length > 0 && (
-          <div className="text-muted-foreground mb-component-md text-sm">{matchers.join(' ')}</div>
-        )}
+        {matchers.length > 0 && <div className="text-muted-foreground mb-component-md text-sm">{matchers.join(' ')}</div>}
 
         {/* Counters */}
         <div className="gap-component-lg text-muted-foreground mb-component-md flex items-center text-xs">
           <div className="gap-component-xs flex items-center">
-            <span className="font-semibold">{t('mangle.table.columns.packets')}:</span>
-            {isUnused ?
-              <Badge
-                variant="outline"
-                className="text-muted-foreground text-xs"
-              >
-                {t('mangle.table.unused')}
-              </Badge>
-            : <span className="font-mono tabular-nums">{(rule.packets ?? 0).toLocaleString()}</span>
-            }
+            <span className="font-semibold">{"Packets"}:</span>
+            {isUnused ? <Badge variant="outline" className="text-muted-foreground text-xs">
+                {"Unused (0 hits)"}
+              </Badge> : <span className="font-mono tabular-nums">{(rule.packets ?? 0).toLocaleString()}</span>}
           </div>
           <div className="gap-component-xs flex items-center">
-            <span className="font-semibold">{t('mangle.table.columns.bytes')}:</span>
+            <span className="font-semibold">{"Bytes"}:</span>
             <span className="font-mono tabular-nums">{(rule.bytes ?? 0).toLocaleString()}</span>
           </div>
         </div>
 
         {/* Comment */}
-        {rule.comment && (
-          <div className="text-muted-foreground mb-component-md text-sm italic">{rule.comment}</div>
-        )}
+        {rule.comment && <div className="text-muted-foreground mb-component-md text-sm italic">{rule.comment}</div>}
 
         {/* Actions - 44px minimum touch targets */}
         <div className="gap-component-sm flex">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(rule)}
-            className="min-h-[44px] flex-1"
-            aria-label={`Edit rule ${rule.position}`}
-          >
-            <Pencil
-              className="mr-component-sm h-4 w-4"
-              aria-hidden="true"
-            />
-            {t('mangle.buttons.edit')}
+          <Button variant="outline" size="sm" onClick={() => onEdit(rule)} className="min-h-[44px] flex-1" aria-label={`Edit rule ${rule.position}`}>
+            <Pencil className="mr-component-sm h-4 w-4" aria-hidden="true" />
+            {"Edit"}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDuplicate(rule)}
-            className="px-component-md min-h-[44px]"
-            aria-label={`Duplicate rule ${rule.position}`}
-          >
-            <Copy
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" size="sm" onClick={() => onDuplicate(rule)} className="px-component-md min-h-[44px]" aria-label={`Duplicate rule ${rule.position}`}>
+            <Copy className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(rule)}
-            className="px-component-md text-error hover:text-error/80 min-h-[44px]"
-            aria-label={`Delete rule ${rule.position}`}
-          >
-            <Trash2
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+          <Button variant="outline" size="sm" onClick={() => onDelete(rule)} className="px-component-md text-error hover:text-error/80 min-h-[44px]" aria-label={`Delete rule ${rule.position}`}>
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 });
 
 // ============================================================================
@@ -262,52 +180,55 @@ export interface MangleRulesTableMobileProps {
  */
 export const MangleRulesTableMobile = React.memo(function MangleRulesTableMobileComponent({
   className,
-  chain,
+  chain
 }: MangleRulesTableMobileProps) {
   MangleRulesTableMobile.displayName = 'MangleRulesTableMobile';
-  const { t } = useTranslation('firewall');
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
-
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
   const {
     data: rules,
     isLoading,
-    error,
-  } = useMangleRules(routerIp, chain ? { chain: chain as any } : undefined);
+    error
+  } = useMangleRules(routerIp, chain ? {
+    chain: chain as any
+  } : undefined);
   const deleteMangleRule = useDeleteMangleRule(routerIp);
   const toggleMangleRule = useToggleMangleRule(routerIp);
-
   const [editingRule, setEditingRule] = useState<MangleRule | null>(null);
   const [deleteConfirmRule, setDeleteConfirmRule] = useState<MangleRule | null>(null);
 
   // Use the headless hook
-  const { data: sortedRules } = useMangleRuleTable({
+  const {
+    data: sortedRules
+  } = useMangleRuleTable({
     data: rules || [],
     initialSortBy: 'position',
     initialSortDirection: 'asc',
-    initialFilters: chain ? { chain } : {},
+    initialFilters: chain ? {
+      chain
+    } : {}
   });
 
   // Handlers
   const handleEdit = (rule: MangleRule) => {
     setEditingRule(rule);
   };
-
   const handleDuplicate = (rule: MangleRule) => {
-    const duplicatedRule = { ...rule, id: undefined, position: undefined };
+    const duplicatedRule = {
+      ...rule,
+      id: undefined,
+      position: undefined
+    };
     setEditingRule(duplicatedRule);
   };
-
   const handleDelete = (rule: MangleRule) => {
     setDeleteConfirmRule(rule);
   };
-
   const handleToggle = (rule: MangleRule) => {
     toggleMangleRule.mutate({
       ruleId: rule.id!,
-      disabled: !rule.disabled,
+      disabled: !rule.disabled
     });
   };
-
   const confirmDelete = () => {
     if (deleteConfirmRule) {
       deleteMangleRule.mutate(deleteConfirmRule.id!);
@@ -317,128 +238,75 @@ export const MangleRulesTableMobile = React.memo(function MangleRulesTableMobile
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className={cn('p-component-md space-y-component-md', className)}>
+    return <div className={cn('p-component-md space-y-component-md', className)}>
         <div className="space-y-component-md animate-pulse">
           <div className="bg-muted h-32 rounded" />
           <div className="bg-muted h-32 rounded" />
           <div className="bg-muted h-32 rounded" />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error) {
-    return (
-      <div
-        className={cn('p-component-md text-error', className)}
-        role="alert"
-      >
-        <p className="mb-component-xs font-semibold">{t('mangle.notifications.error.load')}</p>
+    return <div className={cn('p-component-md text-error', className)} role="alert">
+        <p className="mb-component-xs font-semibold">{"Failed to load mangle rules"}</p>
         <p className="text-sm">{error.message}</p>
-      </div>
-    );
+      </div>;
   }
 
   // Empty state
   if (!rules || rules.length === 0) {
-    return (
-      <div className={cn('p-component-lg text-center', className)}>
+    return <div className={cn('p-component-lg text-center', className)}>
         <p className="text-muted-foreground">
-          {chain ? t('mangle.table.noRulesInChain') : t('mangle.table.noRules')}
+          {chain ? "No rules in this chain" : "No mangle rules configured"}
         </p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className={cn('space-y-component-md', className)}>
-        {sortedRules.map((rule) => (
-          <RuleCard
-            key={rule.id}
-            rule={rule}
-            onEdit={handleEdit}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDelete}
-            onToggle={handleToggle}
-          />
-        ))}
+        {sortedRules.map(rule => <RuleCard key={rule.id} rule={rule} onEdit={handleEdit} onDuplicate={handleDuplicate} onDelete={handleDelete} onToggle={handleToggle} />)}
       </div>
 
       {/* Edit/Create Sheet */}
-      <Sheet
-        open={!!editingRule}
-        onOpenChange={(open) => !open && setEditingRule(null)}
-      >
-        <SheetContent
-          side="bottom"
-          className="h-[90vh] overflow-y-auto"
-        >
+      <Sheet open={!!editingRule} onOpenChange={open => !open && setEditingRule(null)}>
+        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>
-              {editingRule?.id ?
-                t('mangle.dialogs.editRule.title')
-              : t('mangle.dialogs.addRule.title')}
+              {editingRule?.id ? "Edit Mangle Rule" : "Add Mangle Rule"}
             </SheetTitle>
             <SheetDescription>
-              {editingRule?.id ?
-                t('mangle.dialogs.editRule.description')
-              : t('mangle.dialogs.addRule.description')}
+              {editingRule?.id ? "Modify existing mangle rule configuration" : "Create a new mangle rule for traffic marking and QoS"}
             </SheetDescription>
           </SheetHeader>
-          {editingRule && (
-            <MangleRuleEditor
-              routerId={routerIp}
-              initialRule={editingRule}
-              open={!!editingRule}
-              onClose={() => setEditingRule(null)}
-              onSave={async () => setEditingRule(null)}
-            />
-          )}
+          {editingRule && <MangleRuleEditor routerId={routerIp} initialRule={editingRule} open={!!editingRule} onClose={() => setEditingRule(null)} onSave={async () => setEditingRule(null)} />}
         </SheetContent>
       </Sheet>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deleteConfirmRule}
-        onOpenChange={(open) => !open && setDeleteConfirmRule(null)}
-      >
+      <Dialog open={!!deleteConfirmRule} onOpenChange={open => !open && setDeleteConfirmRule(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('mangle.dialogs.deleteRule.title')}</DialogTitle>
-            <DialogDescription>{t('mangle.dialogs.deleteRule.description')}</DialogDescription>
+            <DialogTitle>{"Delete Mangle Rule"}</DialogTitle>
+            <DialogDescription>{"Are you sure you want to delete this mangle rule?"}</DialogDescription>
           </DialogHeader>
           <div className="py-component-md">
             <p className="mb-component-sm text-sm font-semibold">
-              {t('mangle.dialogs.deleteRule.warning')}
+              {"This action cannot be undone."}
             </p>
             <ul className="text-muted-foreground space-y-component-xs list-inside list-disc text-sm">
-              {(
-                t('mangle.dialogs.deleteRule.consequences', { returnObjects: true }) as string[]
-              ).map((consequence, i) => (
-                <li key={i}>{consequence}</li>
-              ))}
+              {(["Traffic marks will no longer be applied", "QoS queues depending on this mark may stop working", "Policy routing rules using this mark may be affected", "Firewall rules matching this mark will not trigger"] as string[]).map((consequence, i) => <li key={i}>{consequence}</li>)}
             </ul>
           </div>
           <DialogFooter className="gap-component-sm">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteConfirmRule(null)}
-              className="min-h-[44px]"
-            >
-              {t('button.cancel', { ns: 'common' })}
+            <Button variant="outline" onClick={() => setDeleteConfirmRule(null)} className="min-h-[44px]">
+              {"Cancel"}
             </Button>
-            <Button
-              onClick={confirmDelete}
-              className="bg-error hover:bg-error/90 min-h-[44px]"
-            >
-              {t('button.delete', { ns: 'common' })}
+            <Button onClick={confirmDelete} className="bg-error hover:bg-error/90 min-h-[44px]">
+              {"Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 });

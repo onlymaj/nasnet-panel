@@ -5,21 +5,9 @@
  */
 
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Label,
-  Switch,
-  Alert,
-  AlertDescription,
-} from '@nasnet/ui/primitives';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Label, Switch, Alert, AlertDescription } from '@nasnet/ui/primitives';
 import { Moon, Shield, Clock } from 'lucide-react';
 import { cn } from '@nasnet/ui/utils';
-
 import { useQuietHoursConfig } from './useQuietHoursConfig';
 import { DayOfWeekSelector } from './DayOfWeekSelector';
 import { TimeRangeInput } from './TimeRangeInput';
@@ -35,10 +23,8 @@ function QuietHoursConfigMobileComponent({
   value,
   onChange,
   disabled = false,
-  className,
+  className
 }: QuietHoursConfigProps) {
-  const { t } = useTranslation('alerts');
-
   const {
     startTime,
     endTime,
@@ -51,121 +37,72 @@ function QuietHoursConfigMobileComponent({
     handleTimeChange,
     handleTimezoneChange,
     handleBypassCriticalChange,
-    handleDaysChange,
+    handleDaysChange
   } = useQuietHoursConfig(value, onChange);
-
-  return (
-    <Card className={cn('w-full border-0 shadow-none', className)}>
+  return <Card className={cn('w-full border-0 shadow-none', className)}>
       <CardHeader className="pb-component-md">
         <CardTitle className="gap-component-sm flex items-center text-xl">
-          <Moon
-            className="h-6 w-6"
-            aria-hidden="true"
-          />
-          {t('quietHours.title')}
+          <Moon className="h-6 w-6" aria-hidden="true" />
+          {"Quiet Hours"}
         </CardTitle>
-        <CardDescription className="text-base">{t('quietHours.description')}</CardDescription>
+        <CardDescription className="text-base">{"Suppress non-critical alerts during specified hours to avoid unnecessary disruptions"}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-component-lg p-component-md">
         {/* Time Range */}
         <div className="space-y-component-sm">
-          <TimeRangeInput
-            startTime={startTime}
-            endTime={endTime}
-            onChange={handleTimeChange}
-            disabled={disabled}
-          />
+          <TimeRangeInput startTime={startTime} endTime={endTime} onChange={handleTimeChange} disabled={disabled} />
 
           {/* Duration display */}
           <div className="gap-component-sm text-muted-foreground bg-muted/50 p-component-sm flex items-center rounded-[var(--semantic-radius-button)] text-sm">
-            <Clock
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
+            <Clock className="h-5 w-5" aria-hidden="true" />
             <span>
-              {t('quietHours.duration')}: <strong className="text-foreground">{duration}</strong>
+              {"quietHours.duration"}: <strong className="text-foreground">{duration}</strong>
             </span>
           </div>
         </div>
 
         {/* Timezone */}
         <div>
-          <TimezoneSelector
-            value={timezone}
-            onChange={handleTimezoneChange}
-            disabled={disabled}
-          />
+          <TimezoneSelector value={timezone} onChange={handleTimezoneChange} disabled={disabled} />
         </div>
 
         {/* Days of Week */}
         <div className="space-y-component-sm">
-          <Label className="text-base font-medium">{t('quietHours.activeDays')}</Label>
-          <p className="text-muted-foreground text-sm">{t('quietHours.activeDaysDescription')}</p>
-          <DayOfWeekSelector
-            value={daysOfWeek}
-            onChange={handleDaysChange}
-            disabled={disabled}
-          />
-          {errors.daysOfWeek && (
-            <Alert
-              variant="destructive"
-              className="mt-2"
-              role="alert"
-            >
+          <Label className="text-base font-medium">{"Active Days"}</Label>
+          <p className="text-muted-foreground text-sm">{"quietHours.activeDaysDescription"}</p>
+          <DayOfWeekSelector value={daysOfWeek} onChange={handleDaysChange} disabled={disabled} />
+          {errors.daysOfWeek && <Alert variant="destructive" className="mt-2" role="alert">
               <AlertDescription>{errors.daysOfWeek}</AlertDescription>
-            </Alert>
-          )}
+            </Alert>}
         </div>
 
         {/* Bypass Critical Alerts */}
         <div className="space-y-component-sm pb-component-md border-border border-b">
           <div className="gap-component-lg flex items-start justify-between">
             <div className="space-y-component-xs flex-1">
-              <Label
-                htmlFor="bypass-critical-mobile"
-                className="gap-component-sm flex items-center text-base font-medium"
-              >
-                <Shield
-                  className="h-5 w-5"
-                  aria-hidden="true"
-                />
-                {t('quietHours.bypassCritical')}
+              <Label htmlFor="bypass-critical-mobile" className="gap-component-sm flex items-center text-base font-medium">
+                <Shield className="h-5 w-5" aria-hidden="true" />
+                {"Allow Critical Alerts"}
               </Label>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                {t('quietHours.bypassCriticalDescription')}
+                {"quietHours.bypassCriticalDescription"}
               </p>
             </div>
-            <Switch
-              id="bypass-critical-mobile"
-              checked={bypassCritical}
-              onCheckedChange={handleBypassCriticalChange}
-              disabled={disabled}
-              aria-label={t('quietHours.bypassCritical')}
-              className="mt-component-xs"
-            />
+            <Switch id="bypass-critical-mobile" checked={bypassCritical} onCheckedChange={handleBypassCriticalChange} disabled={disabled} aria-label={"Allow Critical Alerts"} className="mt-component-xs" />
           </div>
         </div>
 
         {/* Validation errors */}
-        {!isValid && Object.keys(errors).length > 0 && (
-          <Alert
-            variant="destructive"
-            role="alert"
-          >
+        {!isValid && Object.keys(errors).length > 0 && <Alert variant="destructive" role="alert">
             <AlertDescription>
               <ul className="space-y-component-xs list-inside list-disc text-sm">
-                {Object.entries(errors).map(([field, message]) => (
-                  <li key={field}>{message}</li>
-                ))}
+                {Object.entries(errors).map(([field, message]) => <li key={field}>{message}</li>)}
               </ul>
             </AlertDescription>
-          </Alert>
-        )}
+          </Alert>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
-
 export const QuietHoursConfigMobile = memo(QuietHoursConfigMobileComponent);
 QuietHoursConfigMobile.displayName = 'QuietHoursConfigMobile';

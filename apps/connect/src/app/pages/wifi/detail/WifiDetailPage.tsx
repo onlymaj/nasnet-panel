@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import { useWirelessInterfaceDetail } from '@nasnet/api-client/queries';
 import { WirelessInterfaceDetail } from '@nasnet/features/wireless';
 import { useConnectionStore } from '@nasnet/state/stores';
@@ -25,27 +22,32 @@ import { Skeleton } from '@nasnet/ui/primitives';
  * Route: /router/:id/wifi/:interfaceName
  */
 export const WifiDetailPage = React.memo(function WifiDetailPage() {
-  const { t } = useTranslation('wifi');
-  const { interfaceName, id: routerId } = useParams({ from: '/router/$id/wifi/$interfaceName' });
+  const {
+    interfaceName,
+    id: routerId
+  } = useParams({
+    from: '/router/$id/wifi/$interfaceName'
+  });
   const navigate = useNavigate();
-  const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const routerIp = useConnectionStore(state => state.currentRouterIp) || '';
   const {
     data: interfaceData,
     isLoading,
-    error,
+    error
   } = useWirelessInterfaceDetail(routerIp, interfaceName || '');
 
   /**
    * Navigate back to the router's WiFi tab
    */
   const handleBack = () => {
-    navigate({ to: `/router/${routerId}/wifi` });
+    navigate({
+      to: `/router/${routerId}/wifi`
+    });
   };
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-page-mobile md:py-page-tablet lg:py-page-desktop">
+    return <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-page-mobile md:py-page-tablet lg:py-page-desktop">
         <div className="mx-auto max-w-3xl">
           {/* Header skeleton */}
           <div className="mb-component-lg">
@@ -61,67 +63,54 @@ export const WifiDetailPage = React.memo(function WifiDetailPage() {
             <Skeleton className="h-32 w-full rounded-[var(--semantic-radius-card)]" />
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Error state
   if (error || !interfaceData) {
-    return (
-      <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-page-mobile md:py-page-tablet lg:py-page-desktop">
+    return <div className="px-page-mobile md:px-page-tablet lg:px-page-desktop py-page-mobile md:py-page-tablet lg:py-page-desktop">
         <div className="mx-auto max-w-3xl">
-          <button
-            onClick={handleBack}
-            className="gap-component-sm text-muted-foreground hover:text-foreground mb-component-lg focus-visible:ring-ring flex items-center rounded-[var(--semantic-radius-button)] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          >
+          <button onClick={handleBack} className="gap-component-sm text-muted-foreground hover:text-foreground mb-component-lg focus-visible:ring-ring flex items-center rounded-[var(--semantic-radius-button)] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
             <ArrowLeft className="h-4 w-4" />
-            {t('button.backToWiFi', { ns: 'common' })}
+            {"Back to WiFi"}
           </button>
 
           <div className="bg-error/10 border-error p-component-lg rounded-[var(--semantic-radius-card)] border text-center">
             <h2 className="text-error mb-component-sm text-lg font-semibold">
-              {t('status.failedToLoadInterface')}
+              {"Failed To Load Interface"}
             </h2>
             <p className="text-muted-foreground text-sm">
               {error?.message || `Interface "${interfaceName}" not found`}
             </p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Success state
-  return (
-    <div className="px-page-tablet py-page-tablet">
+  return <div className="px-page-tablet py-page-tablet">
       <div className="mx-auto max-w-3xl">
         {/* Back button */}
-        <button
-          onClick={handleBack}
-          className="gap-component-sm text-muted-foreground hover:text-foreground mb-component-lg focus-visible:ring-ring flex items-center rounded-[var(--semantic-radius-button)] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          aria-label={t('button.backToWiFi', { ns: 'common' })}
-        >
+        <button onClick={handleBack} className="gap-component-sm text-muted-foreground hover:text-foreground mb-component-lg focus-visible:ring-ring flex items-center rounded-[var(--semantic-radius-button)] text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" aria-label={"Back to WiFi"}>
           <ArrowLeft className="h-4 w-4" />
-          {t('button.backToWiFi', { ns: 'common' })}
+          {"Back to WiFi"}
         </button>
 
         {/* Page header */}
         <div className="mb-component-lg">
           <h1 className="font-display text-foreground mb-component-sm text-2xl font-semibold">
             <span className="font-display font-semibold">
-              {interfaceData.ssid || t('status.wirelessInterface')}
+              {interfaceData.ssid || "Wireless Interface"}
             </span>
           </h1>
           <p className="text-muted-foreground text-sm">
-            {t('interfaces.detailedConfig', { name: interfaceData.name })}
+            {"Detailed configuration"}
           </p>
         </div>
 
         {/* Interface detail component */}
         <WirelessInterfaceDetail interface={interfaceData} />
       </div>
-    </div>
-  );
+    </div>;
 });
-
 WifiDetailPage.displayName = 'WifiDetailPage';

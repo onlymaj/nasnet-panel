@@ -118,13 +118,12 @@ All aliases are defined in `apps/connect/vite.config.ts` (runtime resolution) an
 
 ### Core Libraries
 
-| Alias                    | Resolves To               | Purpose                                                                              |
-| ------------------------ | ------------------------- | ------------------------------------------------------------------------------------ |
-| `@nasnet/core/types`     | `libs/core/types/src`     | Shared TypeScript interfaces and enums                                               |
-| `@nasnet/core/utils`     | `libs/core/utils/src`     | Pure utility functions (IP, MAC, status)                                             |
-| `@nasnet/core/constants` | `libs/core/constants/src` | App constants, route names, socket events, well-known ports                          |
-| `@nasnet/core/forms`     | `libs/core/forms/src`     | React Hook Form + Zod utilities, validation pipeline                                 |
-| `@nasnet/core/i18n`      | `libs/core/i18n/src`      | i18next setup, `useTranslation`, `useDirection`, `DirectionProvider`, `I18nProvider` |
+| Alias                    | Resolves To               | Purpose                                                     |
+| ------------------------ | ------------------------- | ----------------------------------------------------------- |
+| `@nasnet/core/types`     | `libs/core/types/src`     | Shared TypeScript interfaces and enums                      |
+| `@nasnet/core/utils`     | `libs/core/utils/src`     | Pure utility functions (IP, MAC, status)                    |
+| `@nasnet/core/constants` | `libs/core/constants/src` | App constants, route names, socket events, well-known ports |
+| `@nasnet/core/forms`     | `libs/core/forms/src`     | React Hook Form + Zod utilities, validation pipeline        |
 
 ### UI Libraries
 
@@ -205,16 +204,6 @@ React Hook Form integration:
 - `ValidationPipeline` — multi-step async validation (e.g., check IP conflict on blur)
 - `mapBackendErrors()` — maps GraphQL error extensions to field-level form errors
 - Network validators: IP, CIDR, MAC address Zod schemas
-
-### `@nasnet/core/i18n`
-
-i18next integration:
-
-- `I18nProvider` — Suspense-based lazy language loading
-- `DirectionProvider` — RTL/LTR switching
-- `useTranslation()` — typed translation hook
-- `useDirection()` — current text direction
-- `useFormatters()` — locale-aware number, date, byte formatting
 
 ### `@nasnet/api-client/core`
 

@@ -13,7 +13,6 @@
  */
 
 import React from 'react';
-
 import { useNavigate } from '@tanstack/react-router';
 import {
   Shield,
@@ -25,8 +24,6 @@ import {
   XCircle,
   Loader2,
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
 import {
   useRouterInfo,
   useRouterResource,
@@ -56,11 +53,10 @@ import type {
   ConnectedVPNClient,
   NetworkStatus,
 } from '@nasnet/ui/patterns';
-
 export const OverviewTab = React.memo(function OverviewTab() {
-  const { t } = useTranslation('router');
   const navigate = useNavigate();
   const routerIp = useConnectionStore((state) => state.currentRouterIp) || '';
+  const connectionState = useConnectionStore((state) => state.state);
 
   // Fetch router information
   const { data, isLoading, error, refetch } = useRouterInfo(routerIp);
@@ -112,21 +108,23 @@ export const OverviewTab = React.memo(function OverviewTab() {
 
   // Determine overall network status
   const getNetworkStatus = (): NetworkStatus => {
-    if (isLoading || resourceLoading) return 'loading';
-    if (error || resourceError) return 'error';
+    if (!resourceData) {
+      if (isLoading || resourceLoading || connectionState === 'reconnecting') return 'loading';
+      if (resourceError || connectionState === 'disconnected') return 'error';
+    }
+
     if (cpuStatus === 'critical' || memoryStatus === 'critical' || diskStatus === 'critical')
       return 'error';
     if (cpuStatus === 'warning' || memoryStatus === 'warning' || diskStatus === 'warning')
       return 'warning';
     return 'healthy';
   };
-
   const networkStatus = getNetworkStatus();
   const statusMessage =
-    networkStatus === 'healthy' ? t('overview.statusHealthy')
-    : networkStatus === 'warning' ? t('overview.statusWarning')
-    : networkStatus === 'error' ? t('overview.statusError')
-    : t('overview.statusLoading');
+    networkStatus === 'healthy' ? 'All systems operational'
+    : networkStatus === 'warning' ? 'Attention needed'
+    : networkStatus === 'error' ? 'Issues detected'
+    : 'Loading router status...';
 
   // Get uptime in a friendly format
   const uptimeFormatted = data?.uptime ? parseRouterOSUptime(data.uptime) : 'N/A';
@@ -157,29 +155,29 @@ export const OverviewTab = React.memo(function OverviewTab() {
     {
       id: 'vpn',
       icon: Shield,
-      label:
-        vpnConnectedCount > 0 ?
-          t('overview.quickActions.vpnActive')
-        : t('overview.quickActions.vpnConnect'),
-      sublabel:
-        vpnConnectedCount > 0 ?
-          t('overview.quickActions.vpnConnected', { count: vpnConnectedCount })
-        : t('overview.quickActions.vpnManage'),
-      onClick: () => navigate({ to: 'vpn' as '/' }),
+      label: vpnConnectedCount > 0 ? 'VPN Active' : 'Connect VPN',
+      sublabel: vpnConnectedCount > 0 ? 'Connected clients' : 'Manage tunnels',
+      onClick: () =>
+        navigate({
+          to: 'vpn' as '/',
+        }),
       variant: vpnConnectedCount > 0 ? 'primary' : 'default',
     },
     {
       id: 'wifi',
       icon: Wifi,
-      label: t('overview.quickActions.wifi'),
-      sublabel: t('overview.quickActions.wifiManage'),
-      onClick: () => navigate({ to: 'wifi' as '/' }),
+      label: 'WiFi',
+      sublabel: 'Manage wireless',
+      onClick: () =>
+        navigate({
+          to: 'wifi' as '/',
+        }),
     },
     {
       id: 'restart',
       icon: RotateCcw,
-      label: t('overview.quickActions.restart'),
-      sublabel: t('overview.quickActions.restartSafe'),
+      label: 'Restart',
+      sublabel: 'Safe reboot',
       onClick: () => {
         // TODO: Implement restart confirmation dialog
         console.log('Restart clicked');
@@ -188,9 +186,12 @@ export const OverviewTab = React.memo(function OverviewTab() {
     {
       id: 'firewall',
       icon: ShieldCheck,
-      label: t('overview.quickActions.firewall'),
-      sublabel: t('overview.quickActions.firewallActive'),
-      onClick: () => navigate({ to: 'firewall' as '/' }),
+      label: 'Firewall',
+      sublabel: 'Rules active',
+      onClick: () =>
+        navigate({
+          to: 'firewall' as '/',
+        }),
     },
   ];
 
@@ -198,7 +199,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
   const statusPills: StatusPill[] = [
     {
       id: 'internet',
-      label: t('overview.statusPills.internetOk'),
+      label: 'Internet OK',
       variant:
         networkStatus === 'healthy' ? 'success'
         : networkStatus === 'warning' ? 'warning'
@@ -206,10 +207,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
     },
     {
       id: 'vpn',
-      label:
-        vpnConnectedCount > 0 ?
-          t('overview.statusPills.vpn', { count: vpnConnectedCount })
-        : t('overview.statusPills.vpnOff'),
+      label: vpnConnectedCount > 0 ? 'VPN connected' : 'VPN off',
       variant: vpnConnectedCount > 0 ? 'success' : 'neutral',
     },
     {
@@ -219,7 +217,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
     },
     {
       id: 'dhcp',
-      label: t('overview.statusPills.devices', { count: activeDhcpLeases }),
+      label: 'Devices online',
       variant: 'info',
     },
   ];
@@ -246,7 +244,6 @@ export const OverviewTab = React.memo(function OverviewTab() {
         return <Loader2 className="text-foreground h-16 w-16 animate-spin" />;
     }
   };
-
   const getHeroGradient = () => {
     switch (networkStatus) {
       case 'healthy':
@@ -259,7 +256,6 @@ export const OverviewTab = React.memo(function OverviewTab() {
         return 'from-muted to-muted';
     }
   };
-
   return (
     <div className="min-h-full">
       {/* Hero Section with Status */}
@@ -268,7 +264,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
       >
         <div className="mx-auto max-w-7xl">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm text-white/70">{t('overview.routerStatus')}</p>
+            <p className="text-sm text-white/70">{'Router status'}</p>
             <LastUpdated
               timestamp={dataUpdatedAt}
               className="text-white/70"
@@ -289,7 +285,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
           {/* Quick Actions Card (Floating) */}
           <QuickActionsCard
             actions={quickActions}
-            title={t('overview.quickActionsTitle')}
+            title={'Quick Actions'}
           />
 
           {/* Status Pills */}
@@ -298,7 +294,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
           {/* Resource Monitor Section */}
           <div>
             <h2 className="font-display mb-component-md px-component-sm text-lg font-semibold">
-              {t('overview.resourceMonitor')}
+              {'Resource Monitor'}
             </h2>
             <div className="gap-component-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {/* System Information Card */}
@@ -340,21 +336,21 @@ export const OverviewTab = React.memo(function OverviewTab() {
           {/* DHCP & Traffic Section */}
           <div>
             <h2 className="font-display mb-component-md px-component-sm text-lg font-semibold">
-              {t('overview.networkActivity')}
+              {'Network Activity'}
             </h2>
             <div className="gap-component-md grid grid-cols-1 md:grid-cols-2">
               {/* DHCP Summary */}
               <DHCPSummaryCard
                 activeLeases={activeDhcpLeases}
                 ipRange={dhcpPoolRange}
-                serverName={dhcpServers?.[0]?.name || t('overview.defaultDhcpServer')}
+                serverName={dhcpServers?.[0]?.name || 'Default DHCP Server'}
                 isLoading={dhcpLeasesLoading}
                 linkTo="dhcp"
               />
 
               {/* Traffic Chart */}
               <TrafficChart
-                title={t('overview.networkTraffic')}
+                title={'Network Traffic'}
                 showPlaceholder={true}
                 height={140}
               />
@@ -364,7 +360,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
           {/* VPN Clients Section */}
           <div>
             <h2 className="font-display mb-component-md px-component-sm text-lg font-semibold">
-              {t('overview.vpnStatus')}
+              {'VPN Status'}
             </h2>
             <VPNClientsSummary
               connectedCount={vpnConnectedCount}
@@ -378,7 +374,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
           {/* Hardware Details Section */}
           <div className="pb-component-lg">
             <h2 className="font-display mb-component-md px-component-sm text-lg font-semibold">
-              {t('overview.hardware')}
+              {'Hardware'}
             </h2>
             <div className="gap-component-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               <HardwareCard
@@ -393,5 +389,4 @@ export const OverviewTab = React.memo(function OverviewTab() {
     </div>
   );
 });
-
 OverviewTab.displayName = 'OverviewTab';

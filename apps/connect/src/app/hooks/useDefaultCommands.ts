@@ -30,16 +30,32 @@ import {
 
 import {
   useCommandRegistry,
+  useConnectionStore,
   useShortcutRegistry,
   useUIStore,
   type Command,
   type Shortcut,
 } from '@nasnet/state/stores';
 
+function navigateToWifi(navigate: ReturnType<typeof useNavigate>, currentRouterId: string | null) {
+  if (currentRouterId) {
+    navigate({
+      to: '/router/$id/wifi',
+      params: { id: currentRouterId },
+    });
+    return;
+  }
+
+  navigate({ to: '/routers' });
+}
+
 /**
  * Default navigation commands
  */
-function createNavigationCommands(navigate: ReturnType<typeof useNavigate>): Command[] {
+function createNavigationCommands(
+  navigate: ReturnType<typeof useNavigate>,
+  currentRouterId: string | null
+): Command[] {
   return [
     {
       id: 'nav-home',
@@ -93,7 +109,7 @@ function createNavigationCommands(navigate: ReturnType<typeof useNavigate>): Com
       icon: Wifi,
       category: 'navigation',
       shortcut: 'g w',
-      onExecute: () => navigate({ to: '/wifi' }),
+      onExecute: () => navigateToWifi(navigate, currentRouterId),
     },
     {
       id: 'nav-discover',
@@ -213,6 +229,7 @@ function createResourceCommands(navigate: ReturnType<typeof useNavigate>): Comma
  */
 function createDefaultShortcuts(
   navigate: ReturnType<typeof useNavigate>,
+  currentRouterId: string | null,
   toggleCommandPalette: () => void,
   toggleShortcutsOverlay: () => void
 ): Shortcut[] {
@@ -273,7 +290,7 @@ function createDefaultShortcuts(
       label: 'Go to WiFi',
       keys: 'g w',
       group: 'navigation',
-      onExecute: () => navigate({ to: '/wifi' }),
+      onExecute: () => navigateToWifi(navigate, currentRouterId),
     },
     // Action shortcuts
     {
@@ -307,13 +324,14 @@ function createDefaultShortcuts(
  */
 export function useDefaultCommands() {
   const navigate = useNavigate();
+  const currentRouterId = useConnectionStore((state) => state.currentRouterId);
   const { registerMany: registerCommands } = useCommandRegistry();
   const { registerMany: registerShortcuts, toggleOverlay } = useShortcutRegistry();
   const { toggleCommandPalette } = useUIStore();
 
   useEffect(() => {
     // Register navigation commands
-    const navCommands = createNavigationCommands(navigate);
+    const navCommands = createNavigationCommands(navigate, currentRouterId);
     registerCommands(navCommands);
 
     // Register action commands
@@ -325,7 +343,19 @@ export function useDefaultCommands() {
     registerCommands(resourceCommands);
 
     // Register shortcuts
-    const shortcuts = createDefaultShortcuts(navigate, toggleCommandPalette, toggleOverlay);
+    const shortcuts = createDefaultShortcuts(
+      navigate,
+      currentRouterId,
+      toggleCommandPalette,
+      toggleOverlay
+    );
     registerShortcuts(shortcuts);
-  }, [navigate, registerCommands, registerShortcuts, toggleCommandPalette, toggleOverlay]);
+  }, [
+    currentRouterId,
+    navigate,
+    registerCommands,
+    registerShortcuts,
+    toggleCommandPalette,
+    toggleOverlay,
+  ]);
 }

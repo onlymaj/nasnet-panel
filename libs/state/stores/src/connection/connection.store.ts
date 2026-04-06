@@ -291,11 +291,6 @@ export const useConnectionStore = create<ConnectionState & ConnectionActions>()(
               wsStatus: status,
               wsError: error ?? null,
               isReconnecting: status === 'connecting',
-              // Legacy compatibility mapping
-              state:
-                status === 'connected' ? 'connected'
-                : status === 'connecting' ? 'reconnecting'
-                : 'disconnected',
             },
             false,
             `setWsStatus/${status}`
@@ -421,18 +416,17 @@ export const useConnectionStore = create<ConnectionState & ConnectionActions>()(
               currentRouterId: id,
               currentRouterIp: ip,
               activeRouterId: id,
-              state: 'connected',
-              wsStatus: 'connected',
-              lastConnectedAt: new Date(),
-              isReconnecting: false,
+              state: 'reconnecting',
+              wsStatus: state.wsStatus,
+              isReconnecting: true,
               routers: {
                 ...state.routers,
                 [id]: {
                   routerId: id,
-                  status: 'connected',
+                  status: 'disconnected',
                   protocol: state.routers[id]?.protocol ?? 'rest',
                   latencyMs: state.routers[id]?.latencyMs ?? null,
-                  lastConnected: new Date(),
+                  lastConnected: state.routers[id]?.lastConnected ?? null,
                   lastError: null,
                 },
               },

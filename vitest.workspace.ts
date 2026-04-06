@@ -36,15 +36,6 @@ export default defineWorkspace([
   },
   {
     test: {
-      name: 'libs-core-i18n',
-      root: './libs/core/i18n',
-      include: ['src/**/*.{test,spec}.{ts,tsx}'],
-      environment: 'jsdom',
-      globals: true,
-    },
-  },
-  {
-    test: {
       name: 'libs-ros-cmd-generator',
       root: './libs/ros-cmd-generator',
       include: ['src/**/*.{test,spec}.{ts,tsx}'],

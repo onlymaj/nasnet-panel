@@ -124,7 +124,7 @@ func InitializeOrchestrator(
 	// 8. Resource Limiter - monitors resource usage and applies cgroups v2 memory limits
 	resourceLimiter, err := resources.NewResourceLimiter(resources.ResourceLimiterConfig{
 		EventBus: eventBus,
-		Logger:   logger.Desugar(),
+		Logger:   logger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("init resource limiter: %w", err)

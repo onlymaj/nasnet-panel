@@ -8,56 +8,12 @@
  */
 
 import React from 'react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2, AlertTriangle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-  Input,
-  Button,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Alert,
-  AlertDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Badge,
-  Card,
-  cn,
-} from '@nasnet/ui/primitives';
-
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage, Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Alert, AlertDescription, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, Card, cn } from '@nasnet/ui/primitives';
 import { PortKnockVisualizer } from '../port-knock-visualizer';
-
 import type { UsePortKnockSequenceFormReturn } from './use-port-knock-sequence-form';
 
 // ============================================================================
@@ -82,57 +38,72 @@ export interface PortKnockSequenceFormDesktopProps {
 // Common Service Suggestions
 // ============================================================================
 
-const COMMON_SERVICES = [
-  { label: 'SSH (22)', port: 22, protocol: 'tcp' },
-  { label: 'HTTP (80)', port: 80, protocol: 'tcp' },
-  { label: 'HTTPS (443)', port: 443, protocol: 'tcp' },
-  { label: 'RDP (3389)', port: 3389, protocol: 'tcp' },
-  { label: 'VNC (5900)', port: 5900, protocol: 'tcp' },
-  { label: 'Custom', port: 0, protocol: 'tcp' },
-];
+const COMMON_SERVICES = [{
+  label: 'SSH (22)',
+  port: 22,
+  protocol: 'tcp'
+}, {
+  label: 'HTTP (80)',
+  port: 80,
+  protocol: 'tcp'
+}, {
+  label: 'HTTPS (443)',
+  port: 443,
+  protocol: 'tcp'
+}, {
+  label: 'RDP (3389)',
+  port: 3389,
+  protocol: 'tcp'
+}, {
+  label: 'VNC (5900)',
+  port: 5900,
+  protocol: 'tcp'
+}, {
+  label: 'Custom',
+  port: 0,
+  protocol: 'tcp'
+}];
 
 // ============================================================================
 // Sortable Row Component
 // ============================================================================
 
 interface SortableRowProps {
-  knockPort: { port: number; protocol: string; order: number };
+  knockPort: {
+    port: number;
+    protocol: string;
+    order: number;
+  };
   index: number;
   onRemove: () => void;
   onPortChange: (port: number) => void;
   onProtocolChange: (protocol: string) => void;
 }
-
 function SortableRow({
   knockPort,
   index,
   onRemove,
   onPortChange,
-  onProtocolChange,
+  onProtocolChange
 }: SortableRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: `knock-port-${index}`,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({
+    id: `knock-port-${index}`
   });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : 1
   };
-
-  return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-    >
+  return <TableRow ref={setNodeRef} style={style}>
       <TableCell className="w-12">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="cursor-grab active:cursor-grabbing"
-          {...attributes}
-          {...listeners}
-        >
+        <Button variant="ghost" size="sm" className="cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
           <GripVertical className="text-muted-foreground h-4 w-4" />
         </Button>
       </TableCell>
@@ -140,20 +111,10 @@ function SortableRow({
         <Badge variant="secondary">{knockPort.order}</Badge>
       </TableCell>
       <TableCell>
-        <Input
-          type="number"
-          min={1}
-          max={65535}
-          value={knockPort.port}
-          onChange={(e) => onPortChange(parseInt(e.target.value, 10))}
-          className="w-32"
-        />
+        <Input type="number" min={1} max={65535} value={knockPort.port} onChange={e => onPortChange(parseInt(e.target.value, 10))} className="w-32" />
       </TableCell>
       <TableCell>
-        <Select
-          value={knockPort.protocol}
-          onValueChange={onProtocolChange}
-        >
+        <Select value={knockPort.protocol} onValueChange={onProtocolChange}>
           <SelectTrigger className="w-24">
             <SelectValue />
           </SelectTrigger>
@@ -164,18 +125,11 @@ function SortableRow({
         </Select>
       </TableCell>
       <TableCell className="w-16">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRemove}
-          disabled={index < 2}
-          title={index < 2 ? 'At least 2 knock ports required' : 'Remove port'}
-        >
+        <Button variant="ghost" size="sm" onClick={onRemove} disabled={index < 2} title={index < 2 ? 'At least 2 knock ports required' : 'Remove port'}>
           <Trash2 className="text-destructive h-4 w-4" />
         </Button>
       </TableCell>
-    </TableRow>
-  );
+    </TableRow>;
 }
 
 // ============================================================================
@@ -186,9 +140,8 @@ function PortKnockSequenceFormDesktopComponent({
   formState,
   isEditMode = false,
   isSubmitting = false,
-  className,
+  className
 }: PortKnockSequenceFormDesktopProps) {
-  const { t } = useTranslation('firewall');
   const {
     form,
     knockPorts,
@@ -196,76 +149,53 @@ function PortKnockSequenceFormDesktopComponent({
     removeKnockPort,
     reorderKnockPorts,
     preview,
-    isLockoutRisk,
+    isLockoutRisk
   } = formState;
 
   // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
+    const {
+      active,
+      over
+    } = event;
     if (over && active.id !== over.id) {
       const oldIndex = knockPorts.findIndex((_, i) => `knock-port-${i}` === active.id);
       const newIndex = knockPorts.findIndex((_, i) => `knock-port-${i}` === over.id);
-
       if (oldIndex !== -1 && newIndex !== -1) {
         reorderKnockPorts(oldIndex, newIndex);
       }
     }
   };
-
-  return (
-    <div
-      className={cn('grid grid-cols-2 gap-6', className)}
-      data-testid="knock-sequence-form"
-    >
+  return <div className={cn('grid grid-cols-2 gap-6', className)} data-testid="knock-sequence-form">
       {/* Left Column: Form */}
       <div className="space-y-6">
         <Form {...form}>
-          <form
-            onSubmit={formState.onSubmit as any}
-            className="space-y-6"
-          >
+          <form onSubmit={formState.onSubmit as any} className="space-y-6">
             {/* Sequence Name */}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="name" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Sequence Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="ssh-protection"
-                      {...field}
-                    />
+                    <Input placeholder="ssh-protection" {...field} />
                   </FormControl>
                   <FormDescription>
                     Unique identifier for this knock sequence (used in address list names)
                   </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
             {/* SSH Lockout Warning */}
-            {isLockoutRisk && (
-              <Alert
-                variant="destructive"
-                data-testid="ssh-lockout-warning"
-              >
+            {isLockoutRisk && <Alert variant="destructive" data-testid="ssh-lockout-warning">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   Warning: This sequence protects SSH (port 22). Ensure you test the knock sequence
                   before logging out to avoid being locked out.
                 </AlertDescription>
-              </Alert>
-            )}
+              </Alert>}
 
             {/* Knock Ports Table */}
             <div className="space-y-2">
@@ -273,15 +203,8 @@ function PortKnockSequenceFormDesktopComponent({
               <FormDescription>
                 Define the sequence of ports to knock. Drag rows to reorder. Minimum 2 ports.
               </FormDescription>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={knockPorts.map((_, i) => `knock-port-${i}`)}
-                  strategy={verticalListSortingStrategy}
-                >
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={knockPorts.map((_, i) => `knock-port-${i}`)} strategy={verticalListSortingStrategy}>
                   <Table data-testid="knock-ports-table">
                     <TableHeader>
                       <TableRow>
@@ -293,40 +216,30 @@ function PortKnockSequenceFormDesktopComponent({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {knockPorts.map((knockPort, index) => (
-                        <SortableRow
-                          key={`knock-port-${index}`}
-                          knockPort={knockPort}
-                          index={index}
-                          onRemove={() => removeKnockPort(index)}
-                          onPortChange={(port) => {
-                            const updatedPorts = [...knockPorts];
-                            updatedPorts[index] = { ...updatedPorts[index], port };
-                            form.setValue('knockPorts', updatedPorts, { shouldValidate: true });
-                          }}
-                          onProtocolChange={(protocol) => {
-                            const updatedPorts = [...knockPorts];
-                            updatedPorts[index] = {
-                              ...updatedPorts[index],
-                              protocol: protocol as 'tcp' | 'udp',
-                            };
-                            form.setValue('knockPorts', updatedPorts, { shouldValidate: true });
-                          }}
-                        />
-                      ))}
+                      {knockPorts.map((knockPort, index) => <SortableRow key={`knock-port-${index}`} knockPort={knockPort} index={index} onRemove={() => removeKnockPort(index)} onPortChange={port => {
+                      const updatedPorts = [...knockPorts];
+                      updatedPorts[index] = {
+                        ...updatedPorts[index],
+                        port
+                      };
+                      form.setValue('knockPorts', updatedPorts, {
+                        shouldValidate: true
+                      });
+                    }} onProtocolChange={protocol => {
+                      const updatedPorts = [...knockPorts];
+                      updatedPorts[index] = {
+                        ...updatedPorts[index],
+                        protocol: protocol as 'tcp' | 'udp'
+                      };
+                      form.setValue('knockPorts', updatedPorts, {
+                        shouldValidate: true
+                      });
+                    }} />)}
                     </TableBody>
                   </Table>
                 </SortableContext>
               </DndContext>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addKnockPort}
-                disabled={knockPorts.length >= 8}
-                data-testid="add-knock-port-button"
-                aria-label="Add knock port to sequence"
-              >
+              <Button type="button" variant="outline" size="sm" onClick={addKnockPort} disabled={knockPorts.length >= 8} data-testid="add-knock-port-button" aria-label="Add knock port to sequence">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Knock Port
               </Button>
@@ -334,52 +247,35 @@ function PortKnockSequenceFormDesktopComponent({
 
             {/* Protected Service */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="protectedPort"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="protectedPort" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Protected Port</FormLabel>
-                    <Select
-                      value={field.value?.toString()}
-                      onValueChange={(val) => {
-                        const selected = COMMON_SERVICES.find((s) => s.port === parseInt(val, 10));
-                        if (selected) {
-                          field.onChange(selected.port);
-                          form.setValue('protectedProtocol', selected.protocol as 'tcp' | 'udp');
-                        }
-                      }}
-                    >
+                    <Select value={field.value?.toString()} onValueChange={val => {
+                const selected = COMMON_SERVICES.find(s => s.port === parseInt(val, 10));
+                if (selected) {
+                  field.onChange(selected.port);
+                  form.setValue('protectedProtocol', selected.protocol as 'tcp' | 'udp');
+                }
+              }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select service" />
                       </SelectTrigger>
                       <SelectContent>
-                        {COMMON_SERVICES.map((service) => (
-                          <SelectItem
-                            key={service.label}
-                            value={service.port.toString()}
-                          >
+                        {COMMON_SERVICES.map(service => <SelectItem key={service.label} value={service.port.toString()}>
                             {service.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormDescription>Service to protect behind knock sequence</FormDescription>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="protectedProtocol"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="protectedProtocol" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Protocol</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -389,63 +285,38 @@ function PortKnockSequenceFormDesktopComponent({
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
             </div>
 
             {/* Timeouts */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="knockTimeout"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="knockTimeout" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Knock Timeout</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="10s"
-                        {...field}
-                      />
+                      <Input placeholder="10s" {...field} />
                     </FormControl>
                     <FormDescription>Time allowed between knocks</FormDescription>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
-              <FormField
-                control={form.control}
-                name="accessTimeout"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="accessTimeout" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Access Timeout</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="1h"
-                        {...field}
-                      />
+                      <Input placeholder="1h" {...field} />
                     </FormControl>
                     <FormDescription>Access duration after successful knock</FormDescription>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
             </div>
 
             {/* Submit Button */}
             <div className="flex justify-end gap-3">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                data-testid="submit-button"
-                aria-label={isEditMode ? 'Update knock sequence' : 'Create knock sequence'}
-              >
-                {isSubmitting ?
-                  'Saving...'
-                : isEditMode ?
-                  'Update Sequence'
-                : 'Create Sequence'}
+              <Button type="submit" disabled={isSubmitting} data-testid="submit-button" aria-label={isEditMode ? 'Update knock sequence' : 'Create knock sequence'}>
+                {isSubmitting ? 'Saving...' : isEditMode ? 'Update Sequence' : 'Create Sequence'}
               </Button>
             </div>
           </form>
@@ -456,36 +327,23 @@ function PortKnockSequenceFormDesktopComponent({
       <div className="space-y-4">
         <Card className="p-4">
           <h3 className="mb-4 text-lg font-semibold">Preview</h3>
-          <PortKnockVisualizer
-            knockPorts={knockPorts}
-            protectedPort={form.watch('protectedPort')}
-            protectedProtocol={form.watch('protectedProtocol')}
-            knockTimeout={form.watch('knockTimeout')}
-            accessTimeout={form.watch('accessTimeout')}
-          />
+          <PortKnockVisualizer knockPorts={knockPorts} protectedPort={form.watch('protectedPort')} protectedProtocol={form.watch('protectedProtocol')} knockTimeout={form.watch('knockTimeout')} accessTimeout={form.watch('accessTimeout')} />
         </Card>
 
         {/* Rule Preview */}
         <Card className="p-4">
           <h3 className="mb-4 text-lg font-semibold">Generated Rules</h3>
           <div className="space-y-2 text-sm">
-            {preview.map((rule, index) => (
-              <div
-                key={index}
-                className="bg-muted flex items-start gap-2 rounded p-2"
-              >
+            {preview.map((rule, index) => <div key={index} className="bg-muted flex items-start gap-2 rounded p-2">
                 <Badge variant={rule.ruleType === 'accept' ? 'success' : 'default'}>
                   {rule.stage}
                 </Badge>
                 <span className="text-muted-foreground">{rule.description}</span>
-              </div>
-            ))}
+              </div>)}
           </div>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
-
 export const PortKnockSequenceFormDesktop = React.memo(PortKnockSequenceFormDesktopComponent);
 PortKnockSequenceFormDesktop.displayName = 'PortKnockSequenceFormDesktop';

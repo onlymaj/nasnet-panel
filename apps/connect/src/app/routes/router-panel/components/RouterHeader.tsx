@@ -1,11 +1,7 @@
 import React from 'react';
-
-import { useTranslation } from 'react-i18next';
-
 import { ROUTES } from '@nasnet/core/constants';
 import { useRouterStore, useConnectionStore } from '@nasnet/state/stores';
 import { BackButton, StatusIndicator } from '@nasnet/ui/patterns';
-
 export interface RouterHeaderProps {
   /**
    * Router ID from URL params
@@ -35,24 +31,24 @@ export interface RouterHeaderProps {
  * ```
  */
 export const RouterHeader = React.memo(function RouterHeader({ routerId }: RouterHeaderProps) {
-  const { t } = useTranslation('router');
   const getRouter = useRouterStore((state) => state.getRouter);
-  const currentRouterIp = useConnectionStore((state) => state.currentRouterIp);
-
+  const connectionState = useConnectionStore((state) => state.state);
   const router = getRouter(routerId);
 
   // Determine connection status
-  const isConnected = !!currentRouterIp;
+  const isConnected = connectionState === 'connected';
   const status = isConnected ? 'online' : 'offline';
-  const statusLabel = isConnected ? t('panel.connected') : t('panel.disconnected');
-
+  const statusLabel =
+    connectionState === 'reconnecting' ? 'Reconnecting'
+    : isConnected ? 'Connected'
+    : 'Disconnected';
   return (
     <div className="bg-card rounded-card-lg border-border brand-accent-line mb-4 border p-4 shadow-md md:mb-6 md:p-6">
       <div className="flex items-start gap-3 md:gap-4">
         {/* Back Button */}
         <BackButton
           to={ROUTES.ROUTER_LIST}
-          ariaLabel={t('panel.backButton')}
+          ariaLabel={'Back to routers'}
         />
 
         {/* Router Information */}
@@ -75,7 +71,7 @@ export const RouterHeader = React.memo(function RouterHeader({ routerId }: Route
           <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm md:gap-3">
             {/* Router ID */}
             <span className="font-mono">
-              {t('panel.idLabel')}: {routerId}
+              {'Router ID'}: {routerId}
             </span>
 
             {/* IP Address */}

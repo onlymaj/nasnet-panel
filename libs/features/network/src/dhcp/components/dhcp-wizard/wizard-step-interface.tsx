@@ -30,7 +30,6 @@ interface NetworkInterface {
   ipAddress?: string;
   running?: boolean;
 }
-
 interface WizardStepInterfaceProps {
   /** Stepper instance providing access to wizard step data */
   stepper: UseStepperReturn;
@@ -43,45 +42,45 @@ interface WizardStepInterfaceProps {
 /**
  * Interface selection step component
  */
-function WizardStepInterfaceComponent({ stepper, routerIp, className }: WizardStepInterfaceProps) {
+function WizardStepInterfaceComponent({
+  stepper,
+  routerIp,
+  className
+}: WizardStepInterfaceProps) {
   const [selectedInterface, setSelectedInterface] = useState<NetworkInterface | null>(null);
-
   const form = useForm<InterfaceStepFormData>({
     resolver: zodResolver(interfaceStepSchema),
-    defaultValues: stepper.getStepData('interface') || {},
+    defaultValues: stepper.getStepData('interface') || {}
   });
 
   // Memoized interface selection handler
-  const handleInterfaceSelect = useCallback(
-    (iface: NetworkInterface) => {
-      setSelectedInterface(iface);
-      form.setValue('interface', iface.name);
+  const handleInterfaceSelect = useCallback((iface: NetworkInterface) => {
+    setSelectedInterface(iface);
+    form.setValue('interface', iface.name);
 
-      // Store interface IP for later steps
-      if (iface.ipAddress) {
-        form.setValue('interfaceIP', iface.ipAddress);
+    // Store interface IP for later steps
+    if (iface.ipAddress) {
+      form.setValue('interfaceIP', iface.ipAddress);
 
-        // Calculate suggested pool for next step
-        try {
-          const suggestion = calculateSuggestedPool(iface.ipAddress);
+      // Calculate suggested pool for next step
+      try {
+        const suggestion = calculateSuggestedPool(iface.ipAddress);
 
-          // Pre-fill pool step data
-          stepper.setStepData({
-            interface: iface.name,
-            interfaceIP: iface.ipAddress,
-            suggestedPool: suggestion,
-          });
-        } catch (error) {
-          console.error('Failed to calculate pool suggestion:', error);
-        }
+        // Pre-fill pool step data
+        stepper.setStepData({
+          interface: iface.name,
+          interfaceIP: iface.ipAddress,
+          suggestedPool: suggestion
+        });
+      } catch (error) {
+        console.error('Failed to calculate pool suggestion:', error);
       }
-    },
-    [form, stepper]
-  );
+    }
+  }, [form, stepper]);
 
   // Save form data when proceeding
   useEffect(() => {
-    const subscription = form.watch((value) => {
+    const subscription = form.watch(value => {
       if (value.interface) {
         stepper.setStepData(value);
       }
@@ -90,42 +89,30 @@ function WizardStepInterfaceComponent({ stepper, routerIp, className }: WizardSt
   }, [form, stepper]);
 
   // Memoized interface selector change handler
-  const handleSelectorChange = useCallback(
-    (value: string | string[]) => {
-      if (!value) return;
-      const interfaceId = typeof value === 'string' ? value : value[0];
-      const iface = { id: interfaceId, name: interfaceId } as NetworkInterface;
-      handleInterfaceSelect(iface);
-    },
-    [handleInterfaceSelect]
-  );
-
-  return (
-    <div className={cn('space-y-component-lg', className)}>
-      <FormSection
-        title="Select Network Interface"
-        description="Choose the interface where the DHCP server will operate"
-      >
+  const handleSelectorChange = useCallback((value: string | string[]) => {
+    if (!value) return;
+    const interfaceId = typeof value === 'string' ? value : value[0];
+    const iface = {
+      id: interfaceId,
+      name: interfaceId
+    } as NetworkInterface;
+    handleInterfaceSelect(iface);
+  }, [handleInterfaceSelect]);
+  return <div className={cn('space-y-component-lg', className)}>
+      <FormSection title="Select Network Interface" description="Choose the interface where the DHCP server will operate">
         <div className="space-y-component-md">
           <div>
             <Label htmlFor="interface-selector">
               Interface
-              <FieldHelp field="dhcp.interface" />
+              <FieldHelp field="Interface" />
             </Label>
-            <InterfaceSelector
-              routerId={routerIp}
-              value={selectedInterface?.id}
-              onChange={handleSelectorChange}
-            />
-            {form.formState.errors.interface && (
-              <p className="text-error mt-component-xs text-sm">
+            <InterfaceSelector routerId={routerIp} value={selectedInterface?.id} onChange={handleSelectorChange} />
+            {form.formState.errors.interface && <p className="text-error mt-component-xs text-sm">
                 {form.formState.errors.interface.message}
-              </p>
-            )}
+              </p>}
           </div>
 
-          {selectedInterface && selectedInterface.ipAddress && (
-            <div className="border-border bg-background p-component-md space-y-component-sm rounded-[var(--semantic-radius-card)] border">
+          {selectedInterface && selectedInterface.ipAddress && <div className="border-border bg-background p-component-md space-y-component-sm rounded-[var(--semantic-radius-card)] border">
               <h4 className="text-sm font-medium">Selected Interface Details</h4>
               <div className="gap-component-sm grid grid-cols-2 text-sm">
                 <div>
@@ -145,14 +132,11 @@ function WizardStepInterfaceComponent({ stepper, routerIp, className }: WizardSt
                   <span className="ml-2">{selectedInterface.running ? 'Running' : 'Down'}</span>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </FormSection>
-    </div>
-  );
+    </div>;
 }
-
 WizardStepInterfaceComponent.displayName = 'WizardStepInterface';
 
 /**

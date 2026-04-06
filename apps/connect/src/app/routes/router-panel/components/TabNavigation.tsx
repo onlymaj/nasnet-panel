@@ -1,30 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
-
 import { useNavigate, useRouterState, useParams } from '@tanstack/react-router';
-import {
-  LayoutDashboard,
-  Wifi,
-  Shield,
-  ShieldAlert,
-  Network,
-  Globe,
-  Cable,
-  ScrollText,
-  Store,
-  Boxes,
-} from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
+import { LayoutDashboard, Wifi, Shield, ShieldAlert, Network, Globe, Cable, ScrollText, Store, Boxes } from 'lucide-react';
 import { cn } from '@nasnet/ui/primitives';
-
-import {
-  preloadFirewallTab,
-  preloadLogsTab,
-  preloadDHCPTab,
-  preloadDnsTab,
-  preloadPluginStoreTab,
-  preloadAllHeavyTabs,
-} from '@/app/routes/router-panel/tabs/lazy';
+import { preloadFirewallTab, preloadLogsTab, preloadDHCPTab, preloadDnsTab, preloadPluginStoreTab, preloadAllHeavyTabs } from '@/app/routes/router-panel/tabs/lazy';
 
 /**
  * Tab definition interface
@@ -50,76 +28,65 @@ interface TabDefinition {
  *
  * @see NAS-4.12: Performance Optimization
  */
-const tabs: TabDefinition[] = [
-  {
-    value: 'overview',
-    label: 'Overview',
-    icon: LayoutDashboard,
-    ariaLabel: 'Router overview and status',
-  },
-  {
-    value: 'wifi',
-    label: 'WiFi',
-    icon: Wifi,
-    ariaLabel: 'WiFi configuration',
-  },
-  {
-    value: 'vpn',
-    label: 'VPN',
-    icon: Shield,
-    ariaLabel: 'VPN configuration',
-  },
-  {
-    value: 'firewall',
-    label: 'Firewall',
-    mobileLabel: 'FW',
-    icon: ShieldAlert,
-    ariaLabel: 'Firewall settings',
-    preload: preloadFirewallTab,
-  },
-  {
-    value: 'dhcp',
-    label: 'DHCP',
-    icon: Network,
-    ariaLabel: 'DHCP server configuration',
-    preload: preloadDHCPTab,
-  },
-  {
-    value: 'dns',
-    label: 'DNS',
-    icon: Globe,
-    ariaLabel: 'DNS configuration and servers',
-    preload: preloadDnsTab,
-  },
-  {
-    value: 'network',
-    label: 'Network',
-    mobileLabel: 'Net',
-    icon: Cable,
-    ariaLabel: 'Network settings',
-  },
-  {
-    value: 'logs',
-    label: 'Logs',
-    icon: ScrollText,
-    ariaLabel: 'System logs',
-    preload: preloadLogsTab,
-  },
-  {
-    value: 'plugins',
-    label: 'Store',
-    icon: Store,
-    ariaLabel: 'Plugin store',
-    preload: preloadPluginStoreTab,
-  },
-  {
-    value: 'services',
-    label: 'Services',
-    mobileLabel: 'Svc',
-    icon: Boxes,
-    ariaLabel: 'Service management',
-  },
-];
+const tabs: TabDefinition[] = [{
+  value: 'overview',
+  label: 'Overview',
+  icon: LayoutDashboard,
+  ariaLabel: 'Router overview and status'
+}, {
+  value: 'wifi',
+  label: 'WiFi',
+  icon: Wifi,
+  ariaLabel: 'WiFi configuration'
+}, {
+  value: 'vpn',
+  label: 'VPN',
+  icon: Shield,
+  ariaLabel: 'VPN configuration'
+}, {
+  value: 'firewall',
+  label: 'Firewall',
+  mobileLabel: 'FW',
+  icon: ShieldAlert,
+  ariaLabel: 'Firewall settings',
+  preload: preloadFirewallTab
+}, {
+  value: 'dhcp',
+  label: 'DHCP',
+  icon: Network,
+  ariaLabel: 'DHCP server configuration',
+  preload: preloadDHCPTab
+}, {
+  value: 'dns',
+  label: 'DNS',
+  icon: Globe,
+  ariaLabel: 'DNS configuration and servers',
+  preload: preloadDnsTab
+}, {
+  value: 'network',
+  label: 'Network',
+  mobileLabel: 'Net',
+  icon: Cable,
+  ariaLabel: 'Network settings'
+}, {
+  value: 'logs',
+  label: 'Logs',
+  icon: ScrollText,
+  ariaLabel: 'System logs',
+  preload: preloadLogsTab
+}, {
+  value: 'plugins',
+  label: 'Store',
+  icon: Store,
+  ariaLabel: 'Plugin store',
+  preload: preloadPluginStoreTab
+}, {
+  value: 'services',
+  label: 'Services',
+  mobileLabel: 'Svc',
+  icon: Boxes,
+  ariaLabel: 'Service management'
+}];
 
 /**
  * Tab Navigation Component
@@ -146,8 +113,11 @@ const tabs: TabDefinition[] = [
  * ```
  */
 export const TabNavigation = React.memo(function TabNavigation() {
-  const { t } = useTranslation('router');
-  const { id } = useParams({ from: '/router/$id' });
+  const {
+    id
+  } = useParams({
+    from: '/router/$id'
+  });
   const navigate = useNavigate();
   const routerState = useRouterState();
   const pathname = routerState.location.pathname;
@@ -171,7 +141,9 @@ export const TabNavigation = React.memo(function TabNavigation() {
   const handleTabClick = (tabValue: string) => {
     const basePath = `/router/${id}`;
     const targetPath = tabValue === 'overview' ? basePath : `${basePath}/${tabValue}`;
-    navigate({ to: targetPath });
+    navigate({
+      to: targetPath
+    });
   };
 
   /**
@@ -193,89 +165,35 @@ export const TabNavigation = React.memo(function TabNavigation() {
       preload();
     }
   }, []);
-
-  return (
-    <>
+  return <>
       {/* Desktop Navigation - Top Tabs */}
-      <nav
-        className="border-border hidden border-b bg-transparent md:block"
-        role="navigation"
-        aria-label="Router panel sections"
-      >
+      <nav className="border-border hidden border-b bg-transparent md:block" role="navigation" aria-label="Router panel sections">
         <div className="mx-auto flex max-w-7xl items-center gap-1">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.value;
-
-            return (
-              <button
-                key={tab.value}
-                onClick={() => handleTabClick(tab.value)}
-                onKeyDown={(e) => handleKeyDown(e, tab.value)}
-                onMouseEnter={() => handleMouseEnter(tab.preload)}
-                onFocus={() => handleMouseEnter(tab.preload)}
-                role="tab"
-                aria-selected={isActive}
-                aria-label={tab.ariaLabel}
-                className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200',
-                  'focus-visible:ring-ring border-b-2 border-transparent focus-visible:ring-2 focus-visible:ring-offset-2',
-                  'hover:text-secondary',
-                  isActive ?
-                    'border-secondary text-secondary font-semibold'
-                  : 'text-muted-foreground'
-                )}
-              >
-                <Icon
-                  className="h-4 w-4"
-                  aria-hidden="true"
-                />
+          {tabs.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.value;
+          return <button key={tab.value} onClick={() => handleTabClick(tab.value)} onKeyDown={e => handleKeyDown(e, tab.value)} onMouseEnter={() => handleMouseEnter(tab.preload)} onFocus={() => handleMouseEnter(tab.preload)} role="tab" aria-selected={isActive} aria-label={tab.ariaLabel} className={cn('flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200', 'focus-visible:ring-ring border-b-2 border-transparent focus-visible:ring-2 focus-visible:ring-offset-2', 'hover:text-secondary', isActive ? 'border-secondary text-secondary font-semibold' : 'text-muted-foreground')}>
+                <Icon className="h-4 w-4" aria-hidden="true" />
                 <span>{tab.label}</span>
-              </button>
-            );
-          })}
+              </button>;
+        })}
         </div>
       </nav>
 
       {/* Mobile Navigation - Bottom Bar */}
-      <nav
-        className="bg-muted border-border safe-bottom fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg md:hidden"
-        role="navigation"
-        aria-label="Router panel sections"
-      >
+      <nav className="bg-muted border-border safe-bottom fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg md:hidden" role="navigation" aria-label="Router panel sections">
         <div className="grid h-16 grid-cols-10">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.value;
-            const displayLabel = tab.mobileLabel || tab.label;
-
-            return (
-              <button
-                key={tab.value}
-                onClick={() => handleTabClick(tab.value)}
-                onKeyDown={(e) => handleKeyDown(e, tab.value)}
-                onTouchStart={() => handleMouseEnter(tab.preload)}
-                role="tab"
-                aria-selected={isActive}
-                aria-label={tab.ariaLabel}
-                className={cn(
-                  'flex flex-col items-center justify-center gap-1 transition-all duration-200',
-                  'focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2',
-                  'active:scale-95',
-                  isActive ? 'text-secondary font-semibold' : 'text-muted-foreground'
-                )}
-              >
-                <Icon
-                  className={cn('h-5 w-5 transition-transform', isActive && 'scale-110')}
-                  aria-hidden="true"
-                />
+          {tabs.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.value;
+          const displayLabel = tab.mobileLabel || tab.label;
+          return <button key={tab.value} onClick={() => handleTabClick(tab.value)} onKeyDown={e => handleKeyDown(e, tab.value)} onTouchStart={() => handleMouseEnter(tab.preload)} role="tab" aria-selected={isActive} aria-label={tab.ariaLabel} className={cn('flex flex-col items-center justify-center gap-1 transition-all duration-200', 'focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2', 'active:scale-95', isActive ? 'text-secondary font-semibold' : 'text-muted-foreground')}>
+                <Icon className={cn('h-5 w-5 transition-transform', isActive && 'scale-110')} aria-hidden="true" />
                 <span className="text-[10px] font-medium leading-none">{displayLabel}</span>
-              </button>
-            );
-          })}
+              </button>;
+        })}
         </div>
       </nav>
-    </>
-  );
+    </>;
 });
 TabNavigation.displayName = 'TabNavigation';

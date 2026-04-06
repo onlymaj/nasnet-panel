@@ -14,7 +14,6 @@
  */
 
 import React, { type ReactElement, type ReactNode } from 'react';
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   RouterProvider,
@@ -24,12 +23,9 @@ import {
 } from '@tanstack/react-router';
 import { render, type RenderOptions, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-import { I18nProvider, DirectionProvider } from '@nasnet/core/i18n';
 import { MockApolloProvider } from '@nasnet/api-client/core';
 import { PlatformProvider } from '@nasnet/ui/layouts';
 import { AnimationProvider, ToastProvider } from '@nasnet/ui/patterns';
-
 import { ThemeProvider } from '../app/providers/ThemeProvider';
 
 // Create a fresh QueryClient for each test to avoid state leaking between tests
@@ -55,17 +51,14 @@ function createTestRouter(children: ReactNode) {
   const rootRoute = createRootRoute({
     component: () => <>{children}</>,
   });
-
   const memoryHistory = createMemoryHistory({
     initialEntries: ['/'],
   });
-
   return createRouter({
     routeTree: rootRoute,
     history: memoryHistory,
   });
 }
-
 interface AllProvidersProps {
   children: ReactNode;
 }
@@ -77,24 +70,19 @@ interface AllProvidersProps {
 function AllProviders({ children }: AllProvidersProps): ReactElement {
   const queryClient = createTestQueryClient();
   const router = createTestRouter(children);
-
   return (
     <MockApolloProvider>
-      <I18nProvider>
-        <DirectionProvider>
-          <ThemeProvider>
-            <PlatformProvider>
-              <AnimationProvider>
-                <QueryClientProvider client={queryClient}>
-                  <ToastProvider>
-                    <RouterProvider router={router} />
-                  </ToastProvider>
-                </QueryClientProvider>
-              </AnimationProvider>
-            </PlatformProvider>
-          </ThemeProvider>
-        </DirectionProvider>
-      </I18nProvider>
+      <ThemeProvider>
+        <PlatformProvider>
+          <AnimationProvider>
+            <QueryClientProvider client={queryClient}>
+              <ToastProvider>
+                <RouterProvider router={router} />
+              </ToastProvider>
+            </QueryClientProvider>
+          </AnimationProvider>
+        </PlatformProvider>
+      </ThemeProvider>
     </MockApolloProvider>
   );
 }
@@ -104,7 +92,10 @@ function AllProviders({ children }: AllProvidersProps): ReactElement {
  * Use this instead of the default render from @testing-library/react.
  */
 function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult {
-  return render(ui, { wrapper: AllProviders, ...options });
+  return render(ui, {
+    wrapper: AllProviders,
+    ...options,
+  });
 }
 
 /**
@@ -118,7 +109,9 @@ function customRender(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
 function renderWithUser(
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
-): RenderResult & { user: ReturnType<typeof userEvent.setup> } {
+): RenderResult & {
+  user: ReturnType<typeof userEvent.setup>;
+} {
   return {
     user: userEvent.setup(),
     ...customRender(ui, options),
