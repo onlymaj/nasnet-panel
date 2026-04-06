@@ -1,8 +1,8 @@
 const { createGlobPatternsForDependencies } = require('@nx/react/tailwind');
 const { join } = require('path');
 
-// Import generated token config from design token pipeline
-const tokenConfig = require('../../libs/ui/tokens/dist/tailwind.config.js');
+// Import generated token config from the tokens package export
+const tokenConfig = require('@nasnet/ui-tokens/tailwind');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {

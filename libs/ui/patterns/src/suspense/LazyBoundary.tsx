@@ -284,7 +284,7 @@ LazyBoundary.displayName = 'LazyBoundary';
 // Higher-Order Component for Lazy Loading
 // ============================================================================
 
-export interface WithLazyBoundaryOptions extends Omit<LazyBoundaryProps, 'children'> {}
+export type WithLazyBoundaryOptions = Omit<LazyBoundaryProps, 'children'>;
 
 /**
  * HOC to wrap a component with LazyBoundary

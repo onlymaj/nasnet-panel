@@ -51,9 +51,9 @@ export interface TrafficHistoryChartProps {
 /**
  * Props for desktop presenter
  */
-export interface RuleStatisticsPanelDesktopProps extends RuleStatisticsPanelProps {}
+export type RuleStatisticsPanelDesktopProps = RuleStatisticsPanelProps;
 
 /**
  * Props for mobile presenter
  */
-export interface RuleStatisticsPanelMobileProps extends RuleStatisticsPanelProps {}
+export type RuleStatisticsPanelMobileProps = RuleStatisticsPanelProps;

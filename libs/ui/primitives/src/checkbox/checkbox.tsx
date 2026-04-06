@@ -13,8 +13,7 @@ import { cn } from '../lib/utils';
  * @interface CheckboxProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  */
-export interface CheckboxProps
-  extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {}
+export type CheckboxProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>;
 
 /**
  * A checkable input control that can be checked or unchecked.

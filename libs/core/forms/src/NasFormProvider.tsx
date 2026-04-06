@@ -44,7 +44,7 @@ export function useNasFormContext(): NasFormContextValue {
 /**
  * Props for NasFormProvider component.
  */
-interface NasFormProviderComponentProps<T extends ZodSchema> extends NasFormProviderProps<T> {}
+type NasFormProviderComponentProps<T extends ZodSchema> = NasFormProviderProps<T>;
 
 /**
  * Form provider component that integrates React Hook Form with Zod

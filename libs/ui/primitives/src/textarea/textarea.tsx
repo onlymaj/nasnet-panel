@@ -18,7 +18,7 @@ import { cn } from '../lib/utils';
  * - aria-label: Accessible label for screen readers
  * - aria-describedby: Links to description element for error messages
  */
-export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 /**
  * A multi-line text input component for longer text content.

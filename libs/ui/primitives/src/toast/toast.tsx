@@ -55,8 +55,7 @@ const ToastProvider = ToastPrimitives.Provider;
 /**
  * Props for the ToastViewport component
  */
-export interface ToastViewportProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport> {}
+export type ToastViewportProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>;
 
 /**
  * ToastViewport component - Container for all toast notifications
@@ -100,7 +99,8 @@ const toastVariants = cva(
  * Props for the Toast component
  */
 export interface ToastProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root>,
     VariantProps<typeof toastVariants> {}
 
 /**
@@ -122,8 +122,7 @@ Toast.displayName = 'Toast';
 /**
  * Props for the ToastAction component
  */
-export interface ToastActionProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action> {}
+export type ToastActionProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>;
 
 /**
  * ToastAction component - Action button for toast notifications
@@ -147,8 +146,7 @@ ToastAction.displayName = 'ToastAction';
 /**
  * Props for the ToastClose component
  */
-export interface ToastCloseProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close> {}
+export type ToastCloseProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>;
 
 /**
  * ToastClose component - Close button for toast notifications
@@ -179,8 +177,7 @@ ToastClose.displayName = 'ToastClose';
 /**
  * Props for the ToastTitle component
  */
-export interface ToastTitleProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title> {}
+export type ToastTitleProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Title>;
 
 /**
  * ToastTitle component - Title for toast notifications
@@ -201,8 +198,9 @@ ToastTitle.displayName = 'ToastTitle';
 /**
  * Props for the ToastDescription component
  */
-export interface ToastDescriptionProps
-  extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description> {}
+export type ToastDescriptionProps = React.ComponentPropsWithoutRef<
+  typeof ToastPrimitives.Description
+>;
 
 /**
  * ToastDescription component - Content for toast notifications

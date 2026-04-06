@@ -17,8 +17,7 @@ import { cn } from '../lib/utils';
  * @property {boolean} [disabled] - When true, prevents the user from interacting with radio items
  * @property {"vertical" | "horizontal"} [orientation] - The orientation of the component
  */
-export interface RadioGroupProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> {}
+export type RadioGroupProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>;
 
 /**
  * Props for the RadioGroupItem component.
@@ -28,8 +27,7 @@ export interface RadioGroupProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  * @property {boolean} [disabled] - When true, prevents the user from interacting with the radio item
  */
-export interface RadioGroupItemProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item> {}
+export type RadioGroupItemProps = React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>;
 
 /**
  * A set of checkable buttons where only one can be selected at a time.

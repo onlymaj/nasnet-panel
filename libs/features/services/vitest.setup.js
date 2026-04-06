@@ -1,4 +1,4 @@
-/* global exports, require, window, global, console, module */
+/* global exports, window, global, console */
 'use strict';
 /**
  * Vitest Setup File for Services Feature
@@ -11,8 +11,7 @@
  * - IntersectionObserver (for virtualization)
  * - ResizeObserver (for responsive components)
  */
-Object.defineProperty(exports, '__esModule', { value: true });
-require('@testing-library/jest-dom/vitest');
+import '@testing-library/jest-dom/vitest';
 // Mock window.matchMedia (not available in JSDOM)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

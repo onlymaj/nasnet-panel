@@ -76,8 +76,7 @@ const alertVariants = cva(
  * @property {boolean} [live] - If true, uses aria-live="polite" (auto-announced)
  */
 export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof alertVariants> {
   live?: boolean;
 }
 
@@ -109,7 +108,7 @@ Alert.displayName = 'Alert';
  * @property {string} [className] - Additional CSS classes
  * @property {React.ReactNode} [children] - Title text content
  */
-export interface AlertTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+export type AlertTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 /**
  * AlertTitle component - Heading for alert messages
@@ -138,7 +137,7 @@ AlertTitle.displayName = 'AlertTitle';
  * @property {string} [className] - Additional CSS classes
  * @property {React.ReactNode} [children] - Description text content
  */
-export interface AlertDescriptionProps extends React.HTMLAttributes<HTMLDivElement> {}
+export type AlertDescriptionProps = React.HTMLAttributes<HTMLDivElement>;
 
 /**
  * AlertDescription component - Content area for alert messages

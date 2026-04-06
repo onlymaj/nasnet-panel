@@ -62,7 +62,7 @@ import { cn } from '../lib/utils';
  * @property className - Optional custom CSS classes (e.g., 'h-14 w-14' for custom sizes)
  * @property children - Avatar subcomponents (AvatarImage, AvatarFallback)
  */
-export interface AvatarProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {}
+export type AvatarProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>;
 
 /**
  * Avatar component - Container for profile images with automatic fallback
@@ -87,8 +87,7 @@ Avatar.displayName = 'Avatar';
  * @property alt - Alternative text (required for accessibility; describes the user)
  * @property className - Optional custom CSS classes
  */
-export interface AvatarImageProps
-  extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image> {}
+export type AvatarImageProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>;
 
 /**
  * AvatarImage component - Image element with lazy loading
@@ -112,8 +111,7 @@ AvatarImage.displayName = 'AvatarImage';
  * @property children - Fallback content (typically 1-2 initials or placeholder text)
  * @property className - Optional custom CSS classes (can add semantic color tokens: bg-primary/20 text-primary)
  */
-export interface AvatarFallbackProps
-  extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback> {}
+export type AvatarFallbackProps = React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>;
 
 /**
  * AvatarFallback component - Text shown when image fails or is loading

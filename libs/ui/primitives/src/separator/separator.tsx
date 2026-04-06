@@ -26,8 +26,7 @@ import { cn } from '../lib/utils';
  * <Separator orientation="vertical" className="h-12" />
  * ```
  */
-export interface SeparatorProps
-  extends React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root> {}
+export type SeparatorProps = React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>;
 
 /**
  * Separator Component

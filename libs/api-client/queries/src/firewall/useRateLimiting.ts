@@ -74,8 +74,7 @@ interface RawAddressListEntry {
 /**
  * Input for creating a rate limit rule
  */
-export interface CreateRateLimitRuleInput
-  extends Omit<RateLimitRuleInput, 'id' | 'packets' | 'bytes'> {}
+export type CreateRateLimitRuleInput = Omit<RateLimitRuleInput, 'id' | 'packets' | 'bytes'>;
 
 /**
  * Input for updating a rate limit rule

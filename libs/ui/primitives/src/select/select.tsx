@@ -21,8 +21,7 @@ import { cn } from '../lib/utils';
  * </SelectTrigger>
  * ```
  */
-export interface SelectTriggerProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {}
+export type SelectTriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>;
 
 /**
  * Props for SelectContent component.
@@ -41,8 +40,7 @@ export interface SelectTriggerProps
  * </SelectContent>
  * ```
  */
-export interface SelectContentProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> {}
+export type SelectContentProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>;
 
 /**
  * Props for SelectLabel component.
@@ -53,8 +51,7 @@ export interface SelectContentProps
  * @interface SelectLabelProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  */
-export interface SelectLabelProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label> {}
+export type SelectLabelProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>;
 
 /**
  * Props for SelectItem component.
@@ -66,8 +63,7 @@ export interface SelectLabelProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  * @property {boolean} [disabled] - Disables the item for selection
  */
-export interface SelectItemProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> {}
+export type SelectItemProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>;
 
 /**
  * Props for SelectSeparator component.
@@ -78,8 +74,7 @@ export interface SelectItemProps
  * @interface SelectSeparatorProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  */
-export interface SelectSeparatorProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator> {}
+export type SelectSeparatorProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>;
 
 /**
  * Props for SelectScrollUpButton and SelectScrollDownButton components.
@@ -90,8 +85,9 @@ export interface SelectSeparatorProps
  * @interface SelectScrollButtonProps
  * @property {string} [className] - Additional CSS classes to merge with component styles
  */
-export interface SelectScrollButtonProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton> {}
+export type SelectScrollButtonProps = React.ComponentPropsWithoutRef<
+  typeof SelectPrimitive.ScrollUpButton
+>;
 
 const Select = SelectPrimitive.Root;
 
