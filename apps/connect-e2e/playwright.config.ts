@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
@@ -21,9 +23,10 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 
 // CHR Docker Router URL for integration testing
 const chrRouterURL = process.env['CHR_ROUTER_URL'] || 'http://localhost:8080';
+const configFilePath = join(workspaceRoot, 'apps/connect-e2e/playwright.config.ts');
 
 export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: './src' }),
+  ...nxE2EPreset(configFilePath, { testDir: './src' }),
 
   // Global test timeout
   timeout: 30000,
