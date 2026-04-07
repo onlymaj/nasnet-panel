@@ -441,11 +441,10 @@ Learn more about specific subsystems:
 
 1. **[Domain UI Stores](../stores/domain-ui-stores.md)** - Feature-specific state patterns
 2. **[Apollo Integration](../integrations/apollo-integration.md)** - Connect stores to GraphQL
-3. **[Accessibility](../integrations/a11y-provider.md)** - Accessibility preferences
-4. **[Cross-Feature Communication](../integrations/cross-feature-sharing.md)** - Share state between
+3. **[Cross-Feature Communication](../integrations/cross-feature-sharing.md)** - Share state between
    features
-5. **[Adding a Store](./adding-a-store.md)** - Create your own store
-6. **[Adding a Machine](./adding-a-machine.md)** - Create your own XState machine
+4. **[Adding a Store](./adding-a-store.md)** - Create your own store
+5. **[Adding a Machine](./adding-a-machine.md)** - Create your own XState machine
 
 ## Quick Checklist
 
@@ -453,7 +452,6 @@ Learn more about specific subsystems:
 - [ ] Know selector hooks prevent unnecessary re-renders
 - [ ] Read [Domain UI Stores](../stores/domain-ui-stores.md) for feature patterns
 - [ ] Check [Apollo Integration](../integrations/apollo-integration.md) when using GraphQL
-- [ ] Review [Accessibility](../integrations/a11y-provider.md) for user preferences
 
 ## Troubleshooting
 

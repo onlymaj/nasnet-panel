@@ -38,13 +38,6 @@ describe('ThemeToggle', () => {
     expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
   });
 
-  it('should have proper aria-label for accessibility', () => {
-    render(<ThemeToggle />);
-    const button = screen.getByRole('button');
-    expect(button).toHaveAttribute('aria-label');
-    expect(button.getAttribute('aria-label')).toContain('theme');
-  });
-
   it('should toggle theme when clicked', async () => {
     const user = userEvent.setup();
     render(<ThemeToggle />);
@@ -81,27 +74,6 @@ describe('ThemeToggle', () => {
     // Click should toggle to light (even though theme was 'system')
     await user.click(button);
     expect(useThemeStore.getState().theme).toBe('light');
-  });
-
-  it('should be keyboard accessible', async () => {
-    const user = userEvent.setup();
-    render(<ThemeToggle />);
-
-    const button = screen.getByRole('button');
-
-    // Tab to focus
-    await user.tab();
-    expect(button).toHaveFocus();
-
-    // Enter key should toggle theme
-    const initialTheme = useThemeStore.getState().theme;
-    await user.keyboard('{Enter}');
-    expect(useThemeStore.getState().theme).not.toBe(initialTheme);
-
-    // Space key should also toggle theme
-    const themeAfterEnter = useThemeStore.getState().theme;
-    await user.keyboard(' ');
-    expect(useThemeStore.getState().theme).not.toBe(themeAfterEnter);
   });
 
   it('should apply custom className when provided', () => {

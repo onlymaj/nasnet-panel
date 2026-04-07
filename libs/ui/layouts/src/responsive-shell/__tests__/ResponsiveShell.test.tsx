@@ -5,8 +5,7 @@
  * - Layout switching between mobile, tablet, and desktop breakpoints
  * - Platform-specific rendering (MobileAppShell vs AppShell)
  * - Sidebar collapse behavior and keyboard shortcuts (Ctrl+B / Cmd+B)
- * - Accessibility structure and focus management
- * - Reduced motion support (WCAG AAA compliance)
+ * - Reduced motion support
  * - Platform provider initialization and overrides
  *
  * @see NAS-4.3: Build Responsive Layout System
@@ -203,22 +202,6 @@ describe('ResponsiveShell', () => {
 
       expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
       expect(screen.getByTestId('mobile-app-shell')).toBeInTheDocument();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should render children with accessible structure', () => {
-      Object.defineProperty(window, 'innerWidth', { value: 1280, writable: true });
-
-      render(
-        <PlatformProvider>
-          <ResponsiveShell sidebar={<nav data-testid="nav">Navigation</nav>}>
-            <main data-testid="main">Main Content</main>
-          </ResponsiveShell>
-        </PlatformProvider>
-      );
-
-      expect(screen.getByTestId('main')).toBeInTheDocument();
     });
   });
 

@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node", "vite/client"],
     "paths": {
+      "@nasnet/core/types": ["../types/src/index.ts"],
       "@nasnet/core/*": ["../*/src"]
     }
   },

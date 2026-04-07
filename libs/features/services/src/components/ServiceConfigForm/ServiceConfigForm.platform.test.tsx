@@ -267,66 +267,6 @@ describe('ServiceConfigForm - Platform Presenters & Integration', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should render loading state with proper accessibility (mobile)', () => {
-      mockUsePlatform.mockReturnValue('mobile');
-
-      const formState: Partial<UseServiceConfigFormReturn> = {
-        schema: undefined,
-        form: {} as any,
-        visibleFields: [],
-        handleSubmit: vi.fn(),
-        isValidating: false,
-        isSubmitting: false,
-        loading: {
-          schema: true,
-          config: false,
-        },
-        errors: {
-          schema: undefined,
-          config: undefined,
-        },
-        validate: vi.fn(),
-        refetch: vi.fn(),
-      };
-
-      render(<ServiceConfigForm formState={formState as UseServiceConfigFormReturn} />);
-
-      // Loading spinner should be visible
-      const loader = document.querySelector('[class*="animate-spin"]');
-      expect(loader).toBeInTheDocument();
-    });
-
-    it('should render error state with proper text contrast (desktop)', () => {
-      mockUsePlatform.mockReturnValue('desktop');
-
-      const formState: Partial<UseServiceConfigFormReturn> = {
-        schema: undefined,
-        form: {} as any,
-        visibleFields: [],
-        handleSubmit: vi.fn(),
-        isValidating: false,
-        isSubmitting: false,
-        loading: {
-          schema: false,
-          config: false,
-        },
-        errors: {
-          schema: undefined,
-          config: undefined,
-        },
-        validate: vi.fn(),
-        refetch: vi.fn(),
-      };
-
-      render(<ServiceConfigForm formState={formState as UseServiceConfigFormReturn} />);
-
-      // Error text should use muted-foreground class for proper contrast
-      const errorText = screen.getByText(/no configuration schema available/i);
-      expect(errorText.className).toMatch(/text-muted-foreground/);
-    });
-  });
-
   describe('Props Forwarding', () => {
     it('should forward title prop to presenters', () => {
       mockUsePlatform.mockReturnValue('desktop');

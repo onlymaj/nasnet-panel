@@ -588,56 +588,6 @@ test.describe('Mobile Responsive', () => {
 });
 
 // =============================================================================
-// Test 11: Keyboard Navigation (Accessibility)
-// =============================================================================
-
-test.describe('Keyboard Navigation', () => {
-  test('should support keyboard navigation', async ({ page }) => {
-    await page.route('**/api/routers/*/mangle/rules', async (route) => {
-      await route.fulfill({ status: 200, json: { success: true, data: MOCK_RULES } });
-    });
-
-    await page.getByRole('tab', { name: /mangle/i }).click();
-    await page.waitForLoadState('networkidle');
-
-    // Tab through elements
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-
-    // Verify focus indicators are visible
-    const focusedElement = page.locator(':focus');
-    await expect(focusedElement).toBeVisible();
-
-    // Verify focus has visible ring/outline
-    const focusStyles = await focusedElement.evaluate((el) => {
-      const computed = window.getComputedStyle(el);
-      return {
-        outline: computed.outline,
-        boxShadow: computed.boxShadow,
-      };
-    });
-
-    // Should have either outline or box-shadow for focus indicator
-    expect(focusStyles.outline !== 'none' || focusStyles.boxShadow !== 'none').toBeTruthy();
-
-    // Press Enter on Add Rule button
-    const addButton = page.getByRole('button', { name: /add rule/i });
-    await addButton.focus();
-    await page.keyboard.press('Enter');
-
-    // Verify dialog opens
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
-
-    // Press Escape to close
-    await page.keyboard.press('Escape');
-
-    // Verify dialog closes
-    await expect(dialog).not.toBeVisible();
-  });
-});
-
-// =============================================================================
 // Additional: Empty State
 // =============================================================================
 

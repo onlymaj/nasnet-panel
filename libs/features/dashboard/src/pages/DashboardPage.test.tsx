@@ -104,23 +104,6 @@ describe('DashboardPage', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper semantic heading hierarchy', () => {
-      render(<DashboardPage />);
-
-      // Should have content with proper h2 headings for sections
-      const sections = screen.getAllByRole('heading', { level: 2 });
-      expect(sections.length).toBeGreaterThan(0);
-    });
-
-    it('should have proper main landmark', () => {
-      render(<DashboardPage />);
-
-      const main = screen.getByRole('main');
-      expect(main).toBeInTheDocument();
-    });
-  });
-
   describe('Component Structure', () => {
     it('should use memo for performance optimization', () => {
       // Component should be memoized

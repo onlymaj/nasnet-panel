@@ -415,8 +415,6 @@ components, and no rendering. Understanding what lives in core vs. what lives el
 - [testing-patterns.md](./guides/testing-patterns.md) - Vitest setup, hook testing, mock strategies
 - [state-machines-guide.md](./guides/state-machines-guide.md) - XState machines for complex
   workflows
-- [accessibility-patterns.md](./guides/accessibility-patterns.md) - A11yProvider, WCAG AAA
-  compliance
 - [performance-patterns.md](./guides/performance-patterns.md) - Auto-scroll, caching, bundle size
 - [security-patterns.md](./guides/security-patterns.md) - Input validation, error safety
 

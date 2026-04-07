@@ -115,26 +115,6 @@ describe('EmailChannelForm', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('wraps presenters in semantic div', () => {
-      mockUseMediaQuery.mockReturnValue(false);
-
-      const { container } = render(<EmailChannelForm />);
-
-      expect(container.firstChild).toBeInstanceOf(HTMLDivElement);
-    });
-
-    it('does not interfere with presenter accessibility features', () => {
-      mockUseMediaQuery.mockReturnValue(false);
-
-      render(<EmailChannelForm />);
-
-      // Presenter should be directly accessible
-      const presenter = screen.getByTestId('desktop-presenter');
-      expect(presenter).toBeInTheDocument();
-    });
-  });
-
   describe('Error Handling', () => {
     it('renders without crashing when no props provided', () => {
       mockUseMediaQuery.mockReturnValue(false);

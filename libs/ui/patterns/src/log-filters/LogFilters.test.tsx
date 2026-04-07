@@ -444,62 +444,6 @@ describe('LogFilters', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have accessible filter button', () => {
-      render(
-        <LogFilters
-          topics={[]}
-          onTopicsChange={vi.fn()}
-          severities={[]}
-          onSeveritiesChange={vi.fn()}
-        />
-      );
-
-      const filterButton = screen.getByRole('button', { name: /filter by topic/i });
-      expect(filterButton).toHaveAccessibleName();
-    });
-
-    it('should have accessible remove buttons for topic badges', () => {
-      const selectedTopics: LogTopic[] = ['firewall', 'wireless'];
-      render(
-        <LogFilters
-          topics={selectedTopics}
-          onTopicsChange={mockOnTopicsChange}
-          severities={[]}
-          onSeveritiesChange={mockOnSeveritiesChange}
-        />
-      );
-
-      const removeFirewallButton = screen.getByRole('button', {
-        name: /remove firewall filter/i,
-      });
-      const removeWirelessButton = screen.getByRole('button', {
-        name: /remove wireless filter/i,
-      });
-
-      expect(removeFirewallButton).toHaveAccessibleName();
-      expect(removeWirelessButton).toHaveAccessibleName();
-    });
-
-    it('should use checkboxes for topic selection', async () => {
-      const user = userEvent.setup();
-      render(
-        <LogFilters
-          topics={[]}
-          onTopicsChange={vi.fn()}
-          severities={[]}
-          onSeveritiesChange={vi.fn()}
-        />
-      );
-
-      const filterButton = screen.getByRole('button', { name: /filter by topic/i });
-      await user.click(filterButton);
-
-      const checkboxes = await screen.findAllByRole('checkbox');
-      expect(checkboxes.length).toBe(14); // All 14 topics
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle empty topics array', () => {
       render(

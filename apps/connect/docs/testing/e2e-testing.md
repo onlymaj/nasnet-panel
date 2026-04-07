@@ -234,39 +234,6 @@ test.describe('Interface Management - Mobile', () => {
 
 ---
 
-## Accessibility E2E Tests
-
-```typescript
-test.describe('Accessibility', () => {
-  test('has no axe violations', async ({ page }) => {
-    await page.goto('/dashboard/network');
-    await page.waitForLoadState('networkidle');
-
-    const results = await page.evaluate(() => {
-      return window.axe ? window.axe.run() : null;
-    });
-
-    if (results) {
-      expect(results.violations).toEqual([]);
-    }
-  });
-
-  test('supports keyboard navigation', async ({ page }) => {
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('dialog')).toBeVisible();
-  });
-
-  test('has proper ARIA labels', async ({ page }) => {
-    await expect(page.getByRole('table')).toHaveAttribute('aria-label');
-    await expect(page.getByRole('search')).toHaveAttribute('aria-label');
-  });
-});
-```
-
----
-
 ## CHR Docker Integration Tests
 
 CHR (Cloud Hosted Router) tests run against a real RouterOS instance in Docker. They are tagged with
@@ -346,29 +313,29 @@ test.afterAll(async () => {
 
 ## Available Test Specs
 
-| File                                 | Coverage area                                                                     |
-| ------------------------------------ | --------------------------------------------------------------------------------- |
-| `interface-management.spec.ts`       | Network interface list, detail panel, edit, enable/disable, mobile, accessibility |
-| `wan-configuration.spec.ts`          | WAN interface setup, DHCP/static/PPPoE                                            |
-| `firewall-filter-rules.spec.ts`      | Firewall filter rule CRUD                                                         |
-| `firewall-mangle-rules.spec.ts`      | Mangle rule management                                                            |
-| `firewall-nat-configuration.spec.ts` | NAT/port forwarding                                                               |
-| `firewall-port-knocking.spec.ts`     | Port knocking sequences                                                           |
-| `firewall-raw-rules.spec.ts`         | Raw table rules                                                                   |
-| `firewall-service-ports.spec.ts`     | Service port management                                                           |
-| `firewall-templates.spec.ts`         | Firewall template application                                                     |
-| `address-lists.spec.ts`              | Firewall address list management                                                  |
-| `dns-diagnostics.spec.ts`            | DNS lookup tool                                                                   |
-| `troubleshoot-wizard.spec.ts`        | Troubleshooting wizard flow                                                       |
-| `services.spec.ts`                   | Feature marketplace install/uninstall                                             |
-| `storage-management.spec.ts`         | Storage configuration                                                             |
-| `webhook-notifications.spec.ts`      | Webhook channel setup                                                             |
-| `alert-rule-templates.spec.ts`       | Alert rule from templates                                                         |
-| `in-app-notifications.spec.ts`       | In-app notification center                                                        |
-| `quiet-hours.spec.ts`                | Notification quiet hours config                                                   |
-| `rate-limiting.spec.ts`              | Rate limiting rules                                                               |
-| `bridges/bridge-workflow.spec.ts`    | Bridge interface creation workflow                                                |
-| `chr-integration.spec.ts`            | CHR Docker real RouterOS tests                                                    |
+| File                                 | Coverage area                                                      |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `interface-management.spec.ts`       | Network interface list, detail panel, edit, enable/disable, mobile |
+| `wan-configuration.spec.ts`          | WAN interface setup, DHCP/static/PPPoE                             |
+| `firewall-filter-rules.spec.ts`      | Firewall filter rule CRUD                                          |
+| `firewall-mangle-rules.spec.ts`      | Mangle rule management                                             |
+| `firewall-nat-configuration.spec.ts` | NAT/port forwarding                                                |
+| `firewall-port-knocking.spec.ts`     | Port knocking sequences                                            |
+| `firewall-raw-rules.spec.ts`         | Raw table rules                                                    |
+| `firewall-service-ports.spec.ts`     | Service port management                                            |
+| `firewall-templates.spec.ts`         | Firewall template application                                      |
+| `address-lists.spec.ts`              | Firewall address list management                                   |
+| `dns-diagnostics.spec.ts`            | DNS lookup tool                                                    |
+| `troubleshoot-wizard.spec.ts`        | Troubleshooting wizard flow                                        |
+| `services.spec.ts`                   | Feature marketplace install/uninstall                              |
+| `storage-management.spec.ts`         | Storage configuration                                              |
+| `webhook-notifications.spec.ts`      | Webhook channel setup                                              |
+| `alert-rule-templates.spec.ts`       | Alert rule from templates                                          |
+| `in-app-notifications.spec.ts`       | In-app notification center                                         |
+| `quiet-hours.spec.ts`                | Notification quiet hours config                                    |
+| `rate-limiting.spec.ts`              | Rate limiting rules                                                |
+| `bridges/bridge-workflow.spec.ts`    | Bridge interface creation workflow                                 |
+| `chr-integration.spec.ts`            | CHR Docker real RouterOS tests                                     |
 
 ---
 
@@ -432,4 +399,3 @@ In CI (GitHub Actions), Playwright runs:
 - `apps/connect-e2e/playwright.config.ts` — Full configuration
 - `apps/connect/src/test/chr/chr-utils.ts` — CHR Docker lifecycle utilities
 - `10-testing/mocking.md` — MSW handlers used by the app during E2E
-- `09-i18n-accessibility/accessibility.md` — Accessibility test requirements

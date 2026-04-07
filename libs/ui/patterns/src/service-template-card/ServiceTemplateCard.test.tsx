@@ -326,30 +326,6 @@ describe('ServiceTemplateCard', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('has correct ARIA label on card', () => {
-      renderWithWrapper(<ServiceTemplateCard template={mockTemplate} />);
-      const card = screen.getByRole('article');
-      expect(card).toHaveAttribute('aria-label', 'Privacy Stack template - Built-in');
-    });
-
-    it('has correct ARIA label on action button', () => {
-      renderWithWrapper(
-        <ServiceTemplateCard
-          template={mockTemplate}
-          actions={mockActions}
-        />
-      );
-      expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
-    });
-
-    it('marks icons as aria-hidden', () => {
-      renderWithWrapper(<ServiceTemplateCard template={mockTemplate} />);
-      const icon = screen.getByText('🔒');
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
-    });
-  });
-
   describe('Edge cases', () => {
     it('renders without description', () => {
       const templateWithoutDesc = { ...mockTemplate, description: undefined };

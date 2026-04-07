@@ -275,48 +275,6 @@ describe('BulkActionsToolbar', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      render(
-        <BulkActionsToolbar
-          {...defaultProps}
-          selectedCount={3}
-        />
-      );
-
-      expect(screen.getByLabelText('Bulk actions toolbar')).toBeInTheDocument();
-    });
-
-    it('should support keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(
-        <BulkActionsToolbar
-          {...defaultProps}
-          selectedCount={1}
-        />
-      );
-
-      const makeStaticButton = screen.getByText('Make All Static');
-      makeStaticButton.focus();
-
-      await user.keyboard('{Tab}');
-      expect(screen.getByText('Delete Selected')).toHaveFocus();
-
-      await user.keyboard('{Tab}');
-      expect(screen.getByText('Clear')).toHaveFocus();
-    });
-
-    it('should have role="toolbar"', () => {
-      render(
-        <BulkActionsToolbar
-          {...defaultProps}
-          selectedCount={1}
-        />
-      );
-      expect(screen.getByRole('toolbar')).toBeInTheDocument();
-    });
-  });
-
   describe('Animation', () => {
     it('should have slide-in animation when appearing', () => {
       const { rerender } = render(

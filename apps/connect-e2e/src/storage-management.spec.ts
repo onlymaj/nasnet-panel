@@ -158,7 +158,6 @@ test.describe('Storage Management', () => {
     });
 
     // Step 3: Verify disconnect banner appears
-    // The banner should have role="alert" for accessibility
     const disconnectBanner = page.getByRole('alert').filter({
       hasText: /external storage disconnected/i,
     });
@@ -352,7 +351,7 @@ test.describe('Storage Management', () => {
     // Step 8: Verify warning appears in usage section
     await expect(page.getByText('Storage Usage')).toBeVisible();
 
-    // Step 9: Verify the warning has appropriate ARIA attributes for accessibility
+    // Step 9: Verify the warning has appropriate attributes
     const alertElement = page.getByRole('alert').filter({
       hasText: /90%|critical|storage space/i,
     });
@@ -468,7 +467,6 @@ test.describe('Storage Management - Mobile', () => {
     const storageSection = page.locator('text=Storage Configuration').locator('..');
     await expect(storageSection).toBeVisible();
 
-    // Verify touch targets are at least 44px (accessibility requirement)
     const enableSwitch = page.getByRole('switch', {
       name: /enable external storage/i,
     });

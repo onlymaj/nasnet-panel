@@ -15,7 +15,6 @@ The NasNetConnect UI library is built on principles of:
 
 - **Reusability**: Components are shared across all features
 - **Responsive Design**: Automatic platform detection (Mobile/Tablet/Desktop)
-- **Accessibility**: WCAG AAA compliance by default
 - **Performance**: Memoization, lazy loading, and virtualization when needed
 - **Developer Experience**: Clear patterns, comprehensive tests, documented stories
 
@@ -603,71 +602,6 @@ npx run-many -t build-storybook
 
 ---
 
-## Accessibility Checklist
-
-Every component must meet **WCAG AAA** standards. Use this 7-point checklist:
-
-- [ ] **7:1 Contrast Ratio** — Text must have 7:1 contrast against background (WCAG AAA)
-
-  - Use `contrast-checker.io` to verify
-  - Applies to normal text, buttons, badges, etc.
-
-- [ ] **44px Touch Targets** — Interactive elements (buttons, links, inputs) must be 44x44px minimum
-      on mobile
-
-  - Use Tailwind: `min-w-[44px] min-h-[44px]`
-  - Desktop can use smaller (32px)
-
-- [ ] **Keyboard Navigation** — All interactive elements must be reachable via Tab/Shift+Tab
-
-  - Test: open DevTools, press Tab repeatedly
-  - No keyboard traps
-  - Focus must be visible
-
-- [ ] **Screen Reader Support** — ARIA labels for buttons, inputs, and custom controls
-
-  - Buttons: `aria-label="Action name"`
-  - Inputs: `<label htmlFor="input-id">`
-  - Custom roles: `role="button"` (if not using `<button>`)
-  - Regions: `<nav>`, `<main>`, `<aside>` semantic HTML
-
-- [ ] **Focus Indicators** — 3px visible ring around focused elements
-
-  - Tailwind: `focus:ring-2 focus:ring-primary`
-  - Never remove default outline without replacement
-
-- [ ] **Reduced Motion Support** — Respect `prefers-reduced-motion` media query
-
-  - Disable animations for users with motion sensitivity
-  - Tailwind: `motion-safe:animate-pulse` (animation only if safe)
-
-- [ ] **Semantic HTML** — Use proper HTML elements (not divs everywhere)
-  - `<button>` for buttons (not `<div onClick>`)
-  - `<a>` for links
-  - `<input>`, `<select>`, `<textarea>` for form fields
-  - Heading hierarchy: `<h1>` → `<h2>` → `<h3>` (no skipping levels)
-
-**Automated Testing:**
-
-```bash
-# Test in Storybook (a11y addon)
-npx nx run ui-patterns:storybook
-# Open story, click "Accessibility" tab → "Violations" shows failing checks
-
-# Or test programmatically in tests
-import { axe, toHaveNoViolations } from 'jest-axe';
-
-expect.extend(toHaveNoViolations);
-
-it('has no accessibility violations', async () => {
-  const { container } = render(<ResourceCard {...props} />);
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
-});
-```
-
----
-
 ## Performance Guidelines
 
 ### When to Use `React.memo()`
@@ -764,20 +698,9 @@ Reviewers should verify:
 - [ ] `tags: ['autodocs']` included for auto-documentation
 - [ ] Component description in Meta.parameters.docs
 
-### Accessibility (WCAG AAA)
-
-- [ ] 7:1 contrast ratio verified (use contrast checker)
-- [ ] Touch targets 44px minimum on mobile
-- [ ] Full keyboard navigation (Tab/Shift+Tab)
-- [ ] ARIA labels on buttons/inputs
-- [ ] Focus indicators visible (ring-2 or equivalent)
-- [ ] Semantic HTML (button, input, nav, etc.)
-- [ ] `axe` or `jest-axe` tests passing
-
 ### Testing
 
 - [ ] Unit tests for hooks and components
-- [ ] Accessibility tests passing (`toHaveNoViolations`)
 - [ ] Mock data realistic and properly typed
 - [ ] Error states tested
 - [ ] `npm run typecheck` passes
@@ -806,7 +729,6 @@ Reviewers should verify:
 - **Component Catalog:** See `libs/ui/docs/patterns-status-and-data.md`
 - **Design System:** See `Docs/design/DESIGN_TOKENS.md`
 - **Responsive Design:** See `Docs/design/PLATFORM_PRESENTER_GUIDE.md`
-- **Accessibility:** See `Docs/design/ux-design/8-responsive-design-accessibility.md`
 - **Testing Strategy:** See `Docs/architecture/implementation-patterns/testing-strategy-patterns.md`
 - **Existing Patterns Guide:** See `libs/ui/patterns/PATTERNS.md`
 

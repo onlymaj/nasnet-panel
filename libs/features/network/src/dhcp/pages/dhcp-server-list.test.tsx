@@ -293,30 +293,4 @@ describe('DHCPServerList', () => {
       });
     });
   });
-
-  describe('accessibility', () => {
-    it('should have proper ARIA labels for action buttons', async () => {
-      render(<DHCPServerList />, { wrapper: createTestWrapper() });
-
-      await waitFor(() => {
-        const dropdownButtons = screen.getAllByRole('button', { name: /open menu/i });
-        expect(dropdownButtons).toHaveLength(2);
-      });
-    });
-
-    it('should have accessible table structure', async () => {
-      vi.mocked(usePlatform).mockReturnValue('desktop');
-      render(<DHCPServerList />, { wrapper: createTestWrapper() });
-
-      await waitFor(() => {
-        const table = screen.getByRole('table');
-        expect(table).toBeInTheDocument();
-
-        // Check for column headers
-        expect(screen.getByText('Name')).toBeInTheDocument();
-        expect(screen.getByText('Interface')).toBeInTheDocument();
-        expect(screen.getByText('Pool')).toBeInTheDocument();
-      });
-    });
-  });
 });

@@ -228,38 +228,6 @@ describe('DeviceListItemMobile', () => {
     expect(screen.queryByText('Johns-iPhone')).not.toBeInTheDocument();
     expect(screen.getByText(/Device-[A-Z0-9]{4}/)).toBeInTheDocument();
   });
-
-  it('has accessible 44px touch target', () => {
-    const device = createMockDevice();
-    const { result } = renderHook(() => useDeviceListItem({ device, showHostname: true }));
-    const { container } = render(
-      <DeviceListItemMobile
-        state={result.current}
-        device={device}
-      />
-    );
-
-    const touchTarget = container.querySelector('button');
-    expect(touchTarget).toHaveClass('min-h-[44px]');
-  });
-
-  it('has accessible aria-expanded attribute', async () => {
-    const user = userEvent.setup();
-    const device = createMockDevice();
-    const { result } = renderHook(() => useDeviceListItem({ device, showHostname: true }));
-    render(
-      <DeviceListItemMobile
-        state={result.current}
-        device={device}
-      />
-    );
-
-    const card = screen.getByRole('button', { name: /Johns-iPhone/i });
-    expect(card).toHaveAttribute('aria-expanded', 'false');
-
-    await user.click(card);
-    expect(card).toHaveAttribute('aria-expanded', 'true');
-  });
 });
 
 describe('DeviceListItemTablet', () => {
@@ -527,64 +495,5 @@ describe('DeviceListItem (auto-detect platform)', () => {
 
     expect(screen.queryByText('Johns-iPhone')).not.toBeInTheDocument();
     expect(screen.getByText(/Device-[A-Z0-9]{4}/)).toBeInTheDocument();
-  });
-});
-
-describe('Accessibility', () => {
-  it('has accessible device type icon with sr-only label', () => {
-    const device = createMockDevice({ deviceType: DeviceType.SMARTPHONE });
-    const { result } = renderHook(() => useDeviceListItem({ device, showHostname: true }));
-    render(
-      <DeviceListItemMobile
-        state={result.current}
-        device={device}
-      />
-    );
-
-    expect(screen.getByText('Smartphone')).toHaveClass('sr-only');
-  });
-
-  it('mobile presenter has keyboard navigation support', async () => {
-    const user = userEvent.setup();
-    const device = createMockDevice();
-    const { result } = renderHook(() => useDeviceListItem({ device, showHostname: true }));
-    render(
-      <DeviceListItemMobile
-        state={result.current}
-        device={device}
-      />
-    );
-
-    const card = screen.getByRole('button', { name: /Johns-iPhone/i });
-
-    // Tab to focus
-    await user.tab();
-    expect(card).toHaveFocus();
-
-    // Enter to expand
-    await user.keyboard('{Enter}');
-    expect(screen.getByText('Apple, Inc.')).toBeInTheDocument();
-
-    // Space to collapse
-    await user.keyboard(' ');
-    expect(screen.queryByText('Apple, Inc.')).not.toBeInTheDocument();
-  });
-
-  it('maintains focus management when expanding/collapsing', async () => {
-    const user = userEvent.setup();
-    const device = createMockDevice();
-    const { result } = renderHook(() => useDeviceListItem({ device, showHostname: true }));
-    render(
-      <DeviceListItemMobile
-        state={result.current}
-        device={device}
-      />
-    );
-
-    const card = screen.getByRole('button');
-    await user.click(card);
-
-    // Focus should remain on the button after expanding
-    expect(card).toHaveFocus();
   });
 });

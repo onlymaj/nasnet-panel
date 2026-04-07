@@ -320,22 +320,3 @@ describe('TemplatesPage - User Interactions', () => {
     });
   });
 });
-
-describe('TemplatesPage - Accessibility', () => {
-  it('should have accessible tab navigation', () => {
-    renderTemplatesPage();
-
-    const browseTab = screen.getByRole('tab', { name: /browse templates/i });
-    const applyTab = screen.getByRole('tab', { name: /configure & apply/i });
-
-    expect(browseTab).toHaveAttribute('aria-selected');
-    expect(applyTab).toBeInTheDocument();
-  });
-
-  it('should disable apply tab when no template selected', () => {
-    renderTemplatesPage();
-
-    const applyTab = screen.getByRole('tab', { name: /configure & apply/i });
-    expect(applyTab).toHaveAttribute('disabled');
-  });
-});

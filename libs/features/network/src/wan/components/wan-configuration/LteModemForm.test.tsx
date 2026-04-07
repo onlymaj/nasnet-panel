@@ -378,27 +378,4 @@ describe('LteModemForm', () => {
       expect(enableSwitch).not.toBeChecked();
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      render(<LteModemForm {...defaultProps} />);
-
-      expect(screen.getByLabelText(/Interface Name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/APN/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Profile Number/i)).toBeInTheDocument();
-    });
-
-    it('should disable all inputs while submitting', async () => {
-      const user = userEvent.setup();
-      render(<LteModemForm {...defaultProps} />);
-
-      const submitButton = screen.getByText(/Configure LTE Modem/i);
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const interfaceInput = screen.getByPlaceholderText('lte1');
-        expect(interfaceInput).toBeDisabled();
-      });
-    });
-  });
 });

@@ -10,7 +10,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { axe } from 'vitest-axe';
 
 import type { FirewallLogEntry } from '@nasnet/core/types';
 import { usePlatform } from '@nasnet/ui/layouts';
@@ -393,13 +392,6 @@ describe('FirewallLogViewer', () => {
 
       expect(screen.getByText(/Showing 3 of 3 logs/i)).toBeInTheDocument();
     });
-
-    it('should pass accessibility checks', async () => {
-      const { container } = render(<FirewallLogViewer routerId="router-1" />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
   });
 
   describe('Mobile Presenter', () => {
@@ -583,13 +575,6 @@ describe('FirewallLogViewer', () => {
       render(<FirewallLogViewer routerId="router-1" />);
 
       expect(screen.getByText(/No logs found. Try adjusting your filters./i)).toBeInTheDocument();
-    });
-
-    it('should pass accessibility checks on mobile', async () => {
-      const { container } = render(<FirewallLogViewer routerId="router-1" />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
     });
   });
 

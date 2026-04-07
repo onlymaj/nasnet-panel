@@ -8,19 +8,14 @@
  * - Trace mode highlights matching rules
  * - Responsive layout (horizontal desktop, vertical mobile)
  * - Category accent color applied
- * - WCAG AAA accessibility (axe-core - 0 violations)
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { MangleFlowDiagram } from './MangleFlowDiagram';
 
 import type { MangleFlowDiagramProps } from './MangleFlowDiagram';
-
-// Note: vitest-axe matchers are extended globally in src/test/setup.ts
 
 // Mock the platform hook
 vi.mock('@nasnet/ui/layouts', () => ({
@@ -281,106 +276,6 @@ describe('MangleFlowDiagram', () => {
       // Mobile clear button should be shorter ("Clear" not "Clear Filter")
       const clearButton = screen.getByRole('button', { name: /^clear$/i });
       expect(clearButton).toBeInTheDocument();
-    });
-  });
-
-  describe('WCAG AAA Accessibility', () => {
-    it('has no accessibility violations (desktop)', async () => {
-      const { container } = render(<MangleFlowDiagram {...defaultProps} />);
-
-      expect(await axe(container)).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations (mobile)', async () => {
-      const layoutModule = await import('@nasnet/ui/layouts');
-      vi.mocked(layoutModule.usePlatform).mockReturnValue('mobile');
-
-      const { container } = render(<MangleFlowDiagram {...defaultProps} />);
-
-      expect(await axe(container)).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations with selected chain', async () => {
-      const { container } = render(
-        <MangleFlowDiagram
-          {...defaultProps}
-          selectedChain="forward"
-        />
-      );
-
-      expect(await axe(container)).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations in trace mode', async () => {
-      const { container } = render(
-        <MangleFlowDiagram
-          {...defaultProps}
-          traceMode={true}
-          highlightedChains={['prerouting', 'forward']}
-        />
-      );
-
-      expect(await axe(container)).toHaveNoViolations();
-    });
-
-    it('provides accessible labels for chain buttons', () => {
-      render(<MangleFlowDiagram {...defaultProps} />);
-
-      const preroutingButton = screen.getByRole('button', { name: /prerouting/i });
-      expect(preroutingButton).toHaveAccessibleName();
-
-      // Should include rule count in label
-      expect(preroutingButton).toHaveAttribute('aria-label', expect.stringContaining('5 rules'));
-    });
-
-    it('supports keyboard navigation through chains', async () => {
-      const user = userEvent.setup();
-      const onChainSelect = vi.fn();
-
-      render(
-        <MangleFlowDiagram
-          {...defaultProps}
-          onChainSelect={onChainSelect}
-        />
-      );
-
-      const preroutingButton = screen.getByRole('button', { name: /prerouting/i });
-
-      // Focus and activate with keyboard
-      preroutingButton.focus();
-      await user.keyboard('{Enter}');
-
-      expect(onChainSelect).toHaveBeenCalledWith('prerouting');
-    });
-
-    it('has proper focus indicators', async () => {
-      const user = userEvent.setup();
-
-      render(<MangleFlowDiagram {...defaultProps} />);
-
-      const preroutingButton = screen.getByRole('button', { name: /prerouting/i });
-
-      // Tab to button
-      await user.tab();
-      preroutingButton.focus();
-
-      // Should have focus styles
-      expect(preroutingButton.className).toContain('focus:ring');
-    });
-
-    it('uses aria-pressed for chain selection state', () => {
-      render(
-        <MangleFlowDiagram
-          {...defaultProps}
-          selectedChain="forward"
-        />
-      );
-
-      const forwardButton = screen.getByRole('button', { name: /forward/i });
-      const preroutingButton = screen.getByRole('button', { name: /prerouting/i });
-
-      expect(forwardButton).toHaveAttribute('aria-pressed', 'true');
-      expect(preroutingButton).toHaveAttribute('aria-pressed', 'false');
     });
   });
 

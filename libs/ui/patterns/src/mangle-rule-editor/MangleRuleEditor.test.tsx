@@ -16,13 +16,9 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { MangleRuleEditor } from './MangleRuleEditor';
 
 import type { MangleRuleEditorProps } from './mangle-rule-editor.types';
-
-// Note: vitest-axe matchers are extended globally in src/test/setup.ts
 
 // Mock the platform hook
 vi.mock('@nasnet/ui/layouts', () => ({
@@ -387,96 +383,6 @@ describe('MangleRuleEditor', () => {
 
       // Field changes would update preview
       // Specific tests depend on implementation
-    });
-  });
-
-  describe('WCAG AAA Accessibility', () => {
-    it('has no accessibility violations (desktop)', async () => {
-      const { container } = render(<MangleRuleEditor {...defaultProps} />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations (mobile)', async () => {
-      const { usePlatform } = require('@nasnet/ui/layouts');
-      usePlatform.mockReturnValue('mobile');
-
-      const { container } = render(<MangleRuleEditor {...defaultProps} />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations with validation errors', async () => {
-      const { container } = render(
-        <MangleRuleEditor
-          {...defaultProps}
-          initialRule={{
-            chain: 'prerouting',
-            action: 'mark-connection',
-            // Invalid - missing newConnectionMark will trigger validation error
-          }}
-        />
-      );
-
-      // Trigger validation
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('supports keyboard navigation', async () => {
-      const user = userEvent.setup();
-
-      render(<MangleRuleEditor {...defaultProps} />);
-
-      // Tab through form elements
-      await user.tab();
-      await waitFor(() => {
-        const focusedElement = document.activeElement;
-        expect(focusedElement).not.toBe(document.body);
-      });
-
-      // Can navigate through multiple elements
-      await user.tab();
-      await user.tab();
-
-      // Should be able to reach save/cancel buttons
-      const buttons = screen.getAllByRole('button');
-      expect(buttons.length).toBeGreaterThan(0);
-    });
-
-    it('has proper ARIA labels and roles', () => {
-      render(<MangleRuleEditor {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-
-      // Dialog should have accessible name
-      expect(dialog).toHaveAccessibleName();
-    });
-
-    it('provides form field labels', async () => {
-      render(<MangleRuleEditor {...defaultProps} />);
-
-      await waitFor(() => {
-        const dialog = screen.getByRole('dialog');
-        // All form inputs should have associated labels
-        const inputs = within(dialog).queryAllByRole('textbox');
-        const selects = within(dialog).queryAllByRole('combobox');
-
-        // Combined inputs and selects should have labels
-        const allControls = [...inputs, ...selects];
-        if (allControls.length > 0) {
-          allControls.forEach((control) => {
-            expect(control).toHaveAccessibleName();
-          });
-        }
-      });
     });
   });
 

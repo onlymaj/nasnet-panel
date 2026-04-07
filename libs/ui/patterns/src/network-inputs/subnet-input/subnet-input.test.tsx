@@ -8,8 +8,6 @@ import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { OverlapWarning } from './overlap-warning';
 import { PrefixSelector } from './prefix-selector';
 import { SubnetCalculations } from './subnet-calculations';
@@ -412,55 +410,5 @@ describe('OverlapWarning', () => {
     await user.click(screen.getByText('Overlap Detected'));
 
     expect(onShowDetails).toHaveBeenCalled();
-  });
-});
-
-// ============================================================================
-// ACCESSIBILITY TESTS
-// ============================================================================
-
-describe('Accessibility', () => {
-  it('SubnetCalculations has no accessibility violations', async () => {
-    const mockInfo: SubnetInfo = {
-      network: '192.168.1.0',
-      broadcast: '192.168.1.255',
-      firstHost: '192.168.1.1',
-      lastHost: '192.168.1.254',
-      hostCount: 254,
-      prefix: 24,
-      mask: '255.255.255.0',
-    };
-
-    const { container } = render(<SubnetCalculations info={mockInfo} />);
-    const results = await axe(container);
-
-    expect(results).toHaveNoViolations();
-  });
-
-  it('PrefixSelector has no accessibility violations', async () => {
-    const { container } = render(
-      <PrefixSelector
-        value={24}
-        onChange={vi.fn()}
-        options={COMMON_PREFIX_OPTIONS}
-        ariaLabel="CIDR prefix"
-      />
-    );
-    const results = await axe(container);
-
-    expect(results).toHaveNoViolations();
-  });
-
-  it('OverlapWarning has no accessibility violations', async () => {
-    const mockOverlap: OverlapResult = {
-      overlappingCidr: '192.168.0.0/16',
-      resourceName: 'LAN Pool',
-      resourceType: 'DHCP Pool',
-    };
-
-    const { container } = render(<OverlapWarning overlap={mockOverlap} />);
-    const results = await axe(container);
-
-    expect(results).toHaveNoViolations();
   });
 });

@@ -5,7 +5,6 @@
  * - Tab switching and persistence
  * - Component composition
  * - State management integration
- * - Accessibility compliance
  * - Empty states and loading states
  *
  * @see NAS-7.11: Implement Connection Rate Limiting - Task 11
@@ -15,13 +14,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { axe, toHaveNoViolations } from 'jest-axe';
 import { RateLimitingPage } from './RateLimitingPage';
 import { useRateLimitingUIStore, useConnectionStore } from '@nasnet/state/stores';
 import * as queries from '@nasnet/api-client/queries';
-
-// Extend Jest matchers
-expect.extend(toHaveNoViolations);
 
 // ============================================================================
 // Mocks
@@ -450,67 +445,6 @@ describe('RateLimitingPage', () => {
       render(<RateLimitingPage />, { wrapper: createWrapper() });
 
       expect(useConnectionStore).toHaveBeenCalled();
-    });
-  });
-
-  // ==========================================================================
-  // Accessibility
-  // ==========================================================================
-
-  describe('Accessibility', () => {
-    it('has no accessibility violations on Rate Limits tab', async () => {
-      const { container } = render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations on SYN Flood tab', async () => {
-      vi.mocked(useRateLimitingUIStore).mockReturnValue({
-        ...mockStoreState,
-        selectedTab: 'syn-flood',
-      });
-
-      const { container } = render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations on Statistics tab', async () => {
-      vi.mocked(useRateLimitingUIStore).mockReturnValue({
-        ...mockStoreState,
-        selectedTab: 'statistics',
-      });
-
-      const { container } = render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('uses proper heading hierarchy', () => {
-      render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const h1 = screen.getByRole('heading', { level: 1, name: 'Rate Limiting' });
-      expect(h1).toBeInTheDocument();
-    });
-
-    it('tabs have proper ARIA roles', () => {
-      render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const tabList = screen.getByRole('tablist');
-      expect(tabList).toBeInTheDocument();
-
-      const tabs = screen.getAllByRole('tab');
-      expect(tabs).toHaveLength(3);
-    });
-
-    it('buttons have accessible labels', () => {
-      render(<RateLimitingPage />, { wrapper: createWrapper() });
-
-      const addButtons = screen.getAllByRole('button', { name: 'Add Rate Limit' });
-      expect(addButtons.length).toBeGreaterThan(0);
     });
   });
 

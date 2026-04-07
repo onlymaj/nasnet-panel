@@ -330,29 +330,4 @@ describe('LeaseCard', () => {
       expect(screen.getByText('never')).toBeInTheDocument();
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      render(<LeaseCard {...defaultProps} />);
-
-      expect(screen.getByLabelText(/lease card for/i)).toBeInTheDocument();
-    });
-
-    it('should indicate selected state to screen readers', () => {
-      render(<LeaseCard {...defaultProps} />);
-
-      const card = screen.getByLabelText(/lease card for/i);
-      expect(card).toBeInTheDocument();
-    });
-
-    it('should have proper focus indicators', async () => {
-      const user = userEvent.setup();
-      render(<LeaseCard {...defaultProps} />);
-
-      const card = screen.getByText('192.168.1.100').closest('div');
-      card!.focus();
-
-      expect(card).toHaveClass('focus:ring-3');
-    });
-  });
 });

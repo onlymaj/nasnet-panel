@@ -14,15 +14,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-// import { axe, toHaveNoViolations } from 'vitest-axe/matchers';
 
 import { FirewallLogFilters } from './FirewallLogFilters';
 import { FirewallLogFiltersDesktop } from './FirewallLogFiltersDesktop';
 import { FirewallLogFiltersMobile } from './FirewallLogFiltersMobile';
 
 import type { FirewallLogFilterState } from './firewall-log-filters.types';
-
-// expect.extend(toHaveNoViolations);
 
 describe('FirewallLogFilters', () => {
   const defaultFilters: FirewallLogFilterState = {
@@ -211,19 +208,6 @@ describe('FirewallLogFilters', () => {
         });
       });
     });
-
-    it.skip('passes axe accessibility check', async () => {
-      // TODO: Configure axe-core for vitest
-      // const { container } = render(
-      //   <FirewallLogFiltersDesktop
-      //     filters={defaultFilters}
-      //     onFiltersChange={mockOnFiltersChange}
-      //     availablePrefixes={['DROPPED-', 'ACCEPTED-']}
-      //   />
-      // );
-      // const results = await axe(container);
-      // expect(results).toHaveNoViolations();
-    });
   });
 
   describe('Mobile Presenter', () => {
@@ -351,21 +335,6 @@ describe('FirewallLogFilters', () => {
           actions: [],
         });
       });
-    });
-
-    it.skip('passes axe accessibility check', async () => {
-      // TODO: Configure axe-core for vitest
-      // const { container } = render(
-      //   <FirewallLogFiltersMobile
-      //     filters={defaultFilters}
-      //     onFiltersChange={mockOnFiltersChange}
-      //     open={true}
-      //     onClose={vi.fn()}
-      //     availablePrefixes={['DROPPED-', 'ACCEPTED-']}
-      //   />
-      // );
-      // const results = await axe(container);
-      // expect(results).toHaveNoViolations();
     });
   });
 

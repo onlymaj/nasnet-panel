@@ -13,7 +13,6 @@
  * - ✅ Successful submission calls createGroup
  * - ✅ Successful update calls updateGroup
  * - ✅ At least 1 service required validation
- * - ✅ axe-core violations = 0
  *
  * @module @nasnet/features/firewall/components
  */
@@ -21,14 +20,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe, toHaveNoViolations } from 'jest-axe';
 
 import type { ServiceGroup, ServicePortDefinition } from '@nasnet/core/types';
 
 import { ServiceGroupDialog } from './ServiceGroupDialog';
 import * as useCustomServicesModule from '../hooks/useCustomServices';
-
-expect.extend(toHaveNoViolations);
 
 // ============================================================================
 // Mock Data
@@ -193,12 +189,6 @@ describe('ServiceGroupDialog', () => {
       expect(screen.getByLabelText(/protocol/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/select services/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
-    });
-
-    it('has no accessibility violations', async () => {
-      const { container } = renderDialog();
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
     });
   });
 

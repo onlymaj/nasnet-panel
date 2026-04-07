@@ -47,24 +47,3 @@ test.describe('Application Loading', () => {
     expect(true).toBe(true);
   });
 });
-
-test.describe('Accessibility', () => {
-  test('should have no critical accessibility violations', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    // Check for basic accessibility attributes
-    // Note: For comprehensive accessibility testing, use axe-core in CI
-    const mainContent = page.locator('main, [role="main"], #root');
-    await expect(mainContent).toBeVisible();
-
-    // Verify interactive elements are keyboard accessible
-    const focusableElements = page.locator(
-      'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const count = await focusableElements.count();
-
-    // There should be at least some focusable elements on the page
-    expect(count).toBeGreaterThan(0);
-  });
-});

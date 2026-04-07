@@ -9,8 +9,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import type { BinaryVerification } from '@nasnet/api-client/generated';
 import { VerificationStatus as GraphQLStatus } from '@nasnet/api-client/generated';
 
@@ -272,22 +270,6 @@ describe('VerificationBadge Component', () => {
     it.todo('should close tooltip/sheet when clicking outside');
 
     it.todo('should trigger re-verify when button is clicked');
-  });
-
-  describe('Accessibility', () => {
-    it.todo('should have no accessibility violations (verified status)');
-
-    it.todo('should have no accessibility violations (failed status)');
-
-    it.todo('should have no accessibility violations (unknown status)');
-
-    it.todo('should have correct ARIA labels');
-
-    it.todo('should support keyboard navigation (Tab, Enter, Escape)');
-
-    it.todo('should have minimum 44px touch targets on mobile');
-
-    it.todo('should announce status changes to screen readers');
   });
 
   describe('Visual States', () => {

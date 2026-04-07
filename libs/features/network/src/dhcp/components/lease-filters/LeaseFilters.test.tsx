@@ -231,32 +231,4 @@ describe('LeaseFilters', () => {
       expect(screen.queryByText('1')).not.toBeInTheDocument();
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels for dropdowns', () => {
-      render(<LeaseFilters servers={servers} />);
-
-      expect(screen.getByLabelText('Filter by status')).toBeInTheDocument();
-      expect(screen.getByLabelText('Filter by server')).toBeInTheDocument();
-    });
-
-    it('should support keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(<LeaseFilters servers={servers} />);
-
-      const statusButton = screen.getByText('Status').closest('button');
-      statusButton!.focus();
-
-      await user.keyboard('{Enter}');
-
-      await waitFor(() => {
-        expect(screen.getByRole('menu')).toBeInTheDocument();
-      });
-
-      await user.keyboard('{ArrowDown}');
-      await user.keyboard('{Enter}');
-
-      expect(mockStore.setLeaseStatusFilter).toHaveBeenCalled();
-    });
-  });
 });

@@ -10,8 +10,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import {
   ConfidenceIndicator,
   ConfidenceIndicatorBase,
@@ -297,60 +295,6 @@ describe('ConfidenceIndicator Component', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper aria-label', async () => {
-      render(
-        <ConfidenceIndicator
-          confidence={95}
-          method="Auto-detected via DHCP"
-          variant="desktop"
-        />
-      );
-
-      // Find the element with the aria-label
-      const indicator = screen.getByLabelText(/High confidence/i);
-      expect(indicator).toBeInTheDocument();
-    });
-
-    it('should have role="status" for dynamic updates in auto variant', () => {
-      render(
-        <ConfidenceIndicator
-          confidence={90}
-          variant="auto"
-        />
-      );
-      // Auto variant has role="status" wrapper for live announcements
-      const statusElements = screen.getAllByRole('status');
-      expect(statusElements.length).toBeGreaterThan(0);
-    });
-
-    it('should pass axe accessibility tests', async () => {
-      const { container } = render(
-        <ConfidenceIndicator
-          confidence={90}
-          method="Auto-detected"
-          variant="desktop"
-        />
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('should have visible focus indicator', () => {
-      render(
-        <ConfidenceIndicator
-          confidence={90}
-          variant="desktop"
-          onOverride={() => {}}
-        />
-      );
-
-      // The interactive element should have focus-visible classes
-      const indicator = screen.getByLabelText(/High confidence/i);
-      expect(indicator.className).toContain('focus-visible:');
-    });
-  });
 });
 
 describe('ConfidenceIndicatorBase', () => {

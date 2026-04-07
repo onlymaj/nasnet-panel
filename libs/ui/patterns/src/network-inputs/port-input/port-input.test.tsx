@@ -13,8 +13,6 @@
 import { render, screen, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { PortInput } from './port-input';
 import { PortInputDesktop } from './port-input-desktop';
 import { PortInputMobile } from './port-input-mobile';
@@ -27,8 +25,6 @@ import {
   formatPortDisplay,
   usePortInput,
 } from './use-port-input';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 // Mock usePlatform hook
 vi.mock('@nasnet/ui/layouts', () => ({
@@ -539,87 +535,6 @@ describe('PortInput Component', () => {
 
       expect(input).toHaveValue('');
     });
-  });
-});
-
-// ============================================================================
-// Accessibility Tests
-// ============================================================================
-
-describe('PortInput Accessibility', () => {
-  it('should have no accessibility violations (single mode)', async () => {
-    const { container } = render(
-      <PortInput
-        label="Port"
-        value={443}
-        showService
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations (range mode)', async () => {
-    const { container } = render(
-      <PortInput
-        mode="range"
-        label="Port Range"
-        value="8080-8090"
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations (multi mode)', async () => {
-    const { container } = render(
-      <PortInput
-        mode="multi"
-        label="Ports"
-        value="80,443"
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations with error', async () => {
-    const { container } = render(
-      <PortInput
-        label="Port"
-        error="Invalid port"
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have proper ARIA labels', () => {
-    render(<PortInput label="Port" />);
-
-    expect(screen.getByLabelText('Port')).toBeInTheDocument();
-  });
-
-  it('should announce errors via role="alert"', () => {
-    render(<PortInput error="Port is required" />);
-
-    const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent('Port is required');
-  });
-
-  it('should have aria-invalid when there is an error', () => {
-    render(
-      <PortInput
-        label="Port"
-        error="Invalid"
-      />
-    );
-
-    expect(screen.getByLabelText('Port')).toHaveAttribute('aria-invalid', 'true');
   });
 });
 

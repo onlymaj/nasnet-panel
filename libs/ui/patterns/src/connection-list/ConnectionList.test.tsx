@@ -14,7 +14,8 @@
 import { MockedProvider } from '@apollo/client/testing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe, toHaveNoViolations } from 'jest-axe';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { usePlatform } from '@nasnet/ui/layouts';
 
 // import { ConnectionList } from './ConnectionList';
 // import { GET_CONNECTIONS, KILL_CONNECTION } from '@nasnet/api-client/queries';
@@ -27,11 +28,9 @@ import {
   mockErrorResponse,
 } from '../__test-utils__/connection-tracking-fixtures';
 
-expect.extend(toHaveNoViolations);
-
 // Mock usePlatform hook for platform detection
-jest.mock('@nasnet/ui/layouts', () => ({
-  usePlatform: jest.fn(() => 'desktop'),
+vi.mock('@nasnet/ui/layouts', () => ({
+  usePlatform: vi.fn(() => 'desktop'),
 }));
 
 // TODO: Define mocks when GraphQL queries are created
@@ -47,9 +46,7 @@ jest.mock('@nasnet/ui/layouts', () => ({
 
 describe('ConnectionList', () => {
   beforeEach(() => {
-    // Reset mock before each test
-    const { usePlatform } = require('@nasnet/ui/layouts');
-    usePlatform.mockReturnValue('desktop');
+    vi.mocked(usePlatform).mockReturnValue('desktop');
   });
 
   describe('Rendering States', () => {
@@ -234,38 +231,6 @@ describe('ConnectionList', () => {
       // usePlatform.mockReturnValue('mobile');
       // TODO: Render ConnectionList
       // Expected: Mobile card layout (VirtualizedList)
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have no axe violations', async () => {
-      // TODO: Render component, run axe
-      // const { container } = render(<ConnectionList routerId="router-1" />);
-      // const results = await axe(container);
-      // expect(results).toHaveNoViolations();
-    });
-
-    it('should have accessible labels for all buttons', async () => {
-      // TODO: Verify aria-label on kill buttons, filter clear, pause/resume
-    });
-
-    it('should support keyboard navigation', async () => {
-      // TODO: Test Tab, Enter, Escape keys
-      // Tab through table rows
-      // Enter to open kill dialog
-      // Escape to close dialog
-    });
-
-    it('should have 44px minimum touch targets on mobile', async () => {
-      // TODO: Switch to mobile presenter, measure button sizes
-      // Expected: All interactive elements >= 44px
-    });
-
-    it('should announce state changes to screen readers', async () => {
-      // TODO: Verify ARIA live regions for:
-      // - Filter updates ("Showing X connections")
-      // - Auto-refresh countdown
-      // - Kill success/error
     });
   });
 });

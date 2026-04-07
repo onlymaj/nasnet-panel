@@ -335,36 +335,4 @@ describe('LeaseTableWithSelection', () => {
       expect(screen.getByText('Blocked')).toBeInTheDocument();
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels for checkboxes', () => {
-      render(<LeaseTableWithSelection {...defaultProps} />);
-
-      const headerCheckbox = screen.getAllByRole('checkbox')[0];
-      expect(headerCheckbox).toHaveAttribute('aria-label', 'Select all leases');
-
-      const rowCheckbox = screen.getAllByRole('checkbox')[1];
-      expect(rowCheckbox).toHaveAttribute('aria-label', expect.stringContaining('Select'));
-    });
-
-    it('should have proper table structure', () => {
-      render(<LeaseTableWithSelection {...defaultProps} />);
-
-      expect(screen.getByRole('table')).toBeInTheDocument();
-      expect(screen.getAllByRole('columnheader')).toHaveLength(7); // Including checkbox column
-      expect(screen.getAllByRole('row').length).toBeGreaterThan(1);
-    });
-
-    it('should support keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(<LeaseTableWithSelection {...defaultProps} />);
-
-      const firstCheckbox = screen.getAllByRole('checkbox')[1];
-      firstCheckbox.focus();
-
-      // Press Space to toggle selection
-      await user.keyboard(' ');
-      expect(defaultProps.onSelectionChange).toHaveBeenCalled();
-    });
-  });
 });

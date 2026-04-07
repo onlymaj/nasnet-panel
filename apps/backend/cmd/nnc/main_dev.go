@@ -41,6 +41,8 @@ func init() {
 	ServerVersion = "development-v2.0"
 }
 
+var prodLogger *zap.Logger
+
 // eventBusAdapter adapts events.EventBus to alerts.EventBus interface.
 type eventBusAdapter struct {
 	bus events.EventBus
@@ -86,8 +88,23 @@ func run() {
 	defer dbManager.Close()
 	systemDB := dbManager.SystemDB()
 
+	// Initialize structured logger (debug level for dev)
+	loggerConfig := zap.NewDevelopmentConfig()
+	loggerConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	logger, err := loggerConfig.Build()
+	if err != nil {
+		log.Fatalf("Failed to initialize logger: %v", err)
+	}
+	defer func() {
+		if syncErr := logger.Sync(); syncErr != nil {
+			logger.Warn("failed to sync logger", zap.Error(syncErr))
+		}
+	}()
+	sugar := logger.Sugar()
+	prodLogger = logger
+
 	// Initialize services
-	scannerSvc := scannerPkg.NewServiceWithDefaults(eventBus)
+	scannerSvc := scannerPkg.NewServiceWithDefaults(eventBus, logger)
 
 	var encryptionSvc *encryption.Service
 	encryptionSvc, err = encryption.NewServiceFromEnv()
@@ -96,7 +113,7 @@ func run() {
 	}
 	defer func() {
 		if encryptionSvc != nil {
-			encryptionSvc.Close()
+			_ = encryptionSvc
 		}
 	}()
 
@@ -116,20 +133,6 @@ func run() {
 		EventBus:   eventBus,
 	})
 
-	// Initialize structured logger (debug level for dev)
-	loggerConfig := zap.NewDevelopmentConfig()
-	loggerConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	logger, err := loggerConfig.Build()
-	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
-	}
-	defer func() {
-		if syncErr := logger.Sync(); syncErr != nil {
-			logger.Warn("failed to sync logger", zap.Error(syncErr))
-		}
-	}()
-	sugar := logger.Sugar()
-
 	// Initialize notification system
 	channels := initDevNotificationChannels(eventBus)
 
@@ -138,7 +141,7 @@ func run() {
 	})
 
 	dispatcher := notifications.NewDispatcher(notifications.DispatcherConfig{
-		Channels: channels, Logger: sugar, TemplateService: templateService,
+		Channels: channels, Logger: logger, TemplateService: templateService,
 		DB: systemDB, MaxRetries: 3, InitialBackoff: 1 * time.Second,
 	})
 	if subscribeErr := eventBus.Subscribe(events.EventTypeAlertCreated, dispatcher.HandleAlertCreated); subscribeErr != nil {
@@ -180,7 +183,7 @@ func run() {
 	}
 
 	// Create server
-	srv := server.New(cfg)
+	srv := server.New(cfg, logger)
 	server.ApplyDevMiddleware(srv.Echo)
 
 	// Setup dev routes
@@ -218,7 +221,7 @@ func performHealthCheck() {
 	if port == "" {
 		port = "8080"
 	}
-	server.PerformHealthCheck(port)
+	server.PerformHealthCheck(port, nil)
 }
 
 // initDevNotificationChannels creates all notification channels for development.

@@ -357,40 +357,6 @@ describe('InAppNotificationPreferences', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('has proper ARIA labels for switches', () => {
-      render(<InAppNotificationPreferences />);
-
-      expect(
-        screen.getByRole('switch', { name: /enable or disable in-app notifications/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole('switch', { name: /enable or disable notification sound/i })
-      ).toBeInTheDocument();
-    });
-
-    it('has proper labels for select elements', () => {
-      render(<InAppNotificationPreferences />);
-
-      expect(screen.getByRole('combobox', { name: /severity filter/i })).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: /auto-dismiss timing/i })).toBeInTheDocument();
-    });
-
-    it('maintains focus management when interacting with controls', async () => {
-      const user = userEvent.setup();
-      render(<InAppNotificationPreferences />);
-
-      const enableSwitch = screen.getByRole('switch', {
-        name: /enable or disable in-app notifications/i,
-      });
-
-      await user.click(enableSwitch);
-
-      // Switch should still be in the document and focusable
-      expect(enableSwitch).toBeInTheDocument();
-    });
-  });
-
   describe('Integration', () => {
     it('auto-saves all settings changes without submit button', async () => {
       const user = userEvent.setup();

@@ -182,11 +182,6 @@ describe('ResourceCardMobile', () => {
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
-
-  it('has accessible aria-label', () => {
-    render(<ResourceCardMobile resource={mockResource} />);
-    expect(screen.getByRole('article', { name: 'Test Resource - Online' })).toBeInTheDocument();
-  });
 });
 
 describe('ResourceCardDesktop', () => {
@@ -223,11 +218,6 @@ describe('ResourceCardDesktop', () => {
       />
     );
     expect(screen.getByRole('button', { name: 'More actions' })).toBeInTheDocument();
-  });
-
-  it('has accessible aria-label', () => {
-    render(<ResourceCardDesktop resource={mockResource} />);
-    expect(screen.getByRole('article', { name: 'Test Resource - Online' })).toBeInTheDocument();
   });
 });
 

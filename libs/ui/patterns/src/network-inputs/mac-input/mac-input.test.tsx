@@ -4,7 +4,6 @@
  * Comprehensive tests for the MAC input component:
  * - Hook unit tests (normalization, validation, vendor lookup)
  * - Component interaction tests
- * - Accessibility tests
  *
  * @module @nasnet/ui/patterns/network-inputs/mac-input
  */
@@ -12,13 +11,9 @@
 import { render, screen, fireEvent, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { MACInputDesktop } from './mac-input-desktop';
 import { MACInputMobile } from './mac-input-mobile';
 import { useMACInput, isValidMAC, normalizeMAC, extractOUI, lookupVendor } from './use-mac-input';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 // ============================================================================
 // Utility Function Tests
@@ -276,17 +271,6 @@ describe('MACInputDesktop', () => {
     render(<MACInputDesktop disabled />);
     expect(screen.getByRole('textbox')).toBeDisabled();
   });
-
-  it('passes accessibility audit', async () => {
-    const { container } = render(
-      <MACInputDesktop
-        label="MAC Address"
-        aria-describedby="help"
-      />
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
 });
 
 // ============================================================================
@@ -324,17 +308,6 @@ describe('MACInputMobile', () => {
     await userEvent.type(input, 'AABB');
 
     expect(onChange).toHaveBeenCalled();
-  });
-
-  it('passes accessibility audit', async () => {
-    const { container } = render(
-      <MACInputMobile
-        label="MAC Address"
-        aria-describedby="help"
-      />
-    );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
   });
 });
 

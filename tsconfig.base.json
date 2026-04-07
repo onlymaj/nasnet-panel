@@ -18,6 +18,7 @@
     "target": "es2022",
     "customConditions": ["@nasnet/source"],
     "paths": {
+      "@nasnet/core/types": ["./libs/core/types/src/index.ts"],
       "@nasnet/core/*": ["./libs/core/*/src"],
       "@nasnet/core/types/*": ["./libs/core/types/src/*"],
       "@nasnet/ui/*": ["./libs/ui/*/src"],

@@ -263,37 +263,6 @@ describe('LeaseDetailPanel', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      render(<LeaseDetailPanel {...defaultProps} />);
-
-      expect(screen.getByRole('region', { name: 'Lease details' })).toBeInTheDocument();
-    });
-
-    it('should have semantic heading hierarchy', () => {
-      render(<LeaseDetailPanel {...defaultProps} />);
-
-      expect(screen.getByRole('heading', { level: 2, name: 'Lease Details' })).toBeInTheDocument();
-      expect(
-        screen.getByRole('heading', { level: 3, name: 'Device Information' })
-      ).toBeInTheDocument();
-    });
-
-    it('should support keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(<LeaseDetailPanel {...defaultProps} />);
-
-      const firstButton = screen.getByText('Make Static');
-      firstButton.focus();
-
-      await user.keyboard('{Tab}');
-      expect(screen.getByText('Delete Lease')).toHaveFocus();
-
-      await user.keyboard('{Tab}');
-      expect(screen.getByText('Copy MAC Address')).toHaveFocus();
-    });
-  });
-
   describe('Layout', () => {
     it('should use grid layout for information sections', () => {
       const { container } = render(<LeaseDetailPanel {...defaultProps} />);

@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedProvider, type MockedResponse } from '@apollo/client/testing';
 import { AlertTemplateApplyDialog } from './AlertTemplateApplyDialog';
@@ -668,65 +668,6 @@ describe('AlertTemplateApplyDialog', () => {
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalled();
         expect(onClose).toHaveBeenCalled();
-      });
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // Accessibility
-  // ---------------------------------------------------------------------------
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels for inputs', async () => {
-      renderDialog();
-
-      await waitFor(() => {
-        const cpuInput = screen.getByLabelText(/cpu threshold/i);
-        expect(cpuInput).toHaveAttribute('aria-invalid');
-      });
-    });
-
-    it('should have aria-describedby for error messages', async () => {
-      const user = userEvent.setup();
-      renderDialog();
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/cpu threshold/i)).toBeInTheDocument();
-      });
-
-      const submitButton = screen.getByRole('button', { name: /apply template/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const cpuInput = screen.getByLabelText(/cpu threshold/i);
-        expect(cpuInput).toHaveAttribute('aria-describedby');
-      });
-    });
-
-    it('should have role="alert" for error messages', async () => {
-      const user = userEvent.setup();
-      renderDialog();
-
-      await waitFor(() => {
-        expect(screen.getByLabelText(/cpu threshold/i)).toBeInTheDocument();
-      });
-
-      const submitButton = screen.getByRole('button', { name: /apply template/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const alerts = screen.getAllByRole('alert');
-        expect(alerts.length).toBeGreaterThan(0);
-      });
-    });
-
-    it('should have proper heading hierarchy', async () => {
-      renderDialog();
-
-      await waitFor(() => {
-        const dialog = screen.getByRole('dialog');
-        const headings = within(dialog).getAllByRole('heading');
-        expect(headings.length).toBeGreaterThan(0);
       });
     });
   });

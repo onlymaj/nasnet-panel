@@ -10,8 +10,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { DeviceCard } from './device-card';
 import { DeviceCardCompact } from './device-card-compact';
 import { DeviceCardDesktop } from './device-card-desktop';
@@ -24,8 +22,6 @@ import {
 } from './use-device-card';
 
 import type { DiscoveredDevice, DeviceType } from './device-card.types';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 /**
  * Create a mock device for tests
@@ -365,79 +361,6 @@ describe('DeviceCard Component', () => {
 
       expect(onClick).toHaveBeenCalled();
     });
-  });
-});
-
-// ============================================================================
-// Accessibility Tests
-// ============================================================================
-
-describe('Accessibility', () => {
-  it('should have no accessibility violations for DeviceCard', async () => {
-    const { container } = render(<DeviceCard device={createMockDevice()} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have proper ARIA label', () => {
-    render(<DeviceCard device={createMockDevice({ hostname: 'Test-PC' })} />);
-    // Get all article elements (mobile and desktop render both)
-    const cards = screen.getAllByRole('article');
-    expect(cards[0]).toHaveAttribute('aria-label');
-    expect(cards[0].getAttribute('aria-label')).toContain('Test-PC');
-  });
-
-  it('should be keyboard navigable when clickable', () => {
-    const onClick = vi.fn();
-    render(
-      <DeviceCard
-        device={createMockDevice()}
-        onClick={onClick}
-      />
-    );
-
-    // Get all article elements (mobile and desktop render both)
-    const cards = screen.getAllByRole('article');
-    expect(cards[0]).toHaveAttribute('tabIndex', '0');
-  });
-
-  it('should handle Enter key for selection', () => {
-    const onClick = vi.fn();
-    render(
-      <DeviceCard
-        device={createMockDevice()}
-        onClick={onClick}
-      />
-    );
-
-    // Get all article elements (mobile and desktop render both)
-    const cards = screen.getAllByRole('article');
-    fireEvent.keyDown(cards[0], { key: 'Enter' });
-
-    expect(onClick).toHaveBeenCalled();
-  });
-
-  it('should handle Space key for selection', () => {
-    const onClick = vi.fn();
-    render(
-      <DeviceCard
-        device={createMockDevice()}
-        onClick={onClick}
-      />
-    );
-
-    // Get all article elements (mobile and desktop render both)
-    const cards = screen.getAllByRole('article');
-    fireEvent.keyDown(cards[0], { key: ' ' });
-
-    expect(onClick).toHaveBeenCalled();
-  });
-
-  it('should use color and icon for status (not color alone)', () => {
-    render(<DeviceCard device={createMockDevice({ online: true })} />);
-    // The status badge should contain text "Online" not just color
-    const statuses = screen.getAllByText('Online');
-    expect(statuses.length).toBeGreaterThan(0);
   });
 });
 

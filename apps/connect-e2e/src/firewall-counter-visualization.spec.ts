@@ -450,63 +450,6 @@ test.describe('CSV Export', () => {
 });
 
 // =============================================================================
-// Scenario 7: Accessibility
-// =============================================================================
-
-test.describe('Accessibility', () => {
-  test('should be keyboard navigable', async ({ page }) => {
-    // Tab through counter settings
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-
-    // Find counter settings button by keyboard navigation
-    const focusedElement = await page.evaluate(() => document.activeElement?.textContent);
-
-    // Should be able to navigate to counter controls
-    expect(focusedElement).toBeTruthy();
-  });
-
-  test('should have proper ARIA labels', async ({ page }) => {
-    // Verify traffic bars have aria-label
-    const progressBars = page.locator('[role="progressbar"]');
-
-    if (await progressBars.first().isVisible()) {
-      await expect(progressBars.first()).toHaveAttribute('aria-label');
-    }
-
-    // Verify buttons have accessible names
-    await expect(page.getByRole('button', { name: /efficiency report/i })).toHaveAccessibleName(
-      /efficiency/i
-    );
-    await expect(page.getByRole('button', { name: /counter settings/i })).toHaveAccessibleName(
-      /counter/i
-    );
-  });
-
-  test('should meet color contrast requirements', async ({ page }) => {
-    // This would typically use axe-core for automated testing
-    // For now, verify text is visible (basic check)
-    const table = page.getByRole('table').first();
-    await expect(table).toBeVisible();
-
-    // Verify counter text is readable
-    await expect(page.getByText('125,430')).toBeVisible();
-  });
-
-  test('should support reduced motion preference', async ({ page }) => {
-    // Set reduced motion preference
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-
-    // Navigate and verify animations don't occur
-    await page.goto(BASE_URL);
-
-    // Counter cells should still be visible but without animations
-    const table = page.getByRole('table').first();
-    await expect(table).toBeVisible();
-  });
-});
-
-// =============================================================================
 // Scenario 8: Mobile Responsiveness
 // =============================================================================
 

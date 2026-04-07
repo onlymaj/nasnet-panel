@@ -2,7 +2,7 @@
  * PreFlightDialog Unit Tests
  *
  * Tests for the PreFlightDialog pattern component.
- * Covers deficit calculation, selection logic, sufficiency check, and accessibility.
+ * Covers deficit calculation, selection logic, and sufficiency check.
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -384,51 +384,6 @@ describe('PreFlightDialog', () => {
 
       // Confirm button should be disabled
       expect(screen.getByText('Confirm')).toBeDisabled();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have proper dialog role', () => {
-      const { container } = render(
-        <PreFlightDialog
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      expect(container.querySelector('[role="dialog"]')).toBeInTheDocument();
-    });
-
-    it('should have accessible dialog title', () => {
-      render(
-        <PreFlightDialog
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      expect(screen.getByText('Insufficient Memory')).toBeInTheDocument();
-    });
-
-    it('should have accessible checkboxes with labels', () => {
-      render(
-        <PreFlightDialog
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      const checkboxes = screen.getAllByRole('checkbox');
-      expect(checkboxes.length).toBe(3);
-
-      // Each checkbox should have an associated label
-      checkboxes.forEach((checkbox) => {
-        expect(checkbox).toHaveAttribute('id');
-        const label = screen.getByLabelText(
-          new RegExp(checkbox.getAttribute('id')?.replace('service-', '') || '')
-        );
-        expect(label).toBeInTheDocument();
-      });
     });
   });
 

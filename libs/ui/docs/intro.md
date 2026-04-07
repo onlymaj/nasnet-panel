@@ -145,9 +145,8 @@ Storybook version: **10.2.7** (ESM-only). Config lives at `libs/ui/primitives/.s
 | 07  | [patterns-domain-components.md](./patterns-domain-components.md) | Domain-specific pattern components, service cards, VPN panels       |
 | 08  | [shared-hooks.md](./shared-hooks.md)                             | Shared hooks API, `usePlatform`, `useTheme`, utility hooks          |
 | 09  | [multi-package-flows.md](./multi-package-flows.md)               | Cross-package integration patterns, provider composition            |
-| 10  | [testing-and-accessibility.md](./testing-and-accessibility.md)   | Test utilities API, a11y testing, WCAG AAA compliance checklist     |
-| 11  | [error-handling.md](./error-handling.md)                         | Error boundaries hierarchy, error UI components, recovery patterns  |
-| 12  | [contributing-and-storybook.md](./contributing-and-storybook.md) | New component checklist, Storybook guide, PR review process         |
+| 10  | [error-handling.md](./error-handling.md)                         | Error boundaries hierarchy, error UI components, recovery patterns  |
+| 11  | [contributing-and-storybook.md](./contributing-and-storybook.md) | New component checklist, Storybook guide, PR review process         |
 
 ---
 
@@ -155,14 +154,13 @@ Storybook version: **10.2.7** (ESM-only). Config lives at `libs/ui/primitives/.s
 
 These documents live in `Docs/design/` and are the authoritative design-side references:
 
-| Document                                                         | Purpose                                                                             |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| See `Docs/design/README.md`                                      | Master navigation for the entire design system                                      |
-| See `Docs/design/DESIGN_TOKENS.md`                               | Complete 200+ token reference — use this before choosing any color or spacing value |
-| See `Docs/design/PLATFORM_PRESENTER_GUIDE.md`                    | Full implementation guide for the Headless + Platform Presenters pattern            |
-| See `Docs/design/ux-design/6-component-library.md`               | Catalog of all 56 pattern components with usage guidelines                          |
-| See `Docs/design/ux-design/1-design-system-foundation.md`        | Architecture overview: tokens, theming, layer rationale                             |
-| See `Docs/design/ux-design/8-responsive-design-accessibility.md` | Responsive breakpoints and WCAG AAA requirements                                    |
+| Document                                                  | Purpose                                                                             |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| See `Docs/design/README.md`                               | Master navigation for the entire design system                                      |
+| See `Docs/design/DESIGN_TOKENS.md`                        | Complete 200+ token reference — use this before choosing any color or spacing value |
+| See `Docs/design/PLATFORM_PRESENTER_GUIDE.md`             | Full implementation guide for the Headless + Platform Presenters pattern            |
+| See `Docs/design/ux-design/6-component-library.md`        | Catalog of all 56 pattern components with usage guidelines                          |
+| See `Docs/design/ux-design/1-design-system-foundation.md` | Architecture overview: tokens, theming, layer rationale                             |
 
 ---
 

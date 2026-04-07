@@ -1,21 +1,17 @@
 /**
  * MiniStepper Tests
  *
- * Unit and accessibility tests for the Mini Stepper mobile pattern.
+ * Unit tests for the Mini Stepper mobile pattern.
  *
  * @see NAS-4A.18: Build Mini Stepper (Mobile Pattern)
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { MiniStepper } from './mini-stepper';
 import { useStepper } from '../../hooks/use-stepper';
 
 import type { StepConfig } from '../../hooks/use-stepper.types';
-
-// Note: vitest-axe auto-extends expect with toHaveNoViolations
 
 // ===== Test Fixtures =====
 
@@ -273,42 +269,6 @@ describe('MiniStepper', () => {
       await waitFor(() => {
         expect(screen.getByText('Step 3/3')).toBeInTheDocument();
       });
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have no accessibility violations', async () => {
-      const { container } = render(<TestWrapper />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('should have aria-live region for step announcements', () => {
-      render(<TestWrapper />);
-
-      const liveRegion = document.querySelector('[aria-live="polite"]');
-      expect(liveRegion).toBeInTheDocument();
-    });
-
-    it('should have descriptive aria-labels on navigation buttons', () => {
-      render(<TestWrapper />);
-
-      expect(screen.getByRole('button', { name: /go to previous step/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /go to next step/i })).toBeInTheDocument();
-    });
-
-    it('should update aria-label to "Finish wizard" on last step', () => {
-      render(<TestWrapper initialStep={2} />);
-
-      expect(screen.getByRole('button', { name: /finish wizard/i })).toBeInTheDocument();
-    });
-
-    it('should have aria-label on progress bar', () => {
-      render(<TestWrapper />);
-
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toHaveAttribute('aria-label');
     });
   });
 

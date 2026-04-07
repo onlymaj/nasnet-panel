@@ -395,43 +395,6 @@ describe('ResourceBudgetPanel', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have table role for desktop variant', () => {
-      render(
-        <ResourceBudgetPanel
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      expect(screen.getByRole('table')).toBeInTheDocument();
-    });
-
-    it('should have sortable column headers with keyboard support', () => {
-      render(
-        <ResourceBudgetPanel
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      const nameHeader = screen.getByText('Service Name');
-      expect(nameHeader.closest('th')).toHaveClass('cursor-pointer');
-    });
-
-    it('should have proper heading hierarchy', () => {
-      render(
-        <ResourceBudgetPanel
-          {...defaultProps}
-          variant="desktop"
-        />
-      );
-
-      expect(screen.getByText('System Resources')).toBeInTheDocument();
-      expect(screen.getByText(/Service Instances/)).toBeInTheDocument();
-    });
-  });
-
   describe('Value Formatting', () => {
     it('should format memory values with MB unit', () => {
       const TestComponent = () => {

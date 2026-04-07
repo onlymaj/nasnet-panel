@@ -253,10 +253,8 @@ These guides explain how core libraries work with other parts of the system:
 - **[state-machines-guide.md](./guides/state-machines-guide.md)** - XState machines (config
   pipeline, change sets, VPN, wizards, resource lifecycle)
 
-### Accessibility & Performance
+### Performance
 
-- **[accessibility-patterns.md](./guides/accessibility-patterns.md)** - A11yProvider, WCAG AAA
-  hooks, keyboard/motion/contrast detection
 - **[performance-patterns.md](./guides/performance-patterns.md)** - Auto-scroll, form persistence
   caching, validation optimization
 

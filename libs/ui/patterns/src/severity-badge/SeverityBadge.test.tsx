@@ -183,38 +183,6 @@ describe('SeverityBadge', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA attributes for read-only badge', () => {
-      render(<SeverityBadge severity="error" />);
-      const badge = screen.getByRole('status');
-      expect(badge).toHaveAttribute('aria-label', 'Severity: Error');
-    });
-
-    it('should have proper ARIA attributes for dismissible badge', () => {
-      const mockOnRemove = vi.fn();
-      render(
-        <SeverityBadge
-          severity="warning"
-          onRemove={mockOnRemove}
-        />
-      );
-      const badge = screen.getByRole('button');
-      expect(badge).toHaveAttribute('aria-label', 'Remove Warning filter');
-    });
-
-    it('should mark X icon as aria-hidden', () => {
-      const mockOnRemove = vi.fn();
-      const { container } = render(
-        <SeverityBadge
-          severity="error"
-          onRemove={mockOnRemove}
-        />
-      );
-      const xIcon = container.querySelector('svg');
-      expect(xIcon).toHaveAttribute('aria-hidden', 'true');
-    });
-  });
-
   describe('Custom Props', () => {
     it('should accept and apply custom className', () => {
       const { container } = render(

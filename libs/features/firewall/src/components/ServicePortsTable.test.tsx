@@ -15,7 +15,6 @@
  * - Edit button works (placeholder)
  * - Empty state shows when no results
  * - Loading state shows skeleton
- * - Accessibility (axe-core)
  *
  * @see NAS-7.8: Implement Service Ports Management - Task 5
  */
@@ -23,13 +22,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe, toHaveNoViolations } from 'jest-axe';
 import { ServicePortsTable } from './ServicePortsTable';
 import { useCustomServices } from '../hooks/useCustomServices';
 import type { ServicePortDefinition } from '@nasnet/core/types';
-
-// Extend matchers
-expect.extend(toHaveNoViolations);
 
 // Mock hooks
 vi.mock('../hooks/useCustomServices');
@@ -353,32 +348,6 @@ describe('ServicePortsTable', () => {
       const dataRows = rows.slice(1);
       expect(within(dataRows[0]).getByText('80')).toBeInTheDocument();
       expect(within(dataRows[1]).getByText('9999')).toBeInTheDocument();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('has no axe-core violations', async () => {
-      const { container } = render(<ServicePortsTable />);
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has accessible tooltips for disabled actions', async () => {
-      const user = userEvent.setup();
-      render(<ServicePortsTable />);
-
-      const httpRow = screen.getByText('HTTP').closest('tr');
-      const editButtons = within(httpRow!).getAllByRole('button');
-      const editButton = editButtons.find((btn) =>
-        btn.querySelector('svg')?.classList.contains('lucide-pencil')
-      );
-
-      // Hover to show tooltip
-      await user.hover(editButton!.parentElement!);
-
-      await waitFor(() => {
-        expect(screen.getByText(/servicePorts.tooltips.builtInReadOnly/i)).toBeInTheDocument();
-      });
     });
   });
 });

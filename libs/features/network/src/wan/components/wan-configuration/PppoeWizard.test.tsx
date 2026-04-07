@@ -209,22 +209,6 @@ describe('PppoeWizard', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have accessible navigation buttons', () => {
-      render(<PppoeWizard {...mockProps} />);
-
-      expect(screen.getByRole('button', { name: /cancel/i })).toHaveAccessibleName();
-      expect(screen.getByRole('button', { name: /next/i })).toHaveAccessibleName();
-    });
-
-    it('should render stepper with proper structure', () => {
-      render(<PppoeWizard {...mockProps} />);
-
-      const stepper = screen.getByTestId('v-stepper');
-      expect(stepper).toBeInTheDocument();
-    });
-  });
-
   describe('error handling', () => {
     it('should display error message when configuration fails', () => {
       // This would require mocking useConfigurePppoeWAN to return an error

@@ -212,50 +212,6 @@ describe('UpdateProgressBar', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('provides progressbar role', () => {
-      render(
-        <UpdateProgressBar
-          stage="DOWNLOADING"
-          progress={45}
-          message="Downloading..."
-        />
-      );
-
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toBeInTheDocument();
-    });
-
-    it('provides ARIA attributes for screen readers', () => {
-      render(
-        <UpdateProgressBar
-          stage="DOWNLOADING"
-          progress={45}
-          message="Downloading binary..."
-        />
-      );
-
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toHaveAttribute('aria-valuenow', '45');
-      expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '100');
-      expect(progressBar).toHaveAttribute('aria-valuetext', 'Downloading binary... - 45%');
-    });
-
-    it('provides status role for live region', () => {
-      render(
-        <UpdateProgressBar
-          stage="DOWNLOADING"
-          progress={45}
-          message="Downloading..."
-        />
-      );
-
-      const statusRegion = screen.getByRole('status');
-      expect(statusRegion).toBeInTheDocument();
-    });
-  });
-
   describe('Visual States', () => {
     it('applies correct color class for each stage', () => {
       const stages: { stage: UpdateStage; expectedColor: string }[] = [

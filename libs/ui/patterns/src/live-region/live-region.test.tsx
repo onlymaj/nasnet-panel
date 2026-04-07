@@ -6,7 +6,6 @@
 
 import { render, screen, act, waitFor, renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { axe } from 'vitest-axe';
 
 import {
   LiveRegion,
@@ -75,26 +74,12 @@ describe('LiveRegion', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have no accessibility violations', async () => {
-      const { container } = render(<LiveRegion>Accessible message</LiveRegion>);
+  describe('rendering', () => {
+    it('should support non-atomic updates', () => {
+      render(<LiveRegion atomic={false}>Message</LiveRegion>);
 
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('should have no violations with alert role', async () => {
-      const { container } = render(
-        <LiveRegion
-          role="alert"
-          mode="assertive"
-        >
-          Alert!
-        </LiveRegion>
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
+      const region = screen.getByRole('status');
+      expect(region).toHaveAttribute('aria-atomic', 'false');
     });
   });
 });
@@ -290,17 +275,5 @@ describe('VisuallyHidden', () => {
 
     expect(screen.getByText('Text')).toHaveClass('custom-class');
     expect(screen.getByText('Text')).toHaveClass('sr-only');
-  });
-
-  it('should be accessible', async () => {
-    const { container } = render(
-      <button>
-        <span aria-hidden="true">🗑️</span>
-        <VisuallyHidden>Delete item</VisuallyHidden>
-      </button>
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
   });
 });

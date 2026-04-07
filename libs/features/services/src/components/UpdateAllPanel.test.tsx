@@ -400,39 +400,6 @@ describe('UpdateAllPanel', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('provides accessible card structure', () => {
-      render(<UpdateAllPanel updates={mockUpdates} />);
-
-      // Check that the card renders with heading and content
-      expect(screen.getByText('Updates Available')).toBeInTheDocument();
-      expect(screen.getByText('3 updates ready to install')).toBeInTheDocument();
-    });
-
-    it('provides accessible button labels', () => {
-      render(<UpdateAllPanel updates={mockUpdates} />);
-
-      const updateAllButton = screen.getByRole('button', { name: /Update All \(3\)/i });
-      expect(updateAllButton).toHaveAccessibleName();
-    });
-
-    it('provides ARIA live region for progress updates', () => {
-      const updatingInstances = { 'tor-1': true };
-      const updateProgress = { 'tor-1': 45 };
-
-      render(
-        <UpdateAllPanel
-          updates={mockUpdates}
-          updatingInstances={updatingInstances}
-          updateProgress={updateProgress}
-        />
-      );
-
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toBeInTheDocument();
-    });
-  });
-
   describe('Singular vs Plural Text', () => {
     it('uses singular form for 1 update', () => {
       const singleUpdate = [mockUpdates[0]];

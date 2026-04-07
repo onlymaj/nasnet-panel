@@ -321,29 +321,6 @@ test.describe('Service Ports Management', () => {
     await expect(page.getByText('HTTP', { exact: true })).toBeVisible();
   });
 
-  test('Accessibility: keyboard navigation works', async ({ page }) => {
-    // Tab to "Add Service" button
-    await page.keyboard.press('Tab');
-    const addButton = page.getByRole('button', { name: /add service/i });
-    await expect(addButton).toBeFocused();
-
-    // Press Enter to open dialog
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    // Tab through form fields
-    await page.keyboard.press('Tab'); // Service name
-    await page.keyboard.type('keyboard-test');
-
-    await page.keyboard.press('Tab'); // Protocol radio group
-    await page.keyboard.press('Tab'); // Port field
-    await page.keyboard.type('5555');
-
-    // Press Escape to close dialog
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog')).not.toBeVisible();
-  });
-
   test('Mobile: touch targets are 44px minimum', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });

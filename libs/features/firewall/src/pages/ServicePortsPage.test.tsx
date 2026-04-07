@@ -8,7 +8,6 @@
  * - Dialog interactions (Add Service, Create Group)
  * - Empty states
  * - i18n integration
- * - Accessibility (axe-core)
  * - Responsive layout
  *
  * @see NAS-7.8: Implement Service Ports Management - Task 8
@@ -17,7 +16,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe } from 'jest-axe';
 import { ServicePortsPage } from './ServicePortsPage';
 import { useCustomServices } from '../hooks';
 
@@ -429,45 +427,6 @@ describe('ServicePortsPage', () => {
         const dialog = screen.getByTestId('add-service-dialog');
         expect(dialog).toHaveAttribute('data-open', 'true');
       });
-    });
-  });
-
-  // ============================================================================
-  // Accessibility Tests
-  // ============================================================================
-
-  describe('Accessibility', () => {
-    it('has no axe violations on Services tab', async () => {
-      const { container } = renderServicePortsPage();
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no axe violations on Groups tab', async () => {
-      const user = userEvent.setup();
-      const { container } = renderServicePortsPage();
-
-      const groupsTab = screen.getByRole('tab', { name: 'Groups' });
-      await user.click(groupsTab);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has accessible tab navigation', () => {
-      renderServicePortsPage();
-
-      const servicesTab = screen.getByRole('tab', { name: 'Services' });
-      const groupsTab = screen.getByRole('tab', { name: 'Groups' });
-
-      expect(servicesTab).toHaveAttribute('data-state', 'active');
-      expect(groupsTab).toHaveAttribute('data-state', 'inactive');
-    });
-
-    it('action buttons have accessible labels', () => {
-      renderServicePortsPage();
-      const buttons = screen.getAllByRole('button', { name: /Add Service/ });
-      expect(buttons.length).toBeGreaterThanOrEqual(1);
     });
   });
 

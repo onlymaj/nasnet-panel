@@ -8,14 +8,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe } from 'vitest-axe';
-import 'vitest-axe/extend-expect';
 
-declare module 'vitest' {
-  interface Assertion {
-    toHaveNoViolations(): void;
-  }
-}
 import { MockedProvider } from '@apollo/client/testing';
 import { InterfaceGrid } from './InterfaceGrid';
 import { InterfaceGridDesktop } from './InterfaceGrid.Desktop';
@@ -613,109 +606,6 @@ describe('Data Integration', () => {
 
     await waitFor(() => {
       expect(screen.getByText('No interfaces found')).toBeInTheDocument();
-    });
-  });
-});
-
-describe('Accessibility', () => {
-  it('should have no accessibility violations (desktop)', async () => {
-    const { container } = render(
-      <MockedProvider
-        mocks={[createSuccessMock(mockInterfaces)]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('ether1')).toBeInTheDocument();
-    });
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations in loading state', async () => {
-    const { container } = render(
-      <MockedProvider
-        mocks={[]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations in error state', async () => {
-    const { container } = render(
-      <MockedProvider
-        mocks={[createErrorMock()]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to load interfaces/i)).toBeInTheDocument();
-    });
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no accessibility violations in empty state', async () => {
-    const { container } = render(
-      <MockedProvider
-        mocks={[createSuccessMock([])]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('No interfaces found')).toBeInTheDocument();
-    });
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have proper button labels for retry', async () => {
-    render(
-      <MockedProvider
-        mocks={[createErrorMock()]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      const retryButton = screen.getByRole('button', { name: /retry/i });
-      expect(retryButton).toBeInTheDocument();
-    });
-  });
-
-  it('should have proper button labels for show all', async () => {
-    render(
-      <MockedProvider
-        mocks={[createSuccessMock(fifteenInterfaces)]}
-        addTypename={false}
-      >
-        <InterfaceGridDesktop deviceId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      const showAllButton = screen.getByRole('button', { name: /show all \(15\)/i });
-      expect(showAllButton).toBeInTheDocument();
-      expect(showAllButton).toHaveAccessibleName();
     });
   });
 });

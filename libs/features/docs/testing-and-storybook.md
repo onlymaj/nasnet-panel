@@ -10,15 +10,14 @@ This document covers the testing strategy and Storybook documentation practices 
 3. [Unit Test Patterns](#3-unit-test-patterns)
 4. [Component Test Patterns](#4-component-test-patterns)
 5. [XState Machine Testing](#5-xstate-machine-testing)
-6. [Accessibility Testing](#6-accessibility-testing)
-7. [Platform Presenter Testing](#7-platform-presenter-testing)
-8. [Hook Testing Patterns](#8-hook-testing-patterns)
-9. [Integration Test Patterns](#9-integration-test-patterns)
-10. [Storybook Setup and Configuration](#10-storybook-setup-and-configuration)
-11. [Story File Inventory](#11-story-file-inventory)
-12. [Story Writing Patterns](#12-story-writing-patterns)
-13. [Code Coverage Expectations](#13-code-coverage-expectations)
-14. [CI Integration](#14-ci-integration)
+6. [Platform Presenter Testing](#6-platform-presenter-testing)
+7. [Hook Testing Patterns](#7-hook-testing-patterns)
+8. [Integration Test Patterns](#8-integration-test-patterns)
+9. [Storybook Setup and Configuration](#9-storybook-setup-and-configuration)
+10. [Story File Inventory](#10-story-file-inventory)
+11. [Story Writing Patterns](#11-story-writing-patterns)
+12. [Code Coverage Expectations](#12-code-coverage-expectations)
+13. [CI Integration](#13-ci-integration)
 
 ---
 
@@ -31,7 +30,6 @@ component tests, and targeted integration/E2E tests.
 | ------------------------ | ------------------------------ | --------------------------------------------------- |
 | Unit tests               | Vitest                         | Pure functions, schemas, utilities, XState machines |
 | Component tests          | Vitest + React Testing Library | Individual components, hooks, rendering             |
-| Accessibility tests      | Vitest + vitest-axe + axe-core | WCAG AAA compliance, semantic HTML                  |
 | Platform presenter tests | Vitest + `usePlatform` mock    | Mobile vs Desktop rendering branches                |
 | Integration tests        | Vitest + Apollo MockProvider   | Full component tree with mocked GraphQL             |
 | Performance tests        | Vitest                         | Render performance benchmarks                       |
@@ -351,74 +349,7 @@ describe('ping-machine', () => {
 
 ---
 
-## 6. Accessibility Testing
-
-Accessibility tests use `vitest-axe` which wraps `axe-core`. All feature components that render
-user-visible UI must pass WCAG AAA (7:1 contrast ratio).
-
-```typescript
-// libs/features/dashboard/components/ConnectedDevices/ConnectedDevices.a11y.test.tsx
-
-import { axe } from 'vitest-axe';
-import { render } from '@testing-library/react';
-
-describe('ConnectedDevices Accessibility', () => {
-  it('has no violations in populated state', async () => {
-    mockReturnValue({ devices: mockDevices, isLoading: false, ... });
-    const { container } = render(<ConnectedDevices routerIp="192.168.88.1" />, { wrapper });
-
-    // @ts-expect-error - vitest-axe extends expect
-    expect(await axe(container)).toHaveNoViolations();
-  });
-
-  it('has no violations in loading state', async () => { ... });
-  it('has no violations in empty state', async () => { ... });
-  it('has no violations in error state', async () => { ... });
-  it('has no violations in DHCP-disabled warning state', async () => { ... });
-
-  it('enforces WCAG AAA color contrast (7:1)', async () => {
-    const { container } = render(<ConnectedDevices routerIp="192.168.88.1" />, { wrapper });
-    // @ts-expect-error
-    const results = await axe(container, {
-      rules: { 'color-contrast-enhanced': { enabled: true } }, // WCAG AAA
-    });
-    expect(results).toHaveNoViolations();
-  });
-});
-```
-
-### Accessibility Assertions
-
-Beyond axe, tests verify semantic structure:
-
-```typescript
-// role semantics
-expect(container.querySelector('[role="region"]')).toBeInTheDocument();
-expect(container.querySelector('[role="alert"]')).toBeInTheDocument();
-
-// heading hierarchy
-expect(heading.tagName).toMatch(/H[1-6]/);
-
-// ARIA attributes
-expect(menuButton).toHaveAttribute('aria-haspopup', 'menu');
-expect(menuButton).toHaveAttribute('aria-expanded', 'false');
-
-// Screen reader text
-expect(getByText('3 devices online')).toBeInTheDocument(); // aria-live region
-expect(container.textContent).toContain('5 minutes ago'); // stale data
-
-// Focus management
-buttons.forEach((button) => {
-  const classes = button.className;
-  expect(classes.includes('focus') || classes.includes('ring') || classes.includes('outline')).toBe(
-    true
-  );
-});
-```
-
----
-
-## 7. Platform Presenter Testing
+## 6. Platform Presenter Testing
 
 Platform presenter tests verify that the correct presenter (Mobile/Desktop) is rendered based on the
 `usePlatform` hook return value.
@@ -469,7 +400,7 @@ presenter (two-presenter model: mobile and desktop/tablet).
 
 ---
 
-## 8. Hook Testing Patterns
+## 7. Hook Testing Patterns
 
 Hook tests use `renderHook` from React Testing Library or test hooks implicitly through component
 tests.
@@ -497,7 +428,7 @@ describe('useResourceMetrics', () => {
 
 ---
 
-## 9. Integration Test Patterns
+## 8. Integration Test Patterns
 
 Integration tests render full component trees with mocked GraphQL responses:
 
@@ -539,7 +470,7 @@ describe('ServiceLogViewer Integration', () => {
 
 ---
 
-## 10. Storybook Setup and Configuration
+## 9. Storybook Setup and Configuration
 
 NasNetConnect uses Storybook 10.2.7 (ESM-only). Three Storybook instances serve different library
 layers:
@@ -632,7 +563,7 @@ The a11y addon runs axe-core on every story in the Accessibility panel.
 
 ---
 
-## 11. Story File Inventory
+## 10. Story File Inventory
 
 The following table lists all story files in `libs/features/`:
 
@@ -780,7 +711,7 @@ The following table lists all story files in `libs/features/`:
 
 ---
 
-## 12. Story Writing Patterns
+## 11. Story Writing Patterns
 
 ### Meta Configuration
 
@@ -858,7 +789,7 @@ argTypes: {
 
 ---
 
-## 13. Code Coverage Expectations
+## 12. Code Coverage Expectations
 
 | Feature Module      | Target Coverage                        |
 | ------------------- | -------------------------------------- |
@@ -866,14 +797,13 @@ argTypes: {
 | Utility functions   | 85%+ line coverage                     |
 | XState machines     | 80%+ state/transition coverage         |
 | Component rendering | 70%+ branch coverage                   |
-| Accessibility       | 100% of user-facing components         |
 | Platform presenter  | 100% of presenter-switching components |
 
 Coverage is collected via Vitest's built-in coverage reporter (`@vitest/coverage-v8`).
 
 ---
 
-## 14. CI Integration
+## 13. CI Integration
 
 Tests run in the following order in CI:
 
@@ -933,7 +863,5 @@ npx storybook doctor
 
 - Component architecture (3-layer model): `Docs/design/ux-design/6-component-library.md`
 - Platform presenter implementation: `Docs/design/PLATFORM_PRESENTER_GUIDE.md`
-- Accessibility requirements (WCAG AAA):
-  `Docs/design/ux-design/8-responsive-design-accessibility.md`
 - Backend testing strategy: `Docs/architecture/implementation-patterns/testing-strategy-patterns.md`
 - Feature module overview: `libs/features/docs/intro.md`

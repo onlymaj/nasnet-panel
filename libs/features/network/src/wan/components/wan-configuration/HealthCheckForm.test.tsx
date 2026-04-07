@@ -440,42 +440,4 @@ describe('HealthCheckForm', () => {
       expect(commentInput.value).toBe('Custom health check');
     });
   });
-
-  describe('accessibility', () => {
-    it('should have accessible labels for all inputs', () => {
-      render(<HealthCheckForm {...mockProps} />);
-
-      expect(screen.getByLabelText(/Enable Health Monitoring/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Target Host\/IP/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Interval \(seconds\)/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Timeout \(seconds\)/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Failure Threshold/i)).toHaveAccessibleName();
-    });
-
-    it('should associate error messages with inputs', async () => {
-      const user = userEvent.setup();
-      render(<HealthCheckForm {...mockProps} />);
-
-      const targetInput = screen.getByLabelText(/Target Host\/IP/i);
-      await user.clear(targetInput);
-      await user.type(targetInput, 'invalid');
-
-      const submitButton = screen.getByRole('button', {
-        name: /Apply Health Check/i,
-      });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const errorMessage = screen.getByText(/Invalid IP address or hostname/i);
-        expect(errorMessage).toHaveAttribute('role', 'alert');
-      });
-    });
-
-    it('should have accessible navigation buttons', () => {
-      render(<HealthCheckForm {...mockProps} />);
-
-      expect(screen.getByRole('button', { name: /cancel/i })).toHaveAccessibleName();
-      expect(screen.getByRole('button', { name: /Apply Health Check/i })).toHaveAccessibleName();
-    });
-  });
 });

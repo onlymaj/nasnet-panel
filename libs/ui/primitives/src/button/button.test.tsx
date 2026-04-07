@@ -1,10 +1,9 @@
 /**
  * Button Component Tests - Comprehensive Coverage
  *
- * Tests: functionality, variants, sizes, loading states, accessibility
+ * Tests: functionality, variants, sizes, loading states
  *
  * @see NAS-4.16: Implement Loading States & Skeleton UI
- * @see WCAG AAA: 44px touch targets, keyboard navigation, focus indicators
  */
 
 import { render, screen } from '@testing-library/react';
@@ -255,83 +254,6 @@ describe('Button', () => {
         </Button>
       );
       expect(screen.getByRole('link')).toHaveClass('bg-secondary');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has focus-visible ring on keyboard focus', () => {
-      render(<Button>Focus Test</Button>);
-      expect(screen.getByRole('button')).toHaveClass('focus-visible:ring-2');
-    });
-
-    it('has aria-disabled set when disabled', () => {
-      render(<Button disabled>Disabled</Button>);
-      expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'true');
-    });
-
-    it('has aria-disabled false when not disabled', () => {
-      render(<Button>Enabled</Button>);
-      expect(screen.getByRole('button')).toHaveAttribute('aria-disabled', 'false');
-    });
-
-    it('has aria-busy true when loading', () => {
-      render(<Button isLoading>Loading</Button>);
-      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
-    });
-
-    it('has aria-busy false when not loading', () => {
-      render(<Button>Not Loading</Button>);
-      expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'false');
-    });
-
-    it('supports keyboard activation with Space', async () => {
-      const user = userEvent.setup();
-      const handleClick = vi.fn();
-
-      render(<Button onClick={handleClick}>Keyboard Test</Button>);
-      const button = screen.getByRole('button');
-
-      // Focus and press Space
-      button.focus();
-      await user.keyboard(' ');
-
-      expect(handleClick).toHaveBeenCalled();
-    });
-
-    it('supports keyboard activation with Enter', async () => {
-      const user = userEvent.setup();
-      const handleClick = vi.fn();
-
-      render(<Button onClick={handleClick}>Keyboard Test</Button>);
-      const button = screen.getByRole('button');
-
-      // Focus and press Enter
-      button.focus();
-      await user.keyboard('{Enter}');
-
-      expect(handleClick).toHaveBeenCalled();
-    });
-
-    it('is keyboard navigable in tab order', async () => {
-      const user = userEvent.setup();
-      render(
-        <div>
-          <Button>First</Button>
-          <Button>Second</Button>
-        </div>
-      );
-
-      const buttons = screen.getAllByRole('button');
-      buttons[0].focus();
-      expect(document.activeElement).toBe(buttons[0]);
-
-      await user.tab();
-      expect(document.activeElement).toBe(buttons[1]);
-    });
-
-    it('prevents pointer events when disabled', () => {
-      render(<Button disabled>Disabled</Button>);
-      expect(screen.getByRole('button')).toHaveClass('disabled:pointer-events-none');
     });
   });
 

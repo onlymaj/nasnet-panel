@@ -156,18 +156,6 @@ libs/ui/patterns/src/common/resource-card/
 See [PATTERNS.md](./patterns/PATTERNS.md) for detailed guidelines on creating new pattern
 components.
 
-## Accessibility
-
-All components must meet WCAG AAA standards:
-
-- 7:1 contrast ratio for normal text
-- 44px minimum touch targets on mobile
-- Full keyboard navigation
-- Screen reader support
-- ARIA labels where needed
-
-Tests use `axe-core` for accessibility validation.
-
 ## Related Documentation
 
 - [ADR-017: Three-Layer Component Architecture](../../Docs/architecture/adrs/017-three-layer-component-architecture.md)

@@ -124,7 +124,6 @@
     "eslint-plugin-storybook": "10.3.4",
     "fake-indexeddb": "^6.2.5",
     "husky": "^9.1.7",
-    "jest-axe": "^10.0.0",
     "jsdom": "^29.0.1",
     "lint-staged": "^15.5.2",
     "msw": "^2.7.4",
@@ -147,8 +146,7 @@
     "vite-plugin-checker": "^0.11.0",
     "vite-plugin-dts": "^4.3.0",
     "vite-tsconfig-paths": "^4.2.1",
-    "vitest": "^1.6.1",
-    "vitest-axe": "^0.1.0"
+    "vitest": "^1.6.1"
   },
   "workspaces": [
     "apps/*",

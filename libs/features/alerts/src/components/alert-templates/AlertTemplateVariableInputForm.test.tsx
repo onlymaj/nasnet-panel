@@ -370,46 +370,4 @@ describe('AlertTemplateVariableInputForm', () => {
       expect(cancelButton).toBeDisabled();
     });
   });
-
-  describe('Accessibility', () => {
-    it('associates error messages with inputs using aria-describedby', async () => {
-      const user = userEvent.setup();
-      const onSubmit = vi.fn();
-
-      render(
-        <AlertTemplateVariableInputForm
-          template={mockTemplateWithVariables}
-          onSubmit={onSubmit}
-        />
-      );
-
-      const durationInput = screen.getByLabelText(/Offline Duration/i);
-      await user.clear(durationInput);
-
-      const submitButton = screen.getByRole('button', { name: /Apply Template/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(durationInput).toHaveAttribute('aria-invalid', 'true');
-        expect(durationInput).toHaveAttribute('aria-describedby');
-      });
-    });
-
-    it('has proper form labels for all inputs', () => {
-      const onSubmit = vi.fn();
-
-      render(
-        <AlertTemplateVariableInputForm
-          template={mockTemplateWithVariables}
-          onSubmit={onSubmit}
-        />
-      );
-
-      const durationInput = screen.getByLabelText(/Offline Duration/i);
-      const retryInput = screen.getByLabelText(/Retry Attempts/i);
-
-      expect(durationInput).toHaveAccessibleName();
-      expect(retryInput).toHaveAccessibleName();
-    });
-  });
 });

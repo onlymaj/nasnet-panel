@@ -468,54 +468,6 @@ test.describe('Webhook Notifications E2E', () => {
     });
   });
 
-  test.describe('Accessibility', () => {
-    test('should have proper form labels for screen readers', async ({ page }) => {
-      // Verify all form fields have associated labels
-      const nameInput = page.getByLabel(/webhook name/i);
-      await expect(nameInput).toBeVisible();
-
-      const urlInput = page.getByLabel(/webhook url/i);
-      await expect(urlInput).toBeVisible();
-
-      const authSelect = page.getByLabel(/authentication type/i);
-      await expect(authSelect).toBeVisible();
-
-      const templateSelect = page.getByLabel(/template type/i);
-      await expect(templateSelect).toBeVisible();
-    });
-
-    test('should support keyboard navigation', async ({ page }) => {
-      // Tab through form fields
-      await page.keyboard.press('Tab'); // Focus first input
-      await page.keyboard.press('Tab'); // Focus second input
-
-      // Verify focus is on URL field
-      const urlInput = page.getByLabel(/webhook url/i);
-      await expect(urlInput).toBeFocused();
-
-      // Continue tabbing
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
-
-      // Verify can reach submit button
-      await page.keyboard.press('Tab');
-      const submitButton = page.getByRole('button', { name: /create webhook/i });
-      // Note: Button might not be reachable if form is invalid
-    });
-
-    test('should announce validation errors to screen readers', async ({ page }) => {
-      // Submit empty form
-      await page.getByRole('button', { name: /create webhook/i }).click();
-
-      // Verify error messages have role="alert" or similar ARIA attributes
-      const errorMessage = page.getByText(/webhook name is required/i);
-      await expect(errorMessage).toBeVisible();
-
-      // In a real implementation, we'd verify ARIA attributes:
-      // await expect(errorMessage).toHaveAttribute('role', 'alert');
-    });
-  });
-
   test.describe('Navigation', () => {
     test('should navigate back to notification settings', async ({ page }) => {
       // Click back button

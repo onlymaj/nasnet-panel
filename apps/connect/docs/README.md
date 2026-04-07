@@ -28,7 +28,6 @@ It runs as a single Docker container embedded on the MikroTik router itself (`<1
 | Working on UI        | [UI System Overview](./ui-system/overview.md) → [Design Tokens](./ui-system/design-tokens.md)            |
 | Writing data queries | [Data Fetching](./data-fetching/graphql-hooks.md)                                                        |
 | Writing forms        | [Forms & Validation](./forms-validation/overview.md)                                                     |
-| Adding i18n/a11y     | [i18n Setup](./i18n-accessibility/i18n.md)                                                               |
 | Writing tests        | [Testing Strategy](./testing/overview.md)                                                                |
 | Deploying            | [Docker Build](./operations/development-workflow.md)                                                     |
 
@@ -73,8 +72,6 @@ It runs as a single Docker container embedded on the MikroTik router itself (`<1
 - [Patterns Library](./ui-system/patterns-catalog.md) — Composite components catalog (~56
   components)
 - [Design Tokens](./ui-system/design-tokens.md) — Framer Motion, animation tokens, reduced motion
-- [Accessibility](./i18n-accessibility/accessibility.md) — WCAG AAA, 44px touch targets, keyboard
-  nav
 
 ### [05 — Data Fetching](./data-fetching/overview.md)
 
@@ -119,18 +116,14 @@ It runs as a single Docker container embedded on the MikroTik router itself (`<1
 - [Services / Plugins](./feature-modules/services.md) — Feature marketplace, install/manage Tor,
   sing-box, etc.
 
-### [09 — Accessibility](./i18n-accessibility/accessibility.md)
-
-- [Accessibility](./i18n-accessibility/accessibility.md) — WCAG AAA checklist, axe-core integration
-
-### [10 — Testing](./testing/overview.md)
+### [09 — Testing](./testing/overview.md)
 
 - [Testing Overview](./testing/overview.md) — Testing trophy, Vitest, RTL, Playwright
 - [Unit Testing](./testing/unit-testing.md) — Vitest setup, RTL patterns
 - [Storybook](./operations/storybook.md) — Story writing, Storybook 10, a11y addon
 - [E2E Testing](./testing/e2e-testing.md) — Playwright, multi-browser, CHR Docker router simulation
 
-### [11 — Operations](./operations/development-workflow.md)
+### [10 — Operations](./operations/development-workflow.md)
 
 - [Development Workflow](./operations/development-workflow.md) — Multi-arch image, size constraints,
   RouterOS deploy

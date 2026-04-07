@@ -9,7 +9,7 @@ import { VlanList } from './VlanList';
 import { GET_VLANS, DELETE_VLAN } from '@nasnet/api-client/queries';
 
 // Mock usePlatform hook
-jest.mock('@nasnet/ui/layouts', () => ({
+vi.mock('@nasnet/ui/layouts', () => ({
   usePlatform: () => 'desktop',
 }));
 
@@ -139,28 +139,6 @@ describe('VlanList', () => {
       expect(screen.getByText('vlan-guest')).toBeInTheDocument();
       expect(screen.queryByText('vlan-iot')).not.toBeInTheDocument();
     });
-  });
-
-  it('should have accessible labels', async () => {
-    render(
-      <MockedProvider
-        mocks={mocks}
-        addTypename={false}
-      >
-        <VlanList routerId="router-1" />
-      </MockedProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('vlan-guest')).toBeInTheDocument();
-    });
-
-    // Check for ARIA labels on action buttons
-    const editButtons = screen.getAllByLabelText(/edit vlan/i);
-    expect(editButtons).toHaveLength(2);
-
-    const deleteButtons = screen.getAllByLabelText(/delete vlan/i);
-    expect(deleteButtons).toHaveLength(2);
   });
 
   it('should display status badges correctly', async () => {

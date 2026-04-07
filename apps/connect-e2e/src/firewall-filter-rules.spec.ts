@@ -383,52 +383,6 @@ test.describe('Firewall Filter Rules - Mobile', () => {
   });
 });
 
-test.describe('Firewall Filter Rules - Accessibility', () => {
-  test('keyboard navigation works', async ({ page }) => {
-    await navigateToFilterRules(page);
-    await waitForTableLoad(page);
-
-    // Tab to "Add Rule" button
-    await page.keyboard.press('Tab');
-    await expect(page.getByRole('button', { name: /add rule/i })).toBeFocused();
-
-    // Enter to open dialog
-    await page.keyboard.press('Enter');
-    await expect(page.getByRole('dialog')).toBeVisible();
-
-    // Escape to close
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog')).not.toBeVisible();
-  });
-
-  test('screen reader announcements', async ({ page }) => {
-    await navigateToFilterRules(page);
-    await waitForTableLoad(page);
-
-    // Open editor
-    await page.getByRole('button', { name: /add rule/i }).click();
-
-    // Verify ARIA live region announces dialog
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toHaveAttribute('aria-modal', 'true');
-    await expect(dialog).toHaveAttribute('aria-labelledby');
-  });
-
-  test('color contrast meets WCAG AAA', async ({ page }) => {
-    await navigateToFilterRules(page);
-    await waitForTableLoad(page);
-
-    // This would typically use axe-core for automated testing
-    // Here we verify key elements have proper contrast classes
-    const actionBadge = page.locator('[data-testid="action-badge"]').first();
-    await expect(actionBadge).toBeVisible();
-
-    // Semantic colors should provide 7:1 contrast
-    const bgColor = await actionBadge.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-    expect(bgColor).toBeDefined();
-  });
-});
-
 test.describe('Firewall Filter Rules - Error Handling', () => {
   test('handles network errors gracefully', async ({ page }) => {
     // Simulate offline

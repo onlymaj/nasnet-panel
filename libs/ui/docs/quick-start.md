@@ -411,7 +411,6 @@ governed by XState in the frontend and the ChangeSet service in the backend.
 | Use animation and design tokens in depth | `05-tokens.md` _(coming)_                          |
 | Implement a new pattern from scratch     | `06-platform-presenters.md` _(coming)_             |
 | Build forms with RHFFormField + Zod      | `07-forms.md` _(coming)_                           |
-| Ensure WCAG AAA compliance               | `08-accessibility.md` _(coming)_                   |
 | Add a component to the library           | `09-contributing.md` _(coming)_                    |
 | Authoritative design system reference    | See `Docs/design/README.md`                        |
 | Complete token reference                 | See `Docs/design/DESIGN_TOKENS.md`                 |

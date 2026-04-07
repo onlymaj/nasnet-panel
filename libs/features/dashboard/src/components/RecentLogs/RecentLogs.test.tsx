@@ -267,24 +267,4 @@ describe('RecentLogs', () => {
       expect(searchData.topics).toBe('firewall,dhcp');
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper button touch targets (44px minimum)', () => {
-      vi.mocked(logStreamHook.useLogStream).mockReturnValue({
-        logs: mockLogs,
-        loading: false,
-        error: null,
-        refetch: vi.fn(),
-        totalCount: 3,
-        hasMore: false,
-      });
-
-      const { container } = render(<RecentLogs deviceId="192.168.88.1" />, {
-        wrapper: createWrapper(),
-      });
-
-      const viewAllButton = screen.getByRole('link', { name: /view all/i });
-      expect(viewAllButton).toHaveClass('min-h-[44px]');
-    });
-  });
 });

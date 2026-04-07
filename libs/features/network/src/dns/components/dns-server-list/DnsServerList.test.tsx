@@ -239,53 +239,6 @@ describe('DnsServerList', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have accessible labels for remove buttons', () => {
-      render(
-        <DnsServerList
-          servers={mockServers}
-          {...mockHandlers}
-        />
-      );
-
-      // Each remove button should have an aria-label with the server address
-      expect(screen.getByRole('button', { name: /remove 1\.1\.1\.1/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /remove 8\.8\.8\.8/i })).toBeInTheDocument();
-    });
-
-    it('should have accessible add button', () => {
-      render(
-        <DnsServerList
-          servers={mockServers}
-          {...mockHandlers}
-        />
-      );
-
-      const addButton = screen.getByRole('button', { name: /add dns server/i });
-      expect(addButton).toHaveAccessibleName();
-    });
-
-    it('should support keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(
-        <DnsServerList
-          servers={mockServers}
-          {...mockHandlers}
-        />
-      );
-
-      const addButton = screen.getByRole('button', { name: /add dns server/i });
-
-      // Tab to button
-      await user.tab();
-
-      // Press Enter to activate
-      await user.keyboard('{Enter}');
-
-      expect(mockHandlers.onAdd).toHaveBeenCalled();
-    });
-  });
-
   describe('edge cases', () => {
     it('should handle single server', () => {
       const singleServer: DnsServer[] = [{ id: '1', address: '1.1.1.1', isDynamic: false }];

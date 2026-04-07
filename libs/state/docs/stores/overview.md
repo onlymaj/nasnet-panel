@@ -84,7 +84,6 @@ sections) - NOT persisted, reset on page leave.
 | -------------------- | -------------------------- | ----------------------------------------------------------------- |
 | Drift Detection      | `drift-detection/*.ts`     | Configuration vs deployment layer drift comparison and resolution |
 | History/Undo-Redo    | `history/*.ts`             | Command pattern history with undo/redo support                    |
-| Accessibility (a11y) | `a11y/a11y-provider.tsx`   | Reduced motion, keyboard user detection, announcements            |
 | Interface Statistics | `interface-stats-store.ts` | Traffic statistics monitoring preferences                         |
 
 ### Hooks & Utilities

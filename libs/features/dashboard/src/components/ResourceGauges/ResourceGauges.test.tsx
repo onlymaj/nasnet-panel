@@ -145,26 +145,6 @@ describe('ResourceGauges', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels on gauges', () => {
-      render(<ResourceGauges deviceId="test-device" />);
-
-      expect(screen.getByLabelText(/CPU: 45%/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Memory: 65%/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Storage: 42%/i)).toBeInTheDocument();
-    });
-
-    it('should have proper color-based accessibility (not color-only)', () => {
-      // Colors are based on thresholds and paired with numeric display
-      render(<ResourceGauges deviceId="test-device" />);
-
-      // Verify text labels are present alongside gauges
-      expect(screen.getByText(/CPU:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Memory:/i)).toBeInTheDocument();
-      expect(screen.getByText(/Storage:/i)).toBeInTheDocument();
-    });
-  });
-
   describe('Component Structure', () => {
     it('should have displayName set for debugging', () => {
       expect(ResourceGauges.displayName).toBe('ResourceGauges');

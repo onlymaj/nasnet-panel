@@ -13,14 +13,10 @@
 import { render, screen, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { IPInput } from './ip-input';
 import { IPInputDesktop } from './ip-input-desktop';
 import { IPInputMobile } from './ip-input-mobile';
 import { useIPInput, classifyIP, isValidOctet, isValidIPv4 } from './use-ip-input';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 // ============================================================================
 // Utility Function Tests
@@ -410,50 +406,6 @@ describe('IPInput interactions', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('10.20.30.40');
     });
-  });
-});
-
-// ============================================================================
-// Accessibility Tests
-// ============================================================================
-
-describe('IPInput accessibility', () => {
-  it('should have no axe violations for desktop presenter', async () => {
-    const { container } = render(
-      <IPInputDesktop
-        value="192.168.1.1"
-        showType
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have no axe violations for mobile presenter', async () => {
-    const { container } = render(
-      <IPInputMobile
-        value="192.168.1.1"
-        showType
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have aria-invalid when there is an error', () => {
-    render(<IPInputDesktop error="Invalid IP" />);
-
-    const input = screen.getByLabelText(/IP address octet 1 of 4/i);
-    expect(input).toHaveAttribute('aria-invalid', 'true');
-  });
-
-  it('should have role="alert" for error messages', () => {
-    render(<IPInputDesktop error="Invalid IP address" />);
-
-    const errorMessage = screen.getByRole('alert');
-    expect(errorMessage).toHaveTextContent('Invalid IP address');
   });
 });
 

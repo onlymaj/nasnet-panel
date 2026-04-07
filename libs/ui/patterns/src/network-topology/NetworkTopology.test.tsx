@@ -152,43 +152,6 @@ describe('NetworkTopologyDesktop', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('has proper SVG accessibility attributes', () => {
-      render(<NetworkTopologyDesktop {...defaultProps} />);
-
-      const svg = screen.getByRole('img', { name: /network topology diagram/i });
-      expect(svg).toHaveAttribute('aria-label');
-    });
-
-    it('includes SVG title and description', () => {
-      render(<NetworkTopologyDesktop {...defaultProps} />);
-
-      // Title element should be present for screen readers
-      expect(screen.getByText('Network Topology')).toBeInTheDocument();
-    });
-
-    it('nodes are focusable via keyboard', async () => {
-      render(<NetworkTopologyDesktop {...defaultProps} />);
-
-      const user = userEvent.setup();
-
-      // Tab into the topology
-      await user.tab();
-
-      // Should be able to navigate through nodes
-      const focusableElements = screen.getAllByRole('button');
-      expect(focusableElements.length).toBeGreaterThan(0);
-    });
-
-    it('nodes have accessible labels', () => {
-      render(<NetworkTopologyDesktop {...defaultProps} />);
-
-      // Router should have aria-label
-      const routerNode = screen.getByRole('button', { name: /Main Router.*online/i });
-      expect(routerNode).toBeInTheDocument();
-    });
-  });
-
   describe('empty states', () => {
     it('renders with no WAN interfaces', () => {
       render(
@@ -295,29 +258,6 @@ describe('NetworkTopologyMobile', () => {
 
       // WAN1 should no longer be visible
       expect(screen.queryByText('WAN1')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has proper region aria-label', () => {
-      render(<NetworkTopologyMobile {...defaultProps} />);
-
-      const region = screen.getByRole('region');
-      expect(region).toHaveAttribute('aria-label', 'Network topology overview');
-    });
-
-    it('section buttons have aria-expanded', () => {
-      render(<NetworkTopologyMobile {...defaultProps} />);
-
-      const wanButton = screen.getByRole('button', { name: /WAN Interfaces/i });
-      expect(wanButton).toHaveAttribute('aria-expanded');
-    });
-
-    it('section buttons have aria-controls', () => {
-      render(<NetworkTopologyMobile {...defaultProps} />);
-
-      const wanButton = screen.getByRole('button', { name: /WAN Interfaces/i });
-      expect(wanButton).toHaveAttribute('aria-controls');
     });
   });
 

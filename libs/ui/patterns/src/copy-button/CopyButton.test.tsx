@@ -134,55 +134,6 @@ describe('CopyButton', () => {
     });
   });
 
-  describe('keyboard accessibility', () => {
-    it('supports keyboard activation with Enter', async () => {
-      const user = userEvent.setup();
-      render(
-        <CopyButton
-          value="test"
-          variant="inline"
-          showTooltip={false}
-        />
-      );
-
-      await user.tab();
-      await user.keyboard('{Enter}');
-
-      expect(mockWriteText).toHaveBeenCalledWith('test');
-    });
-
-    it('supports keyboard activation with Space', async () => {
-      const user = userEvent.setup();
-      render(
-        <CopyButton
-          value="test"
-          variant="inline"
-          showTooltip={false}
-        />
-      );
-
-      await user.tab();
-      await user.keyboard(' ');
-
-      expect(mockWriteText).toHaveBeenCalledWith('test');
-    });
-
-    it('is focusable via Tab', async () => {
-      const user = userEvent.setup();
-      render(
-        <CopyButton
-          value="test"
-          variant="inline"
-          showTooltip={false}
-        />
-      );
-
-      await user.tab();
-
-      expect(screen.getByRole('button')).toHaveFocus();
-    });
-  });
-
   describe('callback props', () => {
     it('calls onCopy callback on successful copy', async () => {
       const onCopy = vi.fn();

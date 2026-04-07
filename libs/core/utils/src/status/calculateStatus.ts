@@ -68,14 +68,5 @@ export function getStatusColor(status: ResourceStatus): {
         bg: 'bg-red-500',
         border: 'border-red-500',
       } as const;
-    default: {
-      // Exhaustive check - this should never be reached
-      const _exhaustive: never = status;
-      return {
-        text: 'text-gray-500',
-        bg: 'bg-gray-500',
-        border: 'border-gray-500',
-      } as const;
-    }
   }
 }

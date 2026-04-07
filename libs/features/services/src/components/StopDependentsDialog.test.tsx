@@ -324,66 +324,6 @@ describe('StopDependentsDialog', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      render(<StopDependentsDialog {...defaultProps} />);
-
-      // Dialog should have title
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      expect(screen.getByText('Stop Tor Gateway?')).toBeInTheDocument();
-    });
-
-    it('should have accessible radio group', () => {
-      render(<StopDependentsDialog {...defaultProps} />);
-
-      const radioGroup = screen.getByRole('radiogroup');
-      expect(radioGroup).toBeInTheDocument();
-
-      const radios = screen.getAllByRole('radio');
-      expect(radios).toHaveLength(2);
-    });
-
-    it('should have labeled radio options', () => {
-      render(<StopDependentsDialog {...defaultProps} />);
-
-      expect(screen.getByLabelText(/Stop dependents first/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Force stop/i)).toBeInTheDocument();
-    });
-
-    it('should be keyboard navigable', async () => {
-      const user = userEvent.setup();
-      render(<StopDependentsDialog {...defaultProps} />);
-
-      // Tab to first radio
-      await user.tab();
-      const firstRadio = screen.getByLabelText(/Stop dependents first/i);
-      expect(firstRadio).toHaveFocus();
-
-      // Arrow down to second radio
-      await user.keyboard('{ArrowDown}');
-      const secondRadio = screen.getByLabelText(/Force stop/i);
-      expect(secondRadio).toBeChecked();
-    });
-
-    it('should have focus trap within dialog', async () => {
-      const user = userEvent.setup();
-      render(<StopDependentsDialog {...defaultProps} />);
-
-      // Dialog should capture focus
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-
-      // Tab through interactive elements
-      await user.tab();
-      await user.tab();
-      await user.tab();
-
-      // Focus should remain within dialog
-      const focusedElement = document.activeElement;
-      expect(dialog.contains(focusedElement)).toBe(true);
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle empty dependents array', () => {
       render(

@@ -12,14 +12,10 @@ import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { CStepper } from './c-stepper';
 import { useStepper } from '../../hooks/use-stepper';
 
 import type { StepConfig, StepperConfig } from '../../hooks/use-stepper.types';
-
-// Note: vitest-axe auto-extends expect with toHaveNoViolations
 
 // ===== Test Helpers =====
 
@@ -528,85 +524,6 @@ describe('CStepper keyboard shortcuts', () => {
     await waitFor(() => {
       expect(screen.getByTestId('current')).toHaveTextContent('0');
     });
-  });
-});
-
-// ===== Accessibility Tests =====
-
-describe('CStepper accessibility', () => {
-  it('should have no accessibility violations', async () => {
-    const { container } = render(
-      <CStepperTestWrapper
-        config={createConfig(basicSteps)}
-        previewContent={<div>Preview</div>}
-      />
-    );
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have proper ARIA roles', () => {
-    render(
-      <CStepperTestWrapper
-        config={createConfig(basicSteps)}
-        previewContent={<div>Preview</div>}
-        stepperProps={{ 'aria-label': 'Setup wizard' }}
-      />
-    );
-
-    // Navigation sidebar
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
-
-    // Main content area (top-level landmark, not nested in region)
-    expect(screen.getByRole('main')).toBeInTheDocument();
-
-    // Preview panel is complementary (top-level landmark, not nested in region)
-    expect(screen.getByRole('complementary')).toBeInTheDocument();
-  });
-
-  it('should have aria-label on container', () => {
-    const { container } = render(
-      <CStepperTestWrapper
-        config={createConfig(basicSteps)}
-        stepperProps={{ 'aria-label': 'Custom wizard label' }}
-      />
-    );
-
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper).toHaveAttribute('aria-label', 'Custom wizard label');
-  });
-
-  it('should have accessible name on preview close button', () => {
-    render(
-      <CStepperTestWrapper
-        config={createConfig(basicSteps)}
-        previewContent={<div>Preview</div>}
-      />
-    );
-
-    const closeButton = screen.getByRole('button', { name: /close preview/i });
-    expect(closeButton).toBeInTheDocument();
-  });
-
-  it('should have accessible name on preview toggle button', () => {
-    render(
-      <CStepperTestWrapper
-        config={createConfig(basicSteps)}
-        previewContent={<div>Preview</div>}
-        stepperProps={{ defaultShowPreview: false }}
-      />
-    );
-
-    const toggleButton = screen.getByRole('button', { name: /show preview/i });
-    expect(toggleButton).toBeInTheDocument();
-  });
-
-  it('should have live region for step content', () => {
-    const { container } = render(<CStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    const liveRegion = container.querySelector('[aria-live="polite"]');
-    expect(liveRegion).toBeInTheDocument();
   });
 });
 

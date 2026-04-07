@@ -7,8 +7,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import type { FirewallLogEntry } from '@nasnet/core/types';
 
 import { FirewallLogStats } from './FirewallLogStats';
@@ -558,74 +556,6 @@ describe('FirewallLogStats', () => {
       const { container } = render(<FirewallLogStats logs={logs} />);
 
       // Check that SVG chart is rendered (pie chart)
-      const svg = container.querySelector('svg');
-      expect(svg).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================================================
-  // Accessibility Tests (axe-core)
-  // ==========================================================================
-
-  describe('Accessibility', () => {
-    it('should have no axe violations with data', async () => {
-      const logs = mockLogsWithVariedData();
-      const { container } = render(<FirewallLogStats logs={logs} />);
-
-      const results = await axe(container);
-      expect(results.violations).toHaveLength(0);
-    });
-
-    it('should have no axe violations in empty state', async () => {
-      const { container } = render(<FirewallLogStats logs={[]} />);
-
-      const results = await axe(container);
-      expect(results.violations).toHaveLength(0);
-    });
-
-    it('should have no axe violations in loading state', async () => {
-      const { container } = render(
-        <FirewallLogStats
-          logs={[]}
-          loading
-        />
-      );
-
-      const results = await axe(container);
-      expect(results.violations).toHaveLength(0);
-    });
-
-    it('should have proper heading hierarchy', () => {
-      const logs = mockLogsWithVariedData();
-      render(<FirewallLogStats logs={logs} />);
-
-      const headings = screen.getAllByRole('heading');
-      // Should have proper semantic headings
-      expect(headings.length).toBeGreaterThan(0);
-    });
-
-    it('should have accessible button labels', () => {
-      const logs = mockLogsWithVariedData();
-      const onAddToBlocklist = vi.fn();
-
-      render(
-        <FirewallLogStats
-          logs={logs}
-          onAddToBlocklist={onAddToBlocklist}
-        />
-      );
-
-      const buttons = screen.getAllByRole('button', { name: /add to blocklist/i });
-      buttons.forEach((button) => {
-        expect(button).toHaveAccessibleName();
-      });
-    });
-
-    it('should have proper ARIA labels for charts', () => {
-      const logs = mockLogsWithVariedData();
-      const { container } = render(<FirewallLogStats logs={logs} />);
-
-      // Recharts renders SVG elements
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
     });

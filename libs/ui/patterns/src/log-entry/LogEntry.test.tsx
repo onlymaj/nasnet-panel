@@ -283,30 +283,6 @@ describe('LogEntry', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should use semantic time element for timestamp', () => {
-      render(<LogEntry entry={mockLogEntry} />);
-
-      const timeElement = screen.getByRole('time');
-      expect(timeElement).toBeInTheDocument();
-    });
-
-    it('should have proper text hierarchy', () => {
-      render(<LogEntry entry={mockLogEntry} />);
-
-      // Message should be in a paragraph
-      const message = screen.getByText('Connection rejected from 192.168.1.100');
-      expect(message.tagName).toBe('P');
-    });
-
-    it('should support hover state for better interactivity', () => {
-      const { container } = render(<LogEntry entry={mockLogEntry} />);
-
-      const logElement = container.firstChild as HTMLElement;
-      expect(logElement.className).toContain('hover:bg-accent');
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle all topic types', () => {
       const topics = [

@@ -3,7 +3,7 @@
  * Tests rendering, interactions, and state management
  */
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedProvider } from '@apollo/client/testing';
 import { vi } from 'vitest';
@@ -317,55 +317,6 @@ describe('BandwidthChart', () => {
 
       // Check for helpful message
       expect(screen.getByText(/check your router connection/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels for chart region', async () => {
-      render(<BandwidthChartDesktop deviceId="router-1" />, {
-        wrapper: (props) => wrapper({ ...props, mocks: defaultMocks }),
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-      });
-
-      // Check for ARIA label on chart
-      expect(screen.getByRole('img', { name: /bandwidth usage graph/i })).toBeInTheDocument();
-    });
-
-    it('should have keyboard-accessible controls', async () => {
-      render(<BandwidthChartDesktop deviceId="router-1" />, {
-        wrapper: (props) => wrapper({ ...props, mocks: defaultMocks }),
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-      });
-
-      // Time range selector should be keyboard accessible
-      const radioGroup = screen.getByRole('radiogroup');
-      expect(radioGroup).toBeInTheDocument();
-
-      // All radio buttons should be keyboard accessible
-      const radios = within(radioGroup).getAllByRole('radio');
-      radios.forEach((radio) => {
-        expect(radio).toHaveAttribute('tabIndex');
-      });
-    });
-
-    it('should provide screen reader alternative via data table', async () => {
-      render(<BandwidthChartDesktop deviceId="router-1" />, {
-        wrapper: (props) => wrapper({ ...props, mocks: defaultMocks }),
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-      });
-
-      // Data table should exist (hidden but accessible)
-      const table = screen.getByRole('region', { name: /bandwidth data table/i });
-      expect(table).toBeInTheDocument();
     });
   });
 

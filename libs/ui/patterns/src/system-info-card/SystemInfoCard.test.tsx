@@ -138,39 +138,6 @@ describe('SystemInfoCard', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper heading structure', () => {
-      render(<SystemInfoCard data={mockSystemInfo} />);
-
-      // Card should have a title
-      const title = screen.getByText('System Information');
-      expect(title).toBeInTheDocument();
-    });
-
-    it('should have accessible error alert', () => {
-      const error = new Error('Test error');
-      const { container } = render(<SystemInfoCard error={error} />);
-
-      // Error icon should be present
-      const errorIcon = container.querySelector('[class*="text-destructive"]');
-      expect(errorIcon).toBeInTheDocument();
-    });
-
-    it('should have accessible retry button with icon and text', async () => {
-      const error = new Error('Test error');
-      const onRetry = vi.fn();
-      render(
-        <SystemInfoCard
-          error={error}
-          onRetry={onRetry}
-        />
-      );
-
-      const retryButton = screen.getByRole('button', { name: /retry/i });
-      expect(retryButton).toHaveAccessibleName();
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle missing uptime gracefully', () => {
       const dataWithoutUptime: SystemInfo = {

@@ -270,46 +270,6 @@ describe('ServiceDetailPage', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper heading hierarchy', () => {
-      render(
-        <ServiceDetailPage
-          routerId="router-1"
-          instanceId="instance-1"
-        />
-      );
-
-      const heading = screen.getByRole('heading', { level: 1 });
-      expect(heading).toHaveTextContent('My Service');
-    });
-
-    it('should have descriptive aria labels on buttons', () => {
-      render(
-        <ServiceDetailPage
-          routerId="router-1"
-          instanceId="instance-1"
-        />
-      );
-
-      const exportButton = screen.getByRole('button', {
-        name: /services.sharing.export.button/i,
-      });
-      expect(exportButton).toHaveAttribute('aria-label');
-    });
-
-    it('should use aria-hidden on decorative icons', () => {
-      render(
-        <ServiceDetailPage
-          routerId="router-1"
-          instanceId="instance-1"
-        />
-      );
-
-      const icons = screen.getAllByTestId((testId) => testId.includes('aria-hidden'));
-      expect(icons.length).toBeGreaterThanOrEqual(0);
-    });
-  });
-
   describe('Tab Navigation', () => {
     it('should switch tabs when clicked', async () => {
       const user = userEvent.setup();

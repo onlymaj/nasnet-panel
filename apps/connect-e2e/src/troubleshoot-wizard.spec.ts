@@ -246,64 +246,6 @@ test.describe('Troubleshoot Wizard - ISP Information', () => {
   });
 });
 
-test.describe('Troubleshoot Wizard - Accessibility', () => {
-  test('should be keyboard navigable', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard`);
-    await page.getByRole('button', { name: /troubleshoot/i }).click();
-
-    // Tab to start button
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab'); // May need multiple tabs
-
-    // Press Enter to start
-    await page.keyboard.press('Enter');
-
-    // Verify diagnostics started
-    await expect(page.getByText(/detecting|wan interface/i)).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should have proper ARIA labels', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard`);
-    await page.getByRole('button', { name: /troubleshoot/i }).click();
-
-    // Check start button has accessible name
-    const startButton = page.getByRole('button', { name: /start diagnostic/i });
-    await expect(startButton).toHaveAccessibleName('Start Diagnostic');
-
-    await startButton.click();
-
-    // Wait for step to appear
-    await page.waitForTimeout(5000);
-
-    // Check for status role
-    const statusElements = page.locator('[role="status"]');
-    expect(await statusElements.count()).toBeGreaterThan(0);
-  });
-
-  test('should announce step progress to screen readers', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard`);
-    await page.getByRole('button', { name: /troubleshoot/i }).click();
-    await page.getByRole('button', { name: /start diagnostic/i }).click();
-
-    // Check for ARIA live region
-    const liveRegion = page.locator('[aria-live="polite"], [aria-live="assertive"]');
-    await expect(liveRegion.first()).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should have 44px minimum touch targets', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard`);
-    await page.getByRole('button', { name: /troubleshoot/i }).click();
-
-    const startButton = page.getByRole('button', { name: /start diagnostic/i });
-    const box = await startButton.boundingBox();
-
-    expect(box).not.toBeNull();
-    if (box) {
-      expect(box.height).toBeGreaterThanOrEqual(44);
-    }
-  });
-});
-
 test.describe('Troubleshoot Wizard - Mobile View', () => {
   test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE
 

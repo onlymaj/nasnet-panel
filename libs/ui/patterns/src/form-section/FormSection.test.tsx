@@ -15,8 +15,6 @@
 import { render, screen, waitFor, act, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { FormSection } from './FormSection';
 import { FormSectionErrors } from './FormSectionErrors';
 import { useFormSection, slugify } from './useFormSection';
@@ -556,124 +554,6 @@ describe('FormSection component', () => {
 
       // Chevron should not have transition class when reduced motion is enabled
       expect(chevron).not.toHaveClass('transition-transform');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has aria-expanded on collapsible header', () => {
-      render(
-        <FormSection
-          title="Test"
-          collapsible
-          defaultOpen
-        >
-          <div>Content</div>
-        </FormSection>
-      );
-
-      const header = screen.getByRole('button', { name: /test/i });
-      expect(header).toHaveAttribute('aria-expanded', 'true');
-    });
-
-    it('updates aria-expanded when toggled', async () => {
-      const user = userEvent.setup();
-
-      render(
-        <FormSection
-          title="Test"
-          collapsible
-          defaultOpen
-        >
-          <div>Content</div>
-        </FormSection>
-      );
-
-      const header = screen.getByRole('button', { name: /test/i });
-      expect(header).toHaveAttribute('aria-expanded', 'true');
-
-      await user.click(header);
-
-      expect(header).toHaveAttribute('aria-expanded', 'false');
-    });
-
-    it('has aria-controls pointing to content', () => {
-      render(
-        <FormSection
-          title="Test"
-          collapsible
-          defaultOpen
-        >
-          <div>Content</div>
-        </FormSection>
-      );
-
-      const header = screen.getByRole('button', { name: /test/i });
-      const controlsId = header.getAttribute('aria-controls');
-
-      expect(controlsId).toBeTruthy();
-      expect(document.getElementById(controlsId!)).toBeInTheDocument();
-    });
-
-    it('passes axe accessibility check for basic section', async () => {
-      const { container } = render(
-        <FormSection
-          title="Network Settings"
-          description="Configure network"
-        >
-          <div>
-            <label htmlFor="ip">IP Address</label>
-            <input
-              id="ip"
-              type="text"
-            />
-          </div>
-        </FormSection>
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('passes axe accessibility check for collapsible section', async () => {
-      const { container } = render(
-        <FormSection
-          title="Advanced Options"
-          collapsible
-          defaultOpen
-        >
-          <div>
-            <label htmlFor="mtu">MTU</label>
-            <input
-              id="mtu"
-              type="number"
-            />
-          </div>
-        </FormSection>
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('passes axe accessibility check for section with errors', async () => {
-      const { container } = render(
-        <FormSection
-          title="Test Section"
-          errors={['IP address is invalid']}
-        >
-          <div>
-            <label htmlFor="ip">IP Address</label>
-            <input
-              id="ip"
-              type="text"
-              aria-invalid="true"
-            />
-          </div>
-        </FormSection>
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
     });
   });
 

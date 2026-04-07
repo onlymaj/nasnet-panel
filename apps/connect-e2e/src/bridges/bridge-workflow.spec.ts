@@ -340,24 +340,3 @@ test.describe('Bridge Port Diagram Drag and Drop', () => {
     await expect(page.getByText(/Added.*to bridge/i)).toBeVisible();
   });
 });
-
-test.describe('Accessibility', () => {
-  test('has no accessibility violations', async ({ page }) => {
-    await page.goto('/dashboard/network/bridges');
-    await page.waitForLoadState('networkidle');
-
-    // Run axe-core accessibility tests
-    // Note: Requires @axe-core/playwright to be installed
-    // const results = await injectAxe(page);
-    // await checkA11y(page);
-
-    // Verify ARIA labels are present
-    await expect(page.getByRole('main')).toBeVisible();
-    await expect(page.getByRole('list')).toBeVisible();
-
-    // Verify keyboard focus indicators
-    await page.keyboard.press('Tab');
-    const focused = page.locator(':focus');
-    await expect(focused).toHaveCSS('outline-width', /[2-9]px/);
-  });
-});

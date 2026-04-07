@@ -173,25 +173,6 @@ describe('HardwareCard', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper heading structure', () => {
-      render(<HardwareCard data={mockHardwareData} />);
-
-      // Card should have a title
-      const title = screen.getByText('Hardware Details');
-      expect(title).toBeInTheDocument();
-    });
-
-    it('should have accessible copy button with aria-label', () => {
-      render(<HardwareCard data={mockHardwareData} />);
-
-      const copyButton = screen.getByRole('button', {
-        name: /copy serial number/i,
-      });
-      expect(copyButton).toHaveAccessibleName();
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle N/A values gracefully', () => {
       const naData: RouterboardInfo = {

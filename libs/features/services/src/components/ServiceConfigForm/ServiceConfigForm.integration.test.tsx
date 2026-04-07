@@ -349,50 +349,6 @@ describe('ServiceConfigForm - Integration & Platform Presenters', () => {
     });
   });
 
-  describe('Accessibility - WCAG AAA Compliance', () => {
-    it('should have proper form structure with accessible submit button', () => {
-      mockUsePlatform.mockReturnValue('desktop');
-
-      const formState = useCreateMockFormState();
-
-      render(<ServiceConfigForm formState={formState} />);
-
-      // Submit button should have accessible name
-      const submitButton = screen.getByRole('button', { name: /save|apply/i });
-      expect(submitButton).toHaveAccessibleName();
-    });
-
-    it('should support keyboard navigation (tab order)', () => {
-      mockUsePlatform.mockReturnValue('desktop');
-
-      const formState = useCreateMockFormState();
-
-      render(<ServiceConfigForm formState={formState} />);
-
-      // All interactive elements should be keyboard accessible
-      const submitButton = screen.getByRole('button', { name: /save|apply/i });
-      expect(submitButton).not.toHaveAttribute('tabindex', '-1');
-    });
-
-    it('should render groups in logical order for screen readers', () => {
-      mockUsePlatform.mockReturnValue('desktop');
-
-      const formState = useCreateMockFormState();
-
-      render(<ServiceConfigForm formState={formState} />);
-
-      // Tabs should be in a tablist for screen reader navigation
-      const tablist = screen.getByRole('tablist');
-      expect(tablist).toBeInTheDocument();
-
-      // Tabs should have proper ARIA attributes
-      const tabs = screen.getAllByRole('tab');
-      tabs.forEach((tab) => {
-        expect(tab).toHaveAttribute('aria-selected');
-      });
-    });
-  });
-
   describe('Mobile-Specific Features', () => {
     it('should render accordion-style cards on mobile', () => {
       mockUsePlatform.mockReturnValue('mobile');

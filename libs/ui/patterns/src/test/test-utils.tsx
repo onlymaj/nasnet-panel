@@ -284,7 +284,3 @@ export function isKeyboardFocusable(element: HTMLElement): boolean {
 export { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 export { renderHook, act } from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
-export { axe } from 'vitest-axe';
-
-// Setup vitest-axe matchers
-import 'vitest-axe/extend-expect';

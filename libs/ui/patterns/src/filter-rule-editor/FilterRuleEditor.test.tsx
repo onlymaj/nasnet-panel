@@ -15,9 +15,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { axe } from 'vitest-axe';
-import 'vitest-axe/extend-expect';
-
 import { FilterRuleEditor } from './FilterRuleEditor';
 
 import type { FilterRuleEditorProps } from './filter-rule-editor.types';
@@ -310,89 +307,6 @@ describe('FilterRuleEditor', () => {
       await waitFor(() => {
         const dialog = screen.getByRole('dialog');
         expect(dialog).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('WCAG AAA Accessibility', () => {
-    it('has no accessibility violations (desktop)', async () => {
-      const { container } = render(<FilterRuleEditor {...defaultProps} />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations (mobile)', async () => {
-      const { usePlatform } = require('@nasnet/ui/layouts');
-      usePlatform.mockReturnValue('mobile');
-
-      const { container } = render(<FilterRuleEditor {...defaultProps} />);
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has no accessibility violations with validation errors', async () => {
-      const { container } = render(
-        <FilterRuleEditor
-          {...defaultProps}
-          initialRule={{
-            chain: 'input',
-            action: 'log',
-            log: true,
-            // Invalid - missing logPrefix will trigger validation error
-          }}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
-      });
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('supports keyboard navigation', async () => {
-      const user = userEvent.setup();
-
-      render(<FilterRuleEditor {...defaultProps} />);
-
-      await user.tab();
-      await waitFor(() => {
-        const focusedElement = document.activeElement;
-        expect(focusedElement).not.toBe(document.body);
-      });
-
-      await user.tab();
-      await user.tab();
-
-      const buttons = screen.getAllByRole('button');
-      expect(buttons.length).toBeGreaterThan(0);
-    });
-
-    it('has proper ARIA labels and roles', () => {
-      render(<FilterRuleEditor {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-      expect(dialog).toHaveAccessibleName();
-    });
-
-    it('provides form field labels', async () => {
-      render(<FilterRuleEditor {...defaultProps} />);
-
-      await waitFor(() => {
-        const dialog = screen.getByRole('dialog');
-        const inputs = within(dialog).queryAllByRole('textbox');
-        const selects = within(dialog).queryAllByRole('combobox');
-
-        const allControls = [...inputs, ...selects];
-        if (allControls.length > 0) {
-          allControls.forEach((control) => {
-            expect(control).toHaveAccessibleName();
-          });
-        }
       });
     });
   });

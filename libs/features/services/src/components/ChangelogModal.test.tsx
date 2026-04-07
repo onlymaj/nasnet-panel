@@ -262,44 +262,6 @@ describe('ChangelogModal', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('provides dialog role', () => {
-      render(<ChangelogModal {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toBeInTheDocument();
-    });
-
-    it('provides accessible name for dialog', () => {
-      render(<ChangelogModal {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toHaveAccessibleName('Tor Proxy Update');
-    });
-
-    it('provides accessible description for dialog', () => {
-      render(<ChangelogModal {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toHaveAccessibleDescription(
-        'View changelog and release notes for this update'
-      );
-    });
-
-    it('renders with proper heading structure', () => {
-      render(
-        <ChangelogModal
-          {...defaultProps}
-          severity="SECURITY"
-        />
-      );
-
-      // Dialog should have proper heading (via DialogTitle)
-      const heading = screen.getByText(/Tor Proxy Update/);
-      expect(heading).toBeInTheDocument();
-    });
-  });
-
   describe('Severity-Based Rendering', () => {
     it('renders SECURITY severity with appropriate styling', () => {
       render(

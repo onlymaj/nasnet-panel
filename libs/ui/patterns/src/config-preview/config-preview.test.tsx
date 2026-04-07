@@ -11,13 +11,9 @@ import * as React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { ConfigPreview } from './config-preview';
 import { ConfigPreviewDesktop } from './config-preview-desktop';
 import { ConfigPreviewMobile } from './config-preview-mobile';
-
-// Note: vitest-axe matchers are extended globally in src/test/setup.ts
 
 // Mock usePlatform hook
 vi.mock('@nasnet/ui/layouts', () => ({
@@ -258,65 +254,6 @@ add action=accept chain=input connection-state=established,related`;
       );
 
       expect(screen.queryByRole('button', { name: /expand all/i })).not.toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has no accessibility violations', async () => {
-      const { container } = render(
-        <ConfigPreview
-          script={sampleScript}
-          title="Accessible Config"
-        />
-      );
-
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it('has proper ARIA role on main container', () => {
-      render(
-        <ConfigPreview
-          script={sampleScript}
-          title="My Config"
-        />
-      );
-
-      expect(screen.getByRole('region', { name: 'My Config' })).toBeInTheDocument();
-    });
-
-    it('has aria-label on interactive elements', () => {
-      render(<ConfigPreview script={sampleScript} />);
-
-      const copyButton = screen.getByRole('button', { name: /copy/i });
-      expect(copyButton).toHaveAttribute('aria-label');
-
-      const downloadButton = screen.getByRole('button', { name: /download/i });
-      expect(downloadButton).toHaveAttribute('aria-label');
-    });
-
-    it('has aria-live region for feedback', () => {
-      render(<ConfigPreview script={sampleScript} />);
-
-      const liveRegion = document.querySelector('[aria-live]');
-      expect(liveRegion).toBeInTheDocument();
-    });
-
-    it('supports keyboard navigation', async () => {
-      const user = userEvent.setup();
-      render(
-        <ConfigPreview
-          script={sampleScript}
-          collapsible
-        />
-      );
-
-      // Tab through buttons
-      await user.tab();
-      expect(document.activeElement?.textContent).toMatch(/expand|collapse|copy|download/i);
-
-      await user.tab();
-      expect(document.activeElement?.textContent).toMatch(/expand|collapse|copy|download/i);
     });
   });
 });

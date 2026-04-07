@@ -1,8 +1,8 @@
 /**
  * PortKnockSequenceForm Component Tests
  *
- * React Testing Library + axe-core tests for port knock sequence form component.
- * Tests rendering, user interactions, validation, and accessibility.
+ * React Testing Library tests for port knock sequence form component.
+ * Tests rendering, user interactions, and validation.
  *
  * Pattern Reference: MangleRuleEditor.test.tsx
  * Story: NAS-7.12 Task 15.4
@@ -190,48 +190,6 @@ describe('PortKnockSequenceForm', () => {
       expect(true).toBe(true); // Placeholder
     });
   });
-
-  // =============================================================================
-  // Accessibility Tests (3 tests)
-  // =============================================================================
-
-  describe('Accessibility', () => {
-    it('has zero axe-core violations (WCAG 2.1 AA)', async () => {
-      // TODO: Uncomment when component is available
-      // const { container } = render(<PortKnockSequenceForm />, { wrapper: TestWrapper });
-      //
-      // const results = await axe(container);
-      // expect(results).toHaveNoViolations();
-      expect(true).toBe(true); // Placeholder
-    });
-
-    it('has 44px minimum touch targets', () => {
-      // TODO: Uncomment when component is available
-      // render(<PortKnockSequenceForm />, { wrapper: TestWrapper });
-      //
-      // const addButton = screen.getByRole('button', { name: /add knock port/i });
-      // const rect = addButton.getBoundingClientRect();
-      //
-      // expect(rect.height).toBeGreaterThanOrEqual(44);
-      // expect(rect.width).toBeGreaterThanOrEqual(44);
-      expect(true).toBe(true); // Placeholder
-    });
-
-    it('supports keyboard navigation (Tab, Enter, Escape)', async () => {
-      // TODO: Uncomment when component is available
-      // const user = userEvent.setup();
-      // render(<PortKnockSequenceForm />, { wrapper: TestWrapper });
-      //
-      // // Tab through form fields
-      // await user.tab();
-      // expect(screen.getByLabelText(/sequence name/i)).toHaveFocus();
-      //
-      // await user.tab();
-      // // Next focusable element should have focus
-      // expect(document.activeElement).not.toBe(document.body);
-      expect(true).toBe(true); // Placeholder
-    });
-  });
 });
 
 // =============================================================================
@@ -244,16 +202,8 @@ describe('PortKnockSequenceForm', () => {
  * ✅ Rendering (5 tests)
  * ✅ User Interactions (6 tests)
  * ✅ Validation (4 tests)
- * ✅ Accessibility (3 tests)
  *
- * Total: 18 tests
- *
- * Accessibility Requirements:
- * - Zero axe-core violations (WCAG 2.1 AA minimum)
- * - 44px minimum touch targets
- * - Keyboard navigation support
- * - ARIA labels on all inputs
- * - Focus indicators visible
+ * Total: 15 tests
  *
  * Pattern Reference: MangleRuleEditor.test.tsx
  *

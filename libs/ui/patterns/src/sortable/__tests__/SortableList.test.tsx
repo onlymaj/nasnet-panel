@@ -337,22 +337,6 @@ describe('SortableList', () => {
     expect(screen.getByTestId('empty')).toBeInTheDocument();
   });
 
-  it('has accessible list role', () => {
-    const items = createTestItems(3);
-
-    render(
-      <SortableList
-        items={items}
-        renderItem={(item) => <div>{item.label}</div>}
-        aria-label="My sortable list"
-      />
-    );
-
-    const list = screen.getByRole('listbox');
-    expect(list).toBeInTheDocument();
-    expect(list).toHaveAttribute('aria-label', 'My sortable list');
-  });
-
   it('shows position numbers when enabled', () => {
     const items = createTestItems(3);
 

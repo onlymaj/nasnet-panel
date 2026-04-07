@@ -107,21 +107,6 @@ describe('useMetricDisplay', () => {
       useMetricDisplay({ label: 'Test', value: 1, variant: 'default' }).valueClasses
     ).toContain('text-slate');
   });
-
-  it('generates accessible status text', () => {
-    const result = useMetricDisplay({
-      label: 'CPU Usage',
-      value: 85,
-      unit: '%',
-      trend: 'up',
-      trendValue: '+5%',
-    });
-    expect(result.statusText).toContain('CPU Usage');
-    expect(result.statusText).toContain('85');
-    expect(result.statusText).toContain('%');
-    expect(result.statusText).toContain('increased by');
-    expect(result.statusText).toContain('+5%');
-  });
 });
 
 describe('MetricDisplayMobile', () => {

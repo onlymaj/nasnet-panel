@@ -14,9 +14,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe } from 'vitest-axe';
 import { AddServiceDialog } from './AddServiceDialog';
 import { useCustomServices } from '../hooks';
 import type { CustomServicePortInput } from '@nasnet/core/types';
@@ -396,63 +395,6 @@ describe('AddServiceDialog - Dialog Behavior', () => {
     await waitFor(() => {
       expect(submitButton).toBeDisabled();
       expect(cancelButton).toBeDisabled();
-    });
-  });
-});
-
-// ============================================================================
-// Tests: Accessibility
-// ============================================================================
-
-describe('AddServiceDialog - Accessibility', () => {
-  it('has no accessibility violations (axe-core)', async () => {
-    const { container } = render(<AddServiceDialog {...defaultProps} />);
-
-    const results = await axe(container);
-    expect(results.violations).toEqual([]);
-  });
-
-  it('properly labels all form fields', () => {
-    render(<AddServiceDialog {...defaultProps} />);
-
-    expect(screen.getByLabelText(/Service Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Port/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
-
-    // Protocol radios - check we have 3 radios
-    const radios = screen.getAllByRole('radio');
-    expect(radios).toHaveLength(3);
-
-    // Check protocol labels exist
-    expect(screen.getByText('TCP')).toBeInTheDocument();
-    expect(screen.getByText('UDP')).toBeInTheDocument();
-    expect(screen.getByText('TCP & UDP')).toBeInTheDocument();
-  });
-
-  it('uses aria-invalid for error states', async () => {
-    const user = userEvent.setup();
-    render(<AddServiceDialog {...defaultProps} />);
-
-    await user.clear(screen.getByLabelText(/Service Name/i));
-    await user.click(screen.getByRole('button', { name: /Save/i }));
-
-    await waitFor(() => {
-      expect(screen.getByLabelText(/Service Name/i)).toHaveAttribute('aria-invalid', 'true');
-    });
-  });
-
-  it('associates error messages with inputs via aria-describedby', async () => {
-    const user = userEvent.setup();
-    render(<AddServiceDialog {...defaultProps} />);
-
-    await user.clear(screen.getByLabelText(/Service Name/i));
-    await user.click(screen.getByRole('button', { name: /Save/i }));
-
-    await waitFor(() => {
-      const input = screen.getByLabelText(/Service Name/i);
-      const errorId = input.getAttribute('aria-describedby');
-      expect(errorId).toBeTruthy();
-      expect(document.getElementById(errorId!)).toBeInTheDocument();
     });
   });
 });

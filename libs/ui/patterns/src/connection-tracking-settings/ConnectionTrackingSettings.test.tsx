@@ -13,7 +13,8 @@
 import { MockedProvider } from '@apollo/client/testing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { axe, toHaveNoViolations } from 'jest-axe';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { usePlatform } from '@nasnet/ui/layouts';
 
 // import { ConnectionTrackingSettings } from './ConnectionTrackingSettings';
 // import {
@@ -27,11 +28,9 @@ import {
   mockUpdateSettingsMutationResponse,
 } from '../__test-utils__/connection-tracking-fixtures';
 
-expect.extend(toHaveNoViolations);
-
 // Mock usePlatform hook
-jest.mock('@nasnet/ui/layouts', () => ({
-  usePlatform: jest.fn(() => 'desktop'),
+vi.mock('@nasnet/ui/layouts', () => ({
+  usePlatform: vi.fn(() => 'desktop'),
 }));
 
 // TODO: Define mocks when GraphQL queries are created
@@ -47,8 +46,7 @@ jest.mock('@nasnet/ui/layouts', () => ({
 
 describe('ConnectionTrackingSettings', () => {
   beforeEach(() => {
-    const { usePlatform } = require('@nasnet/ui/layouts');
-    usePlatform.mockReturnValue('desktop');
+    vi.mocked(usePlatform).mockReturnValue('desktop');
   });
 
   describe('Rendering', () => {
@@ -242,34 +240,6 @@ describe('ConnectionTrackingSettings', () => {
       // usePlatform.mockReturnValue('mobile');
       // TODO: Render
       // Expected: Collapsible accordion sections
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have no axe violations', async () => {
-      // TODO: Render component, run axe
-      // const { container } = render(<ConnectionTrackingSettings routerId="router-1" />);
-      // const results = await axe(container);
-      // expect(results).toHaveNoViolations();
-    });
-
-    it('should have labels for all form fields', async () => {
-      // TODO: Verify all inputs have associated labels
-    });
-
-    it('should announce validation errors to screen readers', async () => {
-      // TODO: Trigger validation error
-      // Expected: Error has role="alert" for screen reader announcement
-    });
-
-    it('should support keyboard navigation', async () => {
-      // TODO: Test Tab through form fields
-      // Tab to switches, Enter to toggle
-      // Tab to save button, Enter to submit
-    });
-
-    it('should have 44px minimum touch targets on mobile', async () => {
-      // TODO: Switch to mobile, measure interactive elements
     });
   });
 

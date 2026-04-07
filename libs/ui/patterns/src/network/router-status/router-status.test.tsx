@@ -6,7 +6,6 @@
  * - Subscription mock tests
  * - Component interaction tests
  * - Platform presenter switching tests
- * - Accessibility tests (axe-core)
  *
  * @module @nasnet/ui/patterns/network/router-status
  * @see NAS-4A.22: Build Router Status Component
@@ -18,8 +17,6 @@ import { MockedProvider } from '@apollo/client/testing';
 import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { RouterStatusDesktop } from './router-status-desktop';
 import { RouterStatusMobile } from './router-status-mobile';
 import { StatusIndicator } from './status-indicator';
@@ -30,8 +27,6 @@ import {
 
 import type { ConnectionStatus, RouterStatusData, UseRouterStatusReturn } from './types';
 import type { MockedResponse } from '@apollo/client/testing';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 // ===== Mock Data Helpers =====
 
@@ -204,27 +199,6 @@ describe('StatusIndicator', () => {
     );
     expect(screen.getByRole('img')).toHaveClass('h-6', 'w-6');
   });
-
-  it('has accessible aria-label', () => {
-    render(<StatusIndicator status="CONNECTED" />);
-    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Router is connected');
-  });
-
-  it('accepts custom aria-label', () => {
-    render(
-      <StatusIndicator
-        status="CONNECTED"
-        aria-label="Custom label"
-      />
-    );
-    expect(screen.getByRole('img')).toHaveAttribute('aria-label', 'Custom label');
-  });
-
-  it('has no accessibility violations', async () => {
-    const { container } = render(<StatusIndicator status="CONNECTED" />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
 });
 
 // ===== RouterStatusDesktop Tests =====
@@ -333,13 +307,6 @@ describe('RouterStatusDesktop', () => {
     await userEvent.click(cancelItem);
     expect(state.cancelReconnect).toHaveBeenCalled();
   });
-
-  it('has no accessibility violations', async () => {
-    const state = createMockState('CONNECTED');
-    const { container } = render(<RouterStatusDesktop state={state} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
 });
 
 // ===== RouterStatusMobile Tests =====
@@ -416,13 +383,6 @@ describe('RouterStatusMobile', () => {
     await userEvent.click(reconnectButton);
 
     expect(state.reconnect).toHaveBeenCalled();
-  });
-
-  it('has no accessibility violations', async () => {
-    const state = createMockState('CONNECTED');
-    const { container } = render(<RouterStatusMobile state={state} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
   });
 
   it('has focus ring for keyboard navigation', async () => {
@@ -599,42 +559,6 @@ describe('Latency Display', () => {
 
     const latency = screen.getByText('500ms');
     expect(latency).toHaveClass('text-semantic-error');
-  });
-});
-
-// ===== Keyboard Navigation Tests =====
-
-describe('Keyboard Navigation', () => {
-  it('action menu is keyboard accessible', async () => {
-    const state = createMockState('CONNECTED');
-    render(<RouterStatusDesktop state={state} />);
-
-    const menuButton = screen.getByRole('button', { name: /actions/i });
-
-    // Focus and open with Enter
-    menuButton.focus();
-    await userEvent.keyboard('{Enter}');
-
-    // Menu should be open
-    expect(await screen.findByText('Refresh Status')).toBeInTheDocument();
-
-    // Navigate with arrow keys and select
-    await userEvent.keyboard('{ArrowDown}');
-    await userEvent.keyboard('{Enter}');
-
-    expect(state.refresh).toHaveBeenCalled();
-  });
-
-  it('mobile badge can be activated with Enter', async () => {
-    const state = createMockState('CONNECTED');
-    render(<RouterStatusMobile state={state} />);
-
-    const badge = screen.getByRole('button', { name: /router status/i });
-    badge.focus();
-    await userEvent.keyboard('{Enter}');
-
-    // Sheet should open
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 });
 

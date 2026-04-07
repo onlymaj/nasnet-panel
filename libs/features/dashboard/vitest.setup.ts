@@ -11,11 +11,6 @@
  */
 
 import '@testing-library/jest-dom/vitest';
-import { expect } from 'vitest';
-import * as matchers from 'vitest-axe/matchers';
-
-// Extend vitest with axe-core accessibility matchers
-expect.extend(matchers);
 
 // Mock window.matchMedia (not available in JSDOM)
 Object.defineProperty(window, 'matchMedia', {

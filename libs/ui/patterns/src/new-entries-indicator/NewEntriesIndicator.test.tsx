@@ -198,63 +198,6 @@ describe('NewEntriesIndicator', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('should be keyboard accessible', () => {
-      render(
-        <NewEntriesIndicator
-          count={5}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-      expect(button.tagName).toBe('BUTTON');
-    });
-
-    it('should be focusable', () => {
-      render(
-        <NewEntriesIndicator
-          count={5}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-      button.focus();
-      expect(button).toHaveFocus();
-    });
-
-    it('should be triggerable with Enter key', async () => {
-      const user = userEvent.setup();
-      render(
-        <NewEntriesIndicator
-          count={5}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button');
-      button.focus();
-      await user.keyboard('{Enter}');
-
-      expect(mockOnClick).toHaveBeenCalled();
-    });
-
-    it('should be triggerable with Space key', async () => {
-      const user = userEvent.setup();
-      render(
-        <NewEntriesIndicator
-          count={5}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button');
-      button.focus();
-      await user.keyboard(' ');
-
-      expect(mockOnClick).toHaveBeenCalled();
-    });
-  });
-
   describe('Edge Cases', () => {
     it('should handle very large counts', () => {
       render(

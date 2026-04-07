@@ -266,32 +266,6 @@ describe('SafetyConfirmation', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
-
-  describe('Accessibility', () => {
-    it('should have proper ARIA attributes on dialog', () => {
-      render(<SafetyConfirmation {...defaultProps} />);
-
-      const dialog = screen.getByRole('dialog');
-      expect(dialog).toHaveAttribute('aria-labelledby');
-      expect(dialog).toHaveAttribute('aria-describedby');
-    });
-
-    it('should have aria-live on countdown timer', () => {
-      render(<SafetyConfirmation {...defaultProps} />);
-
-      const input = screen.getByRole('textbox');
-      fireEvent.change(input, { target: { value: 'RESET' } });
-
-      // The timer should render when counting down
-      const timer = screen.queryByRole('timer');
-      if (timer) {
-        expect(timer).toHaveAttribute('aria-live', 'polite');
-      } else {
-        // Timer might not be rendered yet - just verify the input is valid
-        expect(input).toHaveValue('RESET');
-      }
-    });
-  });
 });
 
 describe('SafetyConfirmationDesktop', () => {

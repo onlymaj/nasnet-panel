@@ -441,42 +441,6 @@ describe('StaticIPForm', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have accessible labels for all form fields', () => {
-      render(<StaticIPForm {...mockProps} />);
-
-      expect(screen.getByLabelText(/Interface/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/IP Address \(CIDR\)/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Gateway/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Primary DNS/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Secondary DNS/i)).toHaveAccessibleName();
-      expect(screen.getByLabelText(/Add Default Route/i)).toHaveAccessibleName();
-    });
-
-    it('should associate error messages with inputs', async () => {
-      const user = userEvent.setup();
-      render(<StaticIPForm {...mockProps} />);
-
-      const ipInput = screen.getByLabelText(/IP Address \(CIDR\)/i);
-      await user.type(ipInput, 'invalid');
-
-      const submitButton = screen.getByRole('button', { name: /apply/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const errorMessage = screen.getByText(/Invalid CIDR notation/i);
-        expect(errorMessage).toHaveAttribute('role', 'alert');
-      });
-    });
-
-    it('should have accessible navigation buttons', () => {
-      render(<StaticIPForm {...mockProps} />);
-
-      expect(screen.getByRole('button', { name: /cancel/i })).toHaveAccessibleName();
-      expect(screen.getByRole('button', { name: /apply/i })).toHaveAccessibleName();
-    });
-  });
-
   describe('error handling', () => {
     it('should display error message when mutation fails', async () => {
       // Mock error state

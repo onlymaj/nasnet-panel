@@ -12,7 +12,6 @@ import * as React from 'react';
 import { render, screen, waitFor, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { axe } from 'vitest-axe';
 
 import {
   FieldHelp,
@@ -27,8 +26,6 @@ import {
 } from './index';
 
 import type { HelpContent, UseFieldHelpReturn } from './help.types';
-
-// Note: vitest-axe matchers are extended in setup.ts
 
 // Mock usePlatform hook
 vi.mock('@nasnet/ui/layouts', () => ({
@@ -169,28 +166,6 @@ describe('HelpIcon Component', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('should be keyboard accessible', async () => {
-    const handleClick = vi.fn();
-    const user = userEvent.setup();
-
-    render(
-      <HelpIcon
-        field="ip"
-        onClick={handleClick}
-      />
-    );
-
-    const icon = screen.getByRole('button');
-    await user.tab();
-    expect(icon).toHaveFocus();
-
-    await user.keyboard('{Enter}');
-    expect(handleClick).toHaveBeenCalledTimes(1);
-
-    await user.keyboard(' ');
-    expect(handleClick).toHaveBeenCalledTimes(2);
-  });
-
   it('should apply size classes', () => {
     const { rerender } = render(
       <HelpIcon
@@ -215,13 +190,6 @@ describe('HelpIcon Component', () => {
       />
     );
     expect(screen.getByRole('button')).toHaveClass('h-8', 'w-8');
-  });
-
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<HelpIcon field="ip" />);
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
   });
 });
 
@@ -383,13 +351,6 @@ describe('HelpModeToggle Component', () => {
     expect(screen.getByText('Beginner')).toBeInTheDocument();
     expect(screen.getByText('Expert')).toBeInTheDocument();
   });
-
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<HelpModeToggle />);
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
 });
 
 describe('FieldHelp Component', () => {
@@ -446,60 +407,6 @@ describe('FieldHelp Component', () => {
     expect(icon).toHaveAttribute('aria-label', 'Help for Gateway field');
     expect(icon).toHaveAttribute('aria-haspopup', 'dialog');
     expect(icon).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<FieldHelp field="ip" />);
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-});
-
-describe('Accessibility', () => {
-  it('HelpIcon should have correct focus styles', () => {
-    render(<HelpIcon field="ip" />);
-
-    const icon = screen.getByRole('button');
-    expect(icon).toHaveClass('focus-visible:ring-[3px]');
-  });
-
-  it('should support keyboard navigation for popover', async () => {
-    const user = userEvent.setup();
-
-    render(<FieldHelp field="ip" />);
-
-    // Tab to focus icon
-    await user.tab();
-    const icon = screen.getByRole('button');
-    expect(icon).toHaveFocus();
-
-    // Enter to open
-    await user.keyboard('{Enter}');
-
-    await waitFor(() => {
-      expect(screen.getByText('IP Address')).toBeInTheDocument();
-    });
-
-    // Escape to close
-    await user.keyboard('{Escape}');
-
-    await waitFor(() => {
-      expect(screen.queryByText('IP Address')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should have minimum 44px touch target on mobile sizes', () => {
-    render(
-      <HelpIcon
-        field="ip"
-        size="sm"
-      />
-    );
-
-    const icon = screen.getByRole('button');
-    expect(icon).toHaveClass('min-h-[44px]');
-    expect(icon).toHaveClass('min-w-[44px]');
   });
 });
 

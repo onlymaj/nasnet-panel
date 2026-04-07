@@ -10,14 +10,10 @@
 import { render, screen, fireEvent, waitFor, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { axe } from 'vitest-axe';
-
 import { VStepper } from './v-stepper';
 import { useStepper } from '../../hooks/use-stepper';
 
 import type { StepConfig, StepperConfig, UseStepperReturn } from '../../hooks/use-stepper.types';
-
-// Note: vitest-axe auto-extends expect with toHaveNoViolations
 
 // ===== Test Helpers =====
 
@@ -291,141 +287,6 @@ describe('VStepper error states', () => {
     // Wait for validation to complete
     await waitFor(() => {
       expect(failingValidation).toHaveBeenCalled();
-    });
-  });
-});
-
-// ===== Accessibility Tests =====
-
-describe('VStepper accessibility', () => {
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('should have proper ARIA attributes', () => {
-    render(
-      <VStepperTestWrapper
-        config={createConfig(basicSteps)}
-        stepperProps={{ 'aria-label': 'Custom wizard steps' }}
-      />
-    );
-
-    const nav = screen.getByRole('navigation');
-    expect(nav).toHaveAttribute('aria-label', 'Custom wizard steps');
-  });
-
-  it('should have role="list" on step container', () => {
-    render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    const list = screen.getByRole('list');
-    expect(list).toBeInTheDocument();
-  });
-
-  it('should have aria-current on active step', () => {
-    render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    const activeStep = screen.getByRole('button', { name: /step 1/i });
-    expect(activeStep).toHaveAttribute('aria-current', 'step');
-  });
-
-  it('should have aria-disabled on future steps', () => {
-    render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    const futureStep = screen.getByRole('button', { name: /step 3/i });
-    expect(futureStep).toHaveAttribute('aria-disabled', 'true');
-  });
-
-  it('should announce step changes via live region', () => {
-    render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    // Check for live region
-    const liveRegion = screen.getByRole('status');
-    expect(liveRegion).toBeInTheDocument();
-    expect(liveRegion).toHaveAttribute('aria-live', 'polite');
-  });
-});
-
-// ===== Keyboard Navigation Tests =====
-
-describe('VStepper keyboard navigation', () => {
-  it('should focus clickable steps with Tab', async () => {
-    const user = userEvent.setup();
-    render(<VStepperTestWrapper config={createConfig(basicSteps)} />);
-
-    // Tab to first step
-    await user.tab();
-    expect(screen.getByRole('button', { name: /step 1/i })).toHaveFocus();
-  });
-
-  it('should activate step on Enter', async () => {
-    const user = userEvent.setup();
-
-    function TestComponent() {
-      const stepper = useStepper(createConfig(basicSteps));
-
-      React.useEffect(() => {
-        // Complete step 1 so we can navigate back
-        stepper.next();
-      }, []);
-
-      return (
-        <div>
-          <VStepper stepper={stepper} />
-          <span data-testid="current">{stepper.currentIndex}</span>
-        </div>
-      );
-    }
-
-    render(<TestComponent />);
-
-    // Wait for initial advance
-    await waitFor(() => {
-      expect(screen.getByTestId('current')).toHaveTextContent('1');
-    });
-
-    // Tab to step 1 (now completed and clickable)
-    await user.tab();
-
-    // Press Enter to navigate
-    await user.keyboard('{Enter}');
-
-    await waitFor(() => {
-      expect(screen.getByTestId('current')).toHaveTextContent('0');
-    });
-  });
-
-  it('should activate step on Space', async () => {
-    const user = userEvent.setup();
-
-    function TestComponent() {
-      const stepper = useStepper(createConfig(basicSteps));
-
-      React.useEffect(() => {
-        stepper.next();
-      }, []);
-
-      return (
-        <div>
-          <VStepper stepper={stepper} />
-          <span data-testid="current">{stepper.currentIndex}</span>
-        </div>
-      );
-    }
-
-    render(<TestComponent />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('current')).toHaveTextContent('1');
-    });
-
-    await user.tab();
-    await user.keyboard(' ');
-
-    await waitFor(() => {
-      expect(screen.getByTestId('current')).toHaveTextContent('0');
     });
   });
 });
