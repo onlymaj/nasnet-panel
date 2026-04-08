@@ -10,7 +10,7 @@ export { ResourceGauges } from './ResourceGauges';
 export type { ResourceGaugesProps } from './ResourceGauges';
 
 // Hooks
-export { useResourceMetrics, formatBytes } from './useResourceMetrics';
+export { useResourceMetrics } from './useResourceMetrics';
 export type { ResourceMetrics, FormattedResourceMetrics } from './useResourceMetrics';
 
 // Reusable components

@@ -13,7 +13,7 @@ import { useInterfaces, useARPTable, useIPAddresses, useDHCPServers, useDHCPLeas
 import { useConnectionStore } from '@nasnet/state/stores';
 import { ConnectedDevicesCard } from './components/ConnectedDevicesCard';
 import { DHCPPoolSummary } from './components/DHCPPoolSummary';
-import { ErrorDisplay } from './components/ErrorDisplay';
+import { ErrorCard } from '@nasnet/ui/patterns';
 import { InterfaceGridCard } from './components/InterfaceGridCard';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { QuickIPOverview } from './components/QuickIPOverview';
@@ -67,7 +67,7 @@ export const NetworkDashboard = React.memo(function NetworkDashboard() {
   // Show error state
   if (interfacesError) {
     return <div className="bg-background min-h-screen p-4" role="alert">
-        <ErrorDisplay error={interfacesError} />
+        <ErrorCard title="Failed to load data" description={interfacesError.message} variant="default" />
       </div>;
   }
   return <div className="bg-background animate-fade-in-up min-h-screen">

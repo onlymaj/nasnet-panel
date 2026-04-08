@@ -7,7 +7,7 @@
 export { ServiceCard } from './ServiceCard';
 export { ServiceCardMobile } from './ServiceCardMobile';
 export { ServiceCardDesktop } from './ServiceCardDesktop';
-export { useServiceCard, formatBytes } from './useServiceCard';
+export { useServiceCard, formatBandwidth } from './useServiceCard';
 export type {
   Service,
   ServiceStatus,

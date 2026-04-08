@@ -6,6 +6,7 @@
  * @see BandwidthChart component
  */
 
+import { formatBytes as sharedFormatBytes } from '@nasnet/core/utils';
 import type { TimeRange, BandwidthDataPoint } from './types';
 import { GraphQLTimeRange, GraphQLAggregationType } from './types';
 
@@ -89,24 +90,9 @@ export function formatBitrate(bps: number): string {
 
 /**
  * Format bytes for display (for tooltip totals and data usage)
- * Uses binary units (KB, MB, GB, TB) with appropriate precision
- *
- * @function formatBytes
- * @param {number} bytes - Byte count
- * @returns {string} Formatted string with appropriate unit (TB, GB, MB, KB, B)
- *
- * @example
- * formatBytes(1048576)     // "1.0 MB"
- * formatBytes(2147483648) // "2.00 GB"
- * formatBytes(512)        // "512 B"
+ * Re-exports shared formatBytes from @nasnet/core/utils (base-1024)
  */
-export function formatBytes(bytes: number): string {
-  if (bytes >= 1_000_000_000_000) return `${(bytes / 1_000_000_000_000).toFixed(2)} TB`;
-  if (bytes >= 1_000_000_000) return `${(bytes / 1_000_000_000).toFixed(2)} GB`;
-  if (bytes >= 1_000_000) return `${(bytes / 1_000_000).toFixed(1)} MB`;
-  if (bytes >= 1_000) return `${(bytes / 1_000).toFixed(1)} KB`;
-  return `${bytes} B`;
-}
+export const formatBytes = sharedFormatBytes;
 
 /**
  * Format X-axis timestamp based on time range

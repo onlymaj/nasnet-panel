@@ -9,6 +9,7 @@ import * as React from 'react';
 
 import { Filter, Network } from 'lucide-react';
 
+import { formatBytes } from '@nasnet/core/utils';
 import { Button, Card, cn } from '@nasnet/ui/primitives';
 
 import { EmptyState } from '../empty-state';
@@ -34,19 +35,6 @@ export interface ConnectionListMobileProps {
 
   /** Container className */
   className?: string;
-}
-
-/**
- * Format bytes to human-readable format
- */
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
 }
 
 /**

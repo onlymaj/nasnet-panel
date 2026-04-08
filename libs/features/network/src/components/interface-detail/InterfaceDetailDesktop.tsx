@@ -14,6 +14,7 @@ import {
   Skeleton,
 } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytes } from '@nasnet/core/utils';
 import { InterfaceEditForm } from '../interface-edit';
 
 export interface InterfaceDetailDesktopProps {
@@ -259,13 +260,6 @@ const InterfaceTrafficSection = memo(function InterfaceTrafficSection({
 }: {
   interface: any;
 }) {
-  const formatBytes = useCallback((bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const BYTE_UNIT = 1024;
-    const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const unitIndex = Math.floor(Math.log(bytes) / Math.log(BYTE_UNIT));
-    return `${(bytes / Math.pow(BYTE_UNIT, unitIndex)).toFixed(2)} ${BYTE_UNITS[unitIndex]}`;
-  }, []);
 
   const formatRate = useCallback(
     (bytesPerSec: number) => {

@@ -9,6 +9,8 @@
 
 import { useMemo, useCallback } from 'react';
 
+import { formatBandwidth } from '@nasnet/core/utils';
+
 import type { ServiceCardProps, ServiceAction, ServiceStatus } from './types';
 
 /**
@@ -129,17 +131,6 @@ function getCategoryColor(category: string): string {
 }
 
 /**
- * Format bytes to human-readable string
- */
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B/s';
-  const k = 1024;
-  const sizes = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-}
-
-/**
  * Headless hook for ServiceCard pattern
  *
  * Contains all business logic, state management, and computed values.
@@ -246,6 +237,6 @@ export function useServiceCard(props: ServiceCardProps): UseServiceCardReturn {
 }
 
 /**
- * Export helper for formatting bytes
+ * Export helper for formatting bandwidth
  */
-export { formatBytes };
+export { formatBandwidth };

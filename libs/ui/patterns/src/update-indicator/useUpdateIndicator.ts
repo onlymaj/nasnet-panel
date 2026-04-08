@@ -16,6 +16,7 @@
 import { useMemo, useCallback } from 'react';
 
 import type { UpdateSeverity, UpdateStage } from '@nasnet/api-client/queries';
+import { formatBytes } from '@nasnet/core/utils';
 
 import type { UpdateIndicatorProps, SeverityConfig, StageConfig } from './types';
 
@@ -180,15 +181,6 @@ export interface UseUpdateIndicatorReturn {
  */
 function formatVersion(version: string): string {
   return version.startsWith('v') ? version : `v${version}`;
-}
-
-/**
- * Format byte size to human-readable string
- */
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /**

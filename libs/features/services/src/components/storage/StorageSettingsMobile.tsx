@@ -39,6 +39,7 @@ import {
   Separator,
 } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytesFromString } from '@nasnet/core/utils';
 
 import { useStorageSettings } from './useStorageSettings';
 import { StorageUsageBar } from './StorageUsageBar';
@@ -52,24 +53,6 @@ export interface StorageSettingsMobileProps {
   className?: string;
 }
 
-/**
- * Format bytes to human-readable string using BigInt for large values
- * @param {string} bytes - Bytes value as serialized uint64 string
- * @returns {string} Formatted value with unit (B, KB, MB, GB, TB)
- */
-function formatBytes(bytes: string): string {
-  const num = BigInt(bytes);
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let value = Number(num);
-  let unitIndex = 0;
-
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex++;
-  }
-
-  return `${value.toFixed(1)} ${units[unitIndex]}`;
-}
 
 /**
  * StorageSettingsMobile component
@@ -224,7 +207,7 @@ export const StorageSettingsMobile = React.memo(function StorageSettingsMobile({
                       value={mount.path}
                     >
                       <span className="font-mono">{mount.path}</span> -{' '}
-                      {formatBytes(mount.availableBytes)} free
+                      {formatBytesFromString(mount.availableBytes)} free
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -302,15 +285,15 @@ export const StorageSettingsMobile = React.memo(function StorageSettingsMobile({
                         variant="secondary"
                         className="font-mono"
                       >
-                        {formatBytes(feature.totalSize)}
+                        {formatBytesFromString(feature.totalSize)}
                       </Badge>
                     </div>
                     {/* Storage Breakdown: Technical data in monospace */}
                     <div className="gap-component-sm text-muted-foreground grid grid-cols-2 font-mono text-xs">
-                      <div>Binary: {formatBytes(feature.binarySize)}</div>
-                      <div>Data: {formatBytes(feature.dataSize)}</div>
-                      <div>Config: {formatBytes(feature.configSize)}</div>
-                      <div>Logs: {formatBytes(feature.logsSize)}</div>
+                      <div>Binary: {formatBytesFromString(feature.binarySize)}</div>
+                      <div>Data: {formatBytesFromString(feature.dataSize)}</div>
+                      <div>Config: {formatBytesFromString(feature.configSize)}</div>
+                      <div>Logs: {formatBytesFromString(feature.logsSize)}</div>
                     </div>
                     <Separator />
                   </div>
@@ -369,8 +352,8 @@ export const StorageSettingsMobile = React.memo(function StorageSettingsMobile({
                     </Badge>
                   </div>
                   <div className="gap-component-sm text-muted-foreground grid grid-cols-2 font-mono text-xs">
-                    <div>Total: {formatBytes(mount.totalBytes)}</div>
-                    <div>Free: {formatBytes(mount.availableBytes)}</div>
+                    <div>Total: {formatBytesFromString(mount.totalBytes)}</div>
+                    <div>Free: {formatBytesFromString(mount.availableBytes)}</div>
                     <div>Type: {mount.filesystem}</div>
                     <div>Usage: {mount.usagePercent.toFixed(1)}%</div>
                   </div>

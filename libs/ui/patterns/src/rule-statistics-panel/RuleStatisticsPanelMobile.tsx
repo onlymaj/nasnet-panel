@@ -8,6 +8,7 @@ import { useState, useMemo, memo } from 'react';
 
 import { Download, X } from 'lucide-react';
 
+import { formatBytes } from '@nasnet/core/utils';
 import {
   Sheet,
   SheetContent,
@@ -36,19 +37,6 @@ function filterByTimeRange(data: CounterHistoryEntry[], range: TimeRange): Count
   };
 
   return data.filter((entry) => entry.timestamp >= cutoffs[range]);
-}
-
-/**
- * Format bytes with SI units
- */
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${units[i]}`;
 }
 
 /**

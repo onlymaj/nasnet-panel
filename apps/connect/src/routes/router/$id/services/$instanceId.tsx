@@ -7,9 +7,11 @@
  * Route: /router/:id/services/:instanceId
  */
 
+import { lazy, Suspense } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { Skeleton } from '@nasnet/ui/primitives';
 
-import { ServiceDetailPage } from '@nasnet/features/services';
+const ServiceDetailPage = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.ServiceDetailPage })));
 
 export const Route = createFileRoute('/router/$id/services/$instanceId')({
   component: ServiceDetailRoute,
@@ -19,9 +21,11 @@ export function ServiceDetailRoute() {
   const { id: routerId, instanceId } = Route.useParams();
 
   return (
-    <ServiceDetailPage
-      routerId={routerId}
-      instanceId={instanceId}
-    />
+    <Suspense fallback={<div className="p-4"><Skeleton className="h-96 w-full" /></div>}>
+      <ServiceDetailPage
+        routerId={routerId}
+        instanceId={instanceId}
+      />
+    </Suspense>
   );
 }

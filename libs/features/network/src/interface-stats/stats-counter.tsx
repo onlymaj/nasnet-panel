@@ -12,45 +12,10 @@
 
 import { memo, useEffect, useState, useCallback } from 'react';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytesBigInt } from '@nasnet/core/utils';
 
 import type { StatsCounterProps } from './interface-stats-panel.types';
 
-/** Kilobytes constant for binary calculations */
-const K_BYTES_BINARY = 1024n;
-
-/** Size units for binary formatting (B, KB, MB, GB, TB, PB) */
-const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-
-/**
- * Formats bytes as BigInt to human-readable size string
- * Extended version of formatBytes that handles BigInt values
- *
- * @param bytes - Size in bytes as BigInt
- * @param decimals - Number of decimal places (default: 2)
- * @returns Formatted size string (e.g., "1.23 GB")
- */
-function formatBytesBigInt(bytes: bigint, decimals = 2): string {
-  if (bytes === 0n) return '0 B';
-
-  // Find appropriate unit
-  let value = bytes;
-  let unitIndex = 0;
-
-  while (value >= K_BYTES_BINARY && unitIndex < BYTE_UNITS.length - 1) {
-    value = value / K_BYTES_BINARY;
-    unitIndex++;
-  }
-
-  // Convert to number for decimal formatting using remainder for precision
-  const divisor = K_BYTES_BINARY ** BigInt(unitIndex);
-  const integerPart = bytes / divisor;
-  const remainder = bytes % divisor;
-
-  // Calculate decimal value
-  const decimalValue = Number(integerPart) + Number(remainder) / Number(divisor);
-
-  return `${decimalValue.toFixed(decimals)} ${BYTE_UNITS[unitIndex]}`;
-}
 
 /**
  * Formats a large number with thousand separators

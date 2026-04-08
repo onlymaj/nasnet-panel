@@ -163,6 +163,58 @@ export const formatBytes = (bytes: number, decimals = 2): string => {
 };
 
 /**
+ * Formats BigInt bytes to a human-readable size string
+ *
+ * @param bytes - Size in bytes as BigInt
+ * @param decimals - Number of decimal places (default: 2)
+ * @returns Formatted size string (e.g., "1.23 MB")
+ * @example
+ * formatBytesBigInt(1048576n) // "1.00 MB"
+ * formatBytesBigInt(0n) // "0 B"
+ */
+export const formatBytesBigInt = (bytes: bigint, decimals = 2): string => {
+  if (bytes === 0n) return '0 B';
+
+  const k = 1024n;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const dm = decimals < 0 ? 0 : decimals;
+
+  let i = 0;
+  let value = bytes;
+  while (value >= k && i < sizes.length - 1) {
+    value = value / k;
+    i++;
+  }
+
+  // Recalculate with precision using Number for the final division
+  const divisor = BigInt(1024) ** BigInt(i);
+  const result = Number(bytes) / Number(divisor);
+
+  return result.toFixed(dm) + ' ' + sizes[i];
+};
+
+/**
+ * Formats a string-encoded byte value to a human-readable size string
+ *
+ * Useful when byte values come as strings from APIs (e.g., storage sizes).
+ *
+ * @param bytes - Size in bytes as a string
+ * @param decimals - Number of decimal places (default: 1)
+ * @returns Formatted size string (e.g., "1.5 GB")
+ * @example
+ * formatBytesFromString("1073741824") // "1.0 GB"
+ * formatBytesFromString("invalid") // "0 B"
+ */
+export const formatBytesFromString = (bytes: string, decimals = 1): string => {
+  try {
+    const value = BigInt(bytes);
+    return formatBytesBigInt(value, decimals);
+  } catch {
+    return '0 B';
+  }
+};
+
+/**
  * Formats a percentage value
  *
  * @param value - Value between 0 and 100

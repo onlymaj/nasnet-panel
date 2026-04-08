@@ -9,6 +9,8 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 
+import { formatBytes } from '@nasnet/core/utils';
+
 /**
  * Counter data interface
  */
@@ -73,36 +75,6 @@ export interface RuleCounterVisualizationState {
  */
 export function formatPackets(packets: number): string {
   return packets.toLocaleString('en-US');
-}
-
-/**
- * Format bytes with SI units (KB, MB, GB, TB)
- *
- * Uses 1000-based units (not 1024) for consistency with networking standards.
- *
- * @param bytes - Number of bytes
- * @returns Formatted string (e.g., "1.2 MB")
- *
- * @example
- * ```ts
- * formatBytes(1234); // "1.23 KB"
- * formatBytes(1234567); // "1.23 MB"
- * formatBytes(1234567890); // "1.23 GB"
- * formatBytes(0); // "0 B"
- * ```
- */
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const k = 1000; // Use 1000 for SI units (networking standard)
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const value = bytes / Math.pow(k, i);
-
-  // Show 2 decimal places for values >= 10, 3 for smaller values
-  const decimals = value >= 10 ? 2 : 3;
-
-  return `${value.toFixed(decimals)} ${units[i]}`;
 }
 
 /**

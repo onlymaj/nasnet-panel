@@ -10,9 +10,10 @@ import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, TrendingUp } from 'lucide-react';
 
+import { formatBytes } from '@nasnet/core/utils';
 import { Progress, Badge, cn, useReducedMotion } from '@nasnet/ui/primitives';
 
-import { formatPackets, formatBytes } from './use-rule-counter-visualization';
+import { formatPackets } from './use-rule-counter-visualization';
 
 import type { CounterCellProps } from './CounterCell';
 

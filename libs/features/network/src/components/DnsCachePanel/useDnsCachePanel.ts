@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { formatBytes } from '@nasnet/core/utils';
 import { useDnsCacheStats, useFlushDnsCache } from '@nasnet/api-client/queries';
 import type { DnsCacheStats, FlushDnsCacheResult } from './types';
 
@@ -102,27 +103,15 @@ export function useDnsCachePanel({
     }
   }, [deviceId, flushCacheMutation, onFlushSuccess, onFlushError, refetch]);
 
-  /**
-   * Format bytes to human-readable format (B, KB, MB, GB)
-   * Memoized for performance across re-renders
-   */
-  const formatBytes = useCallback((bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const BYTE_UNIT = 1024;
-    const UNITS = ['B', 'KB', 'MB', 'GB'];
-    const exponent = Math.floor(Math.log(bytes) / Math.log(BYTE_UNIT));
-    return `${Math.round((bytes / Math.pow(BYTE_UNIT, exponent)) * 100) / 100} ${UNITS[exponent]}`;
-  }, []);
-
   // Memoize computed values
   const cacheUsedFormatted = useMemo(
     () => (cacheStats ? formatBytes(cacheStats.cacheUsedBytes) : 'N/A'),
-    [cacheStats, formatBytes]
+    [cacheStats]
   );
 
   const cacheMaxFormatted = useMemo(
     () => (cacheStats ? formatBytes(cacheStats.cacheMaxBytes) : 'N/A'),
-    [cacheStats, formatBytes]
+    [cacheStats]
   );
 
   const hitRateFormatted = useMemo(

@@ -45,6 +45,7 @@ import {
   Tooltip,
 } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytesFromString } from '@nasnet/core/utils';
 
 import { useStorageSettings } from './useStorageSettings';
 import { StorageUsageBar } from './StorageUsageBar';
@@ -58,24 +59,6 @@ export interface StorageSettingsDesktopProps {
   className?: string;
 }
 
-/**
- * Format bytes to human-readable string using BigInt for large values
- * @param {string} bytes - Bytes value as serialized uint64 string
- * @returns {string} Formatted value with unit (B, KB, MB, GB, TB)
- */
-function formatBytes(bytes: string): string {
-  const num = BigInt(bytes);
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let value = Number(num);
-  let unitIndex = 0;
-
-  while (value >= 1024 && unitIndex < units.length - 1) {
-    value /= 1024;
-    unitIndex++;
-  }
-
-  return `${value.toFixed(2)} ${units[unitIndex]}`;
-}
 
 /**
  * StorageSettingsDesktop component
@@ -239,7 +222,7 @@ export const StorageSettingsDesktop = React.memo(function StorageSettingsDesktop
                         value={mount.path}
                       >
                         <span className="font-mono">{mount.path}</span> -{' '}
-                        {formatBytes(mount.availableBytes)} free ({mount.filesystem})
+                        {formatBytesFromString(mount.availableBytes)} free ({mount.filesystem})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -303,12 +286,12 @@ export const StorageSettingsDesktop = React.memo(function StorageSettingsDesktop
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Capacity:</span>
                   <span className="font-mono font-medium">
-                    {formatBytes(usage.totalCapacityBytes)}
+                    {formatBytesFromString(usage.totalCapacityBytes)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total Used:</span>
-                  <span className="font-mono font-medium">{formatBytes(usage.totalUsedBytes)}</span>
+                  <span className="font-mono font-medium">{formatBytesFromString(usage.totalUsedBytes)}</span>
                 </div>
               </div>
             )}
@@ -365,19 +348,19 @@ export const StorageSettingsDesktop = React.memo(function StorageSettingsDesktop
                         <TableCell className="font-medium">{feature.featureName}</TableCell>
                         <TableCell className="text-right">{feature.instanceCount}</TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatBytes(feature.binarySize)}
+                          {formatBytesFromString(feature.binarySize)}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatBytes(feature.dataSize)}
+                          {formatBytesFromString(feature.dataSize)}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatBytes(feature.configSize)}
+                          {formatBytesFromString(feature.configSize)}
                         </TableCell>
                         <TableCell className="text-right font-mono">
-                          {formatBytes(feature.logsSize)}
+                          {formatBytesFromString(feature.logsSize)}
                         </TableCell>
                         <TableCell className="text-right font-mono font-medium">
-                          {formatBytes(feature.totalSize)}
+                          {formatBytesFromString(feature.totalSize)}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">{feature.location}</Badge>
@@ -445,13 +428,13 @@ export const StorageSettingsDesktop = React.memo(function StorageSettingsDesktop
                         <Badge variant="outline">{mount.locationType}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatBytes(mount.totalBytes)}
+                        {formatBytesFromString(mount.totalBytes)}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatBytes(mount.usedBytes)}
+                        {formatBytesFromString(mount.usedBytes)}
                       </TableCell>
                       <TableCell className="text-right font-mono">
-                        {formatBytes(mount.availableBytes)}
+                        {formatBytesFromString(mount.availableBytes)}
                       </TableCell>
                       <TableCell className="text-right font-mono">
                         {mount.usagePercent.toFixed(1)}%

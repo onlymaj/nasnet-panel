@@ -27,6 +27,7 @@ import {
   Badge,
 } from '@nasnet/ui/primitives';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytesBigInt } from '@nasnet/core/utils';
 import { useServiceTrafficPanel } from './use-service-traffic-panel';
 import type { ServiceTrafficPanelProps } from './service-traffic-panel.types';
 
@@ -63,30 +64,6 @@ function formatBitsPerSecBigInt(bytesPerSec: bigint): string {
   return `${decimalValue.toFixed(2)} ${sizes[unitIndex]}`;
 }
 
-/**
- * Formats bytes as BigInt to human-readable size string
- */
-function formatBytesBigInt(bytes: bigint, decimals = 2): string {
-  if (bytes === 0n) return '0 B';
-
-  const k = 1024n;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
-
-  let value = bytes;
-  let unitIndex = 0;
-
-  while (value >= k && unitIndex < sizes.length - 1) {
-    value = value / k;
-    unitIndex++;
-  }
-
-  const divisor = k ** BigInt(unitIndex);
-  const integerPart = bytes / divisor;
-  const remainder = bytes % divisor;
-  const decimalValue = Number(integerPart) + Number(remainder) / Number(divisor);
-
-  return `${decimalValue.toFixed(decimals)} ${sizes[unitIndex]}`;
-}
 
 /**
  * StatsCounter component for displaying traffic counters
