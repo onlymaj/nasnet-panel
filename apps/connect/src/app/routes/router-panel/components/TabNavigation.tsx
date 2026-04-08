@@ -165,35 +165,43 @@ export const TabNavigation = React.memo(function TabNavigation() {
       preload();
     }
   }, []);
-  return <>
-      {/* Desktop Navigation - Top Tabs */}
-      <nav className="border-border hidden border-b bg-transparent md:block" role="navigation" aria-label="Router panel sections">
-        <div className="mx-auto flex max-w-7xl items-center gap-1">
-          {tabs.map(tab => {
+  return (
+    <nav
+      className="border-border sticky top-0 z-30 border-b bg-white dark:bg-[#0a0a0a]"
+      role="navigation"
+      aria-label="Router panel sections"
+    >
+      <div className="mx-auto flex max-w-7xl items-center gap-0.5 overflow-x-auto px-2 md:px-4">
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.value;
-          return <button key={tab.value} onClick={() => handleTabClick(tab.value)} onKeyDown={e => handleKeyDown(e, tab.value)} onMouseEnter={() => handleMouseEnter(tab.preload)} onFocus={() => handleMouseEnter(tab.preload)} role="tab" aria-selected={isActive} aria-label={tab.ariaLabel} className={cn('flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all duration-200', 'focus-visible:ring-ring border-b-2 border-transparent focus-visible:ring-2 focus-visible:ring-offset-2', 'hover:text-secondary', isActive ? 'border-secondary text-secondary font-semibold' : 'text-muted-foreground')}>
-                <Icon className="h-4 w-4" aria-hidden="true" />
-                <span>{tab.label}</span>
-              </button>;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => handleTabClick(tab.value)}
+              onKeyDown={(e) => handleKeyDown(e, tab.value)}
+              onMouseEnter={() => handleMouseEnter(tab.preload)}
+              onFocus={() => handleMouseEnter(tab.preload)}
+              role="tab"
+              aria-selected={isActive}
+              aria-label={tab.ariaLabel}
+              className={cn(
+                'flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-4 text-sm font-medium transition-all duration-200 md:px-4',
+                'focus-visible:ring-ring border-b-2 border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                'hover:bg-muted hover:text-foreground rounded-t-md',
+                isActive
+                  ? 'border-primary text-primary font-semibold'
+                  : 'text-muted-foreground',
+              )}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.mobileLabel || tab.label}</span>
+            </button>
+          );
         })}
-        </div>
-      </nav>
-
-      {/* Mobile Navigation - Bottom Bar */}
-      <nav className="bg-muted border-border safe-bottom fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg md:hidden" role="navigation" aria-label="Router panel sections">
-        <div className="grid h-16 grid-cols-10">
-          {tabs.map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.value;
-          const displayLabel = tab.mobileLabel || tab.label;
-          return <button key={tab.value} onClick={() => handleTabClick(tab.value)} onKeyDown={e => handleKeyDown(e, tab.value)} onTouchStart={() => handleMouseEnter(tab.preload)} role="tab" aria-selected={isActive} aria-label={tab.ariaLabel} className={cn('flex flex-col items-center justify-center gap-1 transition-all duration-200', 'focus-visible:ring-ring min-h-[44px] focus-visible:ring-2 focus-visible:ring-offset-2', 'active:scale-95', isActive ? 'text-secondary font-semibold' : 'text-muted-foreground')}>
-                <Icon className={cn('h-5 w-5 transition-transform', isActive && 'scale-110')} aria-hidden="true" />
-                <span className="text-[10px] font-medium leading-none">{displayLabel}</span>
-              </button>;
-        })}
-        </div>
-      </nav>
-    </>;
+      </div>
+    </nav>
+  );
 });
 TabNavigation.displayName = 'TabNavigation';
