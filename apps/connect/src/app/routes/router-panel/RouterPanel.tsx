@@ -178,21 +178,15 @@ export const RouterPanel = React.memo(function RouterPanel({
   }, [navigate]);
 
   return (
-    <div className="animate-fade-in-up flex h-full flex-col">
-      {/* Router Header with status and info */}
-      <div className="brand-gradient-subtle px-4 pt-4 md:px-6 md:pt-6">
-        <div className="mx-auto max-w-7xl">
-          <RouterHeader routerId={id || ''} />
-        </div>
-      </div>
+    <div className="animate-fade-in-up -mx-page-mobile md:-mx-page-tablet lg:-mx-page-desktop -mt-6 flex h-full flex-col">
+      {/* Line 1: Router Header bar */}
+      <RouterHeader routerId={id || ''} />
 
-      {/* Tab Navigation (adaptive: top on desktop, bottom on mobile) */}
-      <div className="px-4 md:px-6">
-        <TabNavigation />
-      </div>
+      {/* Line 2: Tab Navigation */}
+      <TabNavigation />
 
-      {/* Tab content area - with bottom padding on mobile for bottom nav */}
-      <div className="flex-1 overflow-auto pb-20 md:pb-0">{children}</div>
+      {/* Line 3: Page content */}
+      <div className="flex-1 overflow-auto">{children}</div>
 
       {/* Credential Dialog - shows when no saved credentials exist */}
       <CredentialDialog
