@@ -2,11 +2,11 @@ import { cpSync, rmSync, mkdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 const root = resolve(process.cwd(), '.');
-const src = resolve(root, 'dist', 'apps', 'connectpoc');
-const dst = resolve(root, 'apps', 'backend', 'dist');
+const src = resolve(root, 'dist', 'apps', 'connect');
+const dst = resolve(root, 'apps', 'backend', 'cmd', 'nnc', 'dist');
 
 if (!existsSync(src)) {
-  console.error(`[copy-frontend] Source not found: ${src}. Did you run nx run connectpoc:build?`);
+  console.error(`[copy-frontend] Source not found: ${src}. Did you run nx run connect:build?`);
   process.exit(1);
 }
 

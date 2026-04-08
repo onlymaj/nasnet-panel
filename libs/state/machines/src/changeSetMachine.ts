@@ -182,7 +182,7 @@ function sortItemsByDependency(items: ChangeSetItem[]): ChangeSetItem[] {
   const nodes = buildDependencyGraph(items);
   const result = topologicalSort(nodes);
 
-  if (!result.success) {
+  if (!result.success || result.sortedIds.length === 0) {
     // If cycle detected, return original order (validation should catch this)
     return items;
   }
@@ -318,13 +318,20 @@ export function createChangeSetMachine(config: ChangeSetMachineConfig) {
       ),
     },
     guards: {
-      hasMoreItems: ({ context }) => context.currentItemIndex < context.sortedItems.length,
-      noMoreItems: ({ context }) => context.currentItemIndex >= context.sortedItems.length,
+      hasMoreItems: ({ context }) => context.currentItemIndex < context.sortedItems.length - 1,
+      noMoreItems: ({ context }) => context.currentItemIndex >= context.sortedItems.length - 1,
       canApply: ({ context }) =>
         context.validationResult?.canApply === true && context.sortedItems.length > 0,
       hasAppliedItems: ({ context }) => context.appliedItems.length > 0,
       isCancelled: ({ context }) => context.cancelRequested,
-      hasValidationErrors: ({ context }) => (context.validationResult?.errors.length ?? 0) > 0,
+      validationFailed: ({ event }) => {
+        if (typeof event !== 'object' || event === null || !('output' in event)) {
+          return false;
+        }
+
+        const result = event.output as ChangeSetValidationResult;
+        return result.canApply === false || result.errors.length > 0;
+      },
     },
     actions: {
       loadChangeSet: assign({
@@ -547,7 +554,7 @@ export function createChangeSetMachine(config: ChangeSetMachineConfig) {
           onDone: [
             {
               target: 'idle',
-              guard: 'hasValidationErrors',
+              guard: 'validationFailed',
               actions: ['setValidationResult', 'setValidationError', 'notifyValidationComplete'],
             },
             {

@@ -1,0 +1,28 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "api-client",
+  "root": "libs/api-client",
+  "sourceRoot": "libs/api-client",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:api-client"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/api-client/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rg --files libs/api-client -g 'tsconfig.lib.json' -g 'tsconfig.spec.json' -g 'tsconfig.storybook.json' -g '.storybook/tsconfig.json' | sort | xargs -I{} -P 4 tsc --noEmit --project \"{}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rg --files libs/api-client -g 'vitest.config.ts' | sort | xargs -I{} sh -c 'dir=$(dirname \"$1\"); cd \"$dir\" && vitest run --config vitest.config.ts --passWithNoTests' _ {}"
+      }
+    }
+  }
+}

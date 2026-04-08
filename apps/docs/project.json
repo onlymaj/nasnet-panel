@@ -21,6 +21,13 @@
       },
       "outputs": ["{projectRoot}/build"]
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -e \"console.log('The docs typecheck target is intentionally disabled.')\"",
+        "cwd": "apps/docs"
+      }
+    },
     "clear": {
       "executor": "nx:run-commands",
       "options": {

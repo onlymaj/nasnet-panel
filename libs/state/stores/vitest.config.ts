@@ -1,14 +1,15 @@
 import path from 'path';
 
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [nxViteTsPaths()],
+  root: __dirname,
   resolve: {
     alias: {
-      '@nasnet/api-client/core': path.resolve(__dirname, '../../../libs/api-client/core/src'),
-      '@nasnet/api-client/queries': path.resolve(__dirname, '../../../libs/api-client/queries/src'),
+      '@nasnet/api-client/core': path.resolve(__dirname, '../../api-client/core/src'),
+      '@nasnet/api-client/queries': path.resolve(__dirname, '../../api-client/queries/src'),
+      '@nasnet/core/types': path.resolve(__dirname, '../../core/types/src'),
+      '@nasnet/core/utils': path.resolve(__dirname, '../../core/utils/src'),
       '@nasnet/state/stores': path.resolve(__dirname, './src'),
     },
   },

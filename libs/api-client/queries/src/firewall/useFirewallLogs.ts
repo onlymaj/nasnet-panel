@@ -12,7 +12,7 @@
 
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { makeRouterOSRequest } from '@nasnet/api-client/core';
-import { parseFirewallLogMessage } from '@nasnet/core-utils';
+import { parseFirewallLogMessage } from '@nasnet/core/utils';
 import type {
   FirewallLogEntry,
   ParsedFirewallLog,

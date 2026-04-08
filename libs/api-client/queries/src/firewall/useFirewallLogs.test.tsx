@@ -31,7 +31,7 @@ vi.mock('@nasnet/api-client/core', () => ({
   makeRouterOSRequest: vi.fn(),
 }));
 
-vi.mock('@nasnet/core-utils', () => ({
+vi.mock('@nasnet/core/utils', () => ({
   parseFirewallLogMessage: vi.fn((message: string) => {
     // Simple mock parser for testing
     if (message.includes('DROPPED-WAN')) {

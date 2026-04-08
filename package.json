@@ -124,7 +124,7 @@
     "eslint-plugin-storybook": "10.3.4",
     "fake-indexeddb": "^6.2.5",
     "husky": "^9.1.7",
-    "jsdom": "^29.0.1",
+    "jsdom": "^26.1.0",
     "lint-staged": "^15.5.2",
     "msw": "^2.7.4",
     "nx": "22.6.4",
@@ -151,10 +151,6 @@
   "workspaces": [
     "apps/*",
     "libs/*",
-    "shared",
-    "libs/api-client/*",
-    "libs/core/*",
-    "libs/ui/*",
     "tools/*"
   ],
   "dependencies": {

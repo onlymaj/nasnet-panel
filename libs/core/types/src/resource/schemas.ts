@@ -260,7 +260,7 @@ export const RuntimeStateSchema = z.object({
   lastUpdated: z.string().datetime(),
   lastSuccessfulOperation: z.string().datetime().nullable().optional(),
   activeConnections: z.number().int().nonnegative().nullable().optional(),
-  uptime: z.string().nullable().optional(),
+  uptime: z.union([z.string(), z.number().nonnegative()]).nullable().optional(),
 });
 
 // =============================================================================

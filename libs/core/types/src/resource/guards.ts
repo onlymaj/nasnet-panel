@@ -135,7 +135,7 @@ export function isResourceCategory(resource: Resource, category: ResourceCategor
  * const clients = resources.filter(isWireGuardClient);
  */
 export function isWireGuardClient(resource: Resource): boolean {
-  return resource.type === 'vpn.wireguard.client';
+  return resource.type === 'vpn.wireguard.client' || resource.type === 'wireguard-client';
 }
 
 /**
@@ -161,7 +161,7 @@ export function isWireGuardServer(resource: Resource): boolean {
  * const lanNetworks = resources.filter(isLANNetwork);
  */
 export function isLANNetwork(resource: Resource): boolean {
-  return resource.type === 'network.lan';
+  return resource.type === 'network.lan' || resource.type === 'lan-network';
 }
 
 /**
@@ -174,7 +174,7 @@ export function isLANNetwork(resource: Resource): boolean {
  * const wanLinks = resources.filter(isWANLink);
  */
 export function isWANLink(resource: Resource): boolean {
-  return resource.type === 'network.wan';
+  return resource.type === 'network.wan' || resource.type === 'wan-link';
 }
 
 /**

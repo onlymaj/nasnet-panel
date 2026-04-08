@@ -17,7 +17,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { useFirewallLogs } from '@nasnet/api-client/queries';
 import type { FirewallLogEntry } from '@nasnet/core/types';
-import { exportLogsToCSV } from '@nasnet/core-utils';
+import { exportLogsToCSV } from '@nasnet/core/utils';
 
 import { useFirewallLogViewer } from './use-firewall-log-viewer';
 
@@ -31,7 +31,7 @@ vi.mock('@nasnet/api-client/queries', () => ({
 }));
 
 // Mock the export utility
-vi.mock('@nasnet/core-utils', () => ({
+vi.mock('@nasnet/core/utils', () => ({
   exportLogsToCSV: vi.fn(),
 }));
 

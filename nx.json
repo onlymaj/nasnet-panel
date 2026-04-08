@@ -17,29 +17,8 @@
   },
   "plugins": [
     {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
-        }
-      },
-      "exclude": [
-        "shared/*",
-        "libs/api-client/core/*",
-        "libs/core/types/*",
-        "libs/core/utils/*",
-        "libs/core/constants/*"
-      ]
-    },
-    {
       "plugin": "@nx/vite/plugin",
-      "exclude": ["ConnectSetupOldRepo/**"],
+      "exclude": ["ConnectSetupOldRepo/**", "libs/**"],
       "options": {
         "buildTargetName": "build",
         "testTargetName": "test",
@@ -63,25 +42,6 @@
       "options": {
         "buildTarget": "docker:build",
         "runTarget": "docker:run"
-      }
-    },
-    {
-      "plugin": "@nx/js/typescript",
-      "include": [
-        "shared/*",
-        "libs/api-client/core/*",
-        "libs/core/types/*",
-        "libs/core/utils/*",
-        "libs/core/constants/*"
-      ],
-      "options": {
-        "typecheck": {
-          "targetName": "typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json"
-        }
       }
     }
   ],

@@ -10,6 +10,13 @@ import dts from 'vite-plugin-dts';
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../../node_modules/.vite/libs/ui/layouts',
+  resolve: {
+    alias: {
+      '@nasnet/ui/primitives': path.resolve(__dirname, '../primitives/src'),
+      '@nasnet/core/utils': path.resolve(__dirname, '../../core/utils/src'),
+      '@nasnet/core/types': path.resolve(__dirname, '../../core/types/src'),
+    },
+  },
   plugins: [
     react(),
     nxViteTsPaths(),

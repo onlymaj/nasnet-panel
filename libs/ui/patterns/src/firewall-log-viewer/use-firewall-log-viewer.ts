@@ -15,7 +15,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 
 import { useFirewallLogs, type FirewallLogFilters } from '@nasnet/api-client/queries';
 import type { FirewallLogEntry, InferredAction } from '@nasnet/core/types';
-import { exportLogsToCSV } from '@nasnet/core-utils';
+import { exportLogsToCSV } from '@nasnet/core/utils';
 
 // ============================================================================
 // Types

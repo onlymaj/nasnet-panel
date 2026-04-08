@@ -23,7 +23,8 @@
       "options": {
         "outputPath": "dist/apps/connect",
         "cwd": "apps/connect"
-      }
+      },
+      "dependsOn": ["ui:build"]
     },
     "lint": {
       "executor": "@nx/eslint:lint",

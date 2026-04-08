@@ -1,0 +1,34 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "ui",
+  "root": "libs/ui",
+  "sourceRoot": "libs/ui",
+  "projectType": "library",
+  "tags": ["type:lib", "scope:ui"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["libs/ui/**/*.{ts,tsx,js,jsx}", "libs/ui/**/.storybook/**/*.{ts,tsx}"]
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rg --files libs/ui -g 'tsconfig.lib.json' -g 'tsconfig.spec.json' -g 'tsconfig.storybook.json' -g '.storybook/tsconfig.json' | sort | xargs -I{} -P 4 tsc --noEmit --project \"{}\""
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rg --files libs/ui -g 'vitest.config.ts' | sort | xargs -I{} sh -c 'dir=$(dirname \"$1\"); cd \"$dir\" && vitest run --config vitest.config.ts --passWithNoTests' _ {}"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run tokens:build && rg --files libs/ui -g 'vite.config.ts' | sort | xargs -I{} sh -c 'vite build --config \"$1\"' _ {}"
+      }
+    }
+  }
+}
