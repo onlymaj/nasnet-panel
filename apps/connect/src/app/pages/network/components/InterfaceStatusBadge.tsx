@@ -6,18 +6,18 @@
 import { memo } from 'react';
 import { type InterfaceStatus } from '@nasnet/core/types';
 import { cn } from '@nasnet/ui/utils';
-interface StatusBadgeProps {
+interface InterfaceStatusBadgeProps {
   status: InterfaceStatus;
   size?: 'sm' | 'md';
   showLabel?: boolean;
   className?: string;
 }
-export const StatusBadge = memo(function StatusBadge({
+export const InterfaceStatusBadge = memo(function InterfaceStatusBadge({
   status,
   size = 'md',
   showLabel = true,
   className
-}: StatusBadgeProps) {
+}: InterfaceStatusBadgeProps) {
   const isRunning = status === 'running';
   const sizeClasses = {
     sm: 'px-2 py-0.5 text-xs',
@@ -37,4 +37,4 @@ export const StatusBadge = memo(function StatusBadge({
         </span>}
     </span>;
 });
-StatusBadge.displayName = 'StatusBadge';
+InterfaceStatusBadge.displayName = 'InterfaceStatusBadge';

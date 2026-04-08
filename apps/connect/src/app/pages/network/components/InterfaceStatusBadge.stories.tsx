@@ -1,15 +1,15 @@
 /**
- * Storybook stories for StatusBadge component
+ * Storybook stories for InterfaceStatusBadge component
  * Covers: running/disabled states, size variants, label visibility, and grid comparison
  */
 
-import { StatusBadge } from './StatusBadge';
+import { InterfaceStatusBadge } from './InterfaceStatusBadge';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-const meta: Meta<typeof StatusBadge> = {
-  title: 'App/Network/StatusBadge',
-  component: StatusBadge,
+const meta: Meta<typeof InterfaceStatusBadge> = {
+  title: 'App/Network/InterfaceStatusBadge',
+  component: InterfaceStatusBadge,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
@@ -42,7 +42,7 @@ const meta: Meta<typeof StatusBadge> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof StatusBadge>;
+type Story = StoryObj<typeof InterfaceStatusBadge>;
 
 export const Running: Story = {
   args: {
@@ -109,36 +109,36 @@ export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
-        <StatusBadge
+        <InterfaceStatusBadge
           status="running"
           size="md"
           showLabel
         />
-        <StatusBadge
+        <InterfaceStatusBadge
           status="disabled"
           size="md"
           showLabel
         />
       </div>
       <div className="flex items-center gap-4">
-        <StatusBadge
+        <InterfaceStatusBadge
           status="running"
           size="sm"
           showLabel
         />
-        <StatusBadge
+        <InterfaceStatusBadge
           status="disabled"
           size="sm"
           showLabel
         />
       </div>
       <div className="flex items-center gap-4">
-        <StatusBadge
+        <InterfaceStatusBadge
           status="running"
           size="md"
           showLabel={false}
         />
-        <StatusBadge
+        <InterfaceStatusBadge
           status="disabled"
           size="md"
           showLabel={false}
@@ -161,7 +161,7 @@ export const InContext: Story = {
     <div className="border-border bg-card w-64 space-y-2 rounded-xl border p-4">
       <div className="flex items-center justify-between">
         <span className="text-foreground text-sm font-medium">ether1</span>
-        <StatusBadge
+        <InterfaceStatusBadge
           status="running"
           size="sm"
           showLabel
@@ -169,7 +169,7 @@ export const InContext: Story = {
       </div>
       <div className="flex items-center justify-between">
         <span className="text-foreground text-sm font-medium">ether2</span>
-        <StatusBadge
+        <InterfaceStatusBadge
           status="disabled"
           size="sm"
           showLabel
@@ -177,7 +177,7 @@ export const InContext: Story = {
       </div>
       <div className="flex items-center justify-between">
         <span className="text-foreground text-sm font-medium">bridge1</span>
-        <StatusBadge
+        <InterfaceStatusBadge
           status="running"
           size="sm"
           showLabel
@@ -189,7 +189,7 @@ export const InContext: Story = {
     docs: {
       description: {
         story:
-          'StatusBadge rendered inside a realistic interface-list card to verify alignment and spacing.',
+          'InterfaceStatusBadge rendered inside a realistic interface-list card to verify alignment and spacing.',
       },
     },
   },

@@ -7,10 +7,12 @@
  * Route: /router/:id/services
  */
 
+import { lazy, Suspense } from 'react';
 import { createFileRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { Package, Boxes } from 'lucide-react';
-import { ServicesPage } from '@nasnet/features/services';
-import { cn } from '@nasnet/ui/primitives';
+import { cn, Skeleton } from '@nasnet/ui/primitives';
+
+const ServicesPage = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.ServicesPage })));
 
 /**
  * Service tab definition
@@ -113,7 +115,11 @@ function ServicesIndexPage() {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'instances' ? <ServicesPage routerId={routerId} onInstanceClick={handleInstanceClick} onImportComplete={handleImportComplete} /> : <Outlet />}
+        {activeTab === 'instances' ? (
+          <Suspense fallback={<div className="p-4"><Skeleton className="h-96 w-full" /></div>}>
+            <ServicesPage routerId={routerId} onInstanceClick={handleInstanceClick} onImportComplete={handleImportComplete} />
+          </Suspense>
+        ) : <Outlet />}
       </div>
     </div>;
 }

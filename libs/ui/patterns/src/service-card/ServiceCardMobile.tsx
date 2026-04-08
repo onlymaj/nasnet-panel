@@ -11,7 +11,7 @@ import { Badge, Button, Card, CardContent } from '@nasnet/ui/primitives';
 
 import { ResourceUsageBar } from '../resource-usage-bar';
 import { ServiceHealthBadge } from '../service-health-badge';
-import { useServiceCard, formatBytes } from './useServiceCard';
+import { useServiceCard, formatBandwidth } from './useServiceCard';
 
 import type { ServiceCardProps } from './types';
 
@@ -127,7 +127,7 @@ export function ServiceCardMobile(props: ServiceCardProps) {
               <div className="text-center">
                 <div className="text-muted-foreground font-mono text-xs">RX</div>
                 <div className="text-foreground font-mono text-sm font-medium">
-                  {formatBytes(networkRx)}
+                  {formatBandwidth(networkRx)}
                 </div>
               </div>
             )}
@@ -135,7 +135,7 @@ export function ServiceCardMobile(props: ServiceCardProps) {
               <div className="text-center">
                 <div className="text-muted-foreground font-mono text-xs">TX</div>
                 <div className="text-foreground font-mono text-sm font-medium">
-                  {formatBytes(networkTx)}
+                  {formatBandwidth(networkTx)}
                 </div>
               </div>
             )}

@@ -9,9 +9,10 @@ import { memo, useMemo } from 'react';
 
 import { Activity } from 'lucide-react';
 
+import { formatBytes } from '@nasnet/core/utils';
 import { Badge, cn, Progress } from '@nasnet/ui/primitives';
 
-import { formatPackets, formatBytes } from './use-rule-counter-visualization';
+import { formatPackets } from './use-rule-counter-visualization';
 
 import type { CounterCellProps } from './CounterCell';
 

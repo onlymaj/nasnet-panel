@@ -5,9 +5,11 @@
  * Provides device discovery, service assignment, and real-time routing updates.
  */
 
+import { lazy, Suspense } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { Skeleton } from '@nasnet/ui/primitives';
 
-import { DeviceRoutingPage } from '@nasnet/features/services';
+const DeviceRoutingPage = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.DeviceRoutingPage })));
 
 export const Route = createFileRoute('/router/$id/routing')({
   component: DeviceRoutingPageRoute,
@@ -20,5 +22,9 @@ export const Route = createFileRoute('/router/$id/routing')({
 function DeviceRoutingPageRoute() {
   const { id: routerId } = Route.useParams();
 
-  return <DeviceRoutingPage routerId={routerId} />;
+  return (
+    <Suspense fallback={<div className="p-4"><Skeleton className="h-96 w-full" /></div>}>
+      <DeviceRoutingPage routerId={routerId} />
+    </Suspense>
+  );
 }

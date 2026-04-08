@@ -17,6 +17,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { cn } from '@nasnet/ui/utils';
+import { formatBytesFromString } from '@nasnet/core/utils';
 
 /**
  * StorageUsageBar component props
@@ -41,26 +42,6 @@ export interface StorageUsageBarProps {
   className?: string;
 }
 
-/**
- * Format bytes to human-readable string using BigInt for precision
- */
-function formatBytes(bytes: string): string {
-  try {
-    const num = BigInt(bytes);
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let value = Number(num);
-    let unitIndex = 0;
-
-    while (value >= 1024 && unitIndex < units.length - 1) {
-      value /= 1024;
-      unitIndex++;
-    }
-
-    return `${value.toFixed(1)} ${units[unitIndex]}`;
-  } catch {
-    return '0 B';
-  }
-}
 
 /**
  * StorageUsageBar component
@@ -98,17 +79,17 @@ function StorageUsageBarComponent({
   /**
    * Format byte values
    */
-  const formattedTotal = useMemo(() => formatBytes(totalBytes), [totalBytes]);
-  const formattedUsed = useMemo(() => formatBytes(usedBytes), [usedBytes]);
+  const formattedTotal = useMemo(() => formatBytesFromString(totalBytes), [totalBytes]);
+  const formattedUsed = useMemo(() => formatBytesFromString(usedBytes), [usedBytes]);
   const formattedFree = useMemo(() => {
     if (freeBytes) {
-      return formatBytes(freeBytes);
+      return formatBytesFromString(freeBytes);
     }
     try {
       const total = BigInt(totalBytes);
       const used = BigInt(usedBytes);
       const free = total - used;
-      return formatBytes(free.toString());
+      return formatBytesFromString(free.toString());
     } catch {
       return '0 B';
     }

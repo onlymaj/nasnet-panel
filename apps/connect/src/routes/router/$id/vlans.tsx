@@ -6,9 +6,11 @@
  * Route: /router/:id/vlans
  */
 
+import { lazy, Suspense } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { Skeleton } from '@nasnet/ui/primitives';
 
-import { VLANSettingsPage } from '@nasnet/features/services';
+const VLANSettingsPage = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.VLANSettingsPage })));
 
 export const Route = createFileRoute('/router/$id/vlans')({
   component: RouteComponent,
@@ -16,5 +18,9 @@ export const Route = createFileRoute('/router/$id/vlans')({
 
 function RouteComponent() {
   const { id: routerId } = Route.useParams();
-  return <VLANSettingsPage routerID={routerId} />;
+  return (
+    <Suspense fallback={<div className="p-4"><Skeleton className="h-96 w-full" /></div>}>
+      <VLANSettingsPage routerID={routerId} />
+    </Suspense>
+  );
 }

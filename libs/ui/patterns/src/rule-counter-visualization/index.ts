@@ -7,7 +7,8 @@
  * - CounterCellDesktop: Desktop presenter
  * - CounterCellMobile: Mobile presenter
  * - useRuleCounterVisualization: Headless hook
- * - formatPackets, formatBytes: Utility functions
+ * - formatPackets: Utility function
+ * - formatBytes: Re-exported from @nasnet/core/utils
  */
 
 export {
@@ -17,10 +18,11 @@ export {
   type CounterCellProps,
 } from './CounterCell';
 
+export { formatBytes } from '@nasnet/core/utils';
+
 export {
   useRuleCounterVisualization,
   formatPackets,
-  formatBytes,
   type CounterData,
   type CounterRates,
   type UseRuleCounterVisualizationOptions,

@@ -30,6 +30,7 @@
 
 import { useSubscription, useQuery, gql } from '@apollo/client';
 import { useCallback, useMemo } from 'react';
+import { formatBytes } from '@nasnet/core/utils';
 
 /**
  * GraphQL subscription for real-time resource metrics
@@ -140,17 +141,6 @@ export interface FormattedResourceMetrics {
   temperature?: number;
   hasTemperature: boolean;
   timestamp: Date;
-}
-
-/**
- * Format bytes to human-readable format (B, KB, MB, GB)
- * Used for memory and storage displays
- */
-export function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
 /**

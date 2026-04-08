@@ -20,7 +20,7 @@ import {
 
 import { ResourceUsageBar } from '../resource-usage-bar';
 import { ServiceHealthBadge } from '../service-health-badge';
-import { useServiceCard, formatBytes } from './useServiceCard';
+import { useServiceCard, formatBandwidth } from './useServiceCard';
 
 import type { ServiceCardProps } from './types';
 
@@ -115,13 +115,13 @@ export function ServiceCardDesktop(props: ServiceCardProps) {
                 {networkRx !== undefined && (
                   <div className="flex items-center gap-1">
                     <span>RX:</span>
-                    <span className="text-foreground font-medium">{formatBytes(networkRx)}</span>
+                    <span className="text-foreground font-medium">{formatBandwidth(networkRx)}</span>
                   </div>
                 )}
                 {networkTx !== undefined && (
                   <div className="flex items-center gap-1">
                     <span>TX:</span>
-                    <span className="text-foreground font-medium">{formatBytes(networkTx)}</span>
+                    <span className="text-foreground font-medium">{formatBandwidth(networkTx)}</span>
                   </div>
                 )}
               </div>

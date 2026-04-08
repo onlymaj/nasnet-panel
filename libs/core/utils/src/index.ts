@@ -68,6 +68,8 @@ export {
   formatUptime,
   parseRouterOSUptime,
   formatBytes,
+  formatBytesBigInt,
+  formatBytesFromString,
   formatPercent,
   formatNumber,
   formatBandwidth,

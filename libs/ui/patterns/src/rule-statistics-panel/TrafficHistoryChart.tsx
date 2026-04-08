@@ -6,6 +6,8 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+import { formatBytes } from '@nasnet/core/utils';
+
 import type { TrafficHistoryChartProps, CounterHistoryEntry } from './types';
 
 /**
@@ -16,19 +18,6 @@ function formatTime(timestamp: number): string {
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
-}
-
-/**
- * Format bytes with SI units for Y-axis
- */
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${units[i]}`;
 }
 
 /**

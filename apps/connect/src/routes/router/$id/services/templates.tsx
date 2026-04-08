@@ -15,11 +15,13 @@
  * Route: /router/:id/services/templates
  */
 
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import type { ServiceTemplate } from '@nasnet/api-client/generated';
-import { TemplatesBrowser, TemplateInstallWizard } from '@nasnet/features/services';
-import { useToast } from '@nasnet/ui/primitives';
+import { Skeleton, useToast } from '@nasnet/ui/primitives';
+
+const TemplatesBrowser = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.TemplatesBrowser })));
+const TemplateInstallWizard = lazy(() => import('@nasnet/features/services').then(m => ({ default: m.TemplateInstallWizard })));
 
 /**
  * Templates Page Component
@@ -71,9 +73,15 @@ export function TemplatesPage() {
     handleWizardClose();
   };
   return <>
-      <TemplatesBrowser routerId={routerId} onInstall={handleInstall} className="p-4 md:p-6" />
+      <Suspense fallback={<div className="p-4"><Skeleton className="h-96 w-full" /></div>}>
+        <TemplatesBrowser routerId={routerId} onInstall={handleInstall} className="p-4 md:p-6" />
+      </Suspense>
 
-      {selectedTemplate && <TemplateInstallWizard routerId={routerId} template={selectedTemplate} open={wizardOpen} onClose={handleWizardClose} onComplete={handleInstallComplete} />}
+      {selectedTemplate && (
+        <Suspense fallback={null}>
+          <TemplateInstallWizard routerId={routerId} template={selectedTemplate} open={wizardOpen} onClose={handleWizardClose} onComplete={handleInstallComplete} />
+        </Suspense>
+      )}
     </>;
 }
 
