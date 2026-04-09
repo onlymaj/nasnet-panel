@@ -30,6 +30,7 @@ import {
   useDHCPPools,
   useVPNStats,
   usePPPActive,
+  useInterfaces,
 } from '@nasnet/api-client/queries';
 import { calculateStatus, formatBytes, parseRouterOSUptime } from '@nasnet/core/utils';
 import { useConnectionStore, useRouterStore } from '@nasnet/state/stores';
@@ -54,6 +55,7 @@ import {
 import type {
   ConnectedVPNClient,
   NetworkStatus,
+  TrafficDataPoint,
 } from '@nasnet/ui/patterns';
 
 export const OverviewTab = React.memo(function OverviewTab() {
@@ -83,6 +85,76 @@ export const OverviewTab = React.memo(function OverviewTab() {
 
   const { isLoading: vpnLoading } = useVPNStats(routerIp);
   const { data: pppActive } = usePPPActive(routerIp);
+
+  // ─── Interface traffic ─────────────────────────────────────────────────────
+
+  const { data: interfaces, dataUpdatedAt: interfacesUpdatedAt } = useInterfaces(routerIp);
+
+  // Pick primary WAN interface: prefer pppoe > ether1 > first running ether
+  const primaryInterface = React.useMemo(() => {
+    if (!interfaces) return undefined;
+    const running = interfaces.filter((i) => i.linkStatus === 'up');
+    return (
+      running.find((i) => i.type === 'pppoe') ||
+      running.find((i) => i.name === 'ether1') ||
+      running.find((i) => i.type === 'ether') ||
+      running[0]
+    );
+  }, [interfaces]);
+
+  // Track byte counter deltas to compute real-time rates
+  const MAX_POINTS = 12; // ~1 minute of history at 5s polling
+  const trafficHistoryRef = React.useRef<TrafficDataPoint[]>([]);
+  const prevTrafficRef = React.useRef<{ rxBytes: number; txBytes: number; time: number } | null>(
+    null
+  );
+  const [trafficData, setTrafficData] = React.useState<TrafficDataPoint[] | undefined>(undefined);
+  const prevInterfaceIdRef = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    // Reset history when interface changes
+    if (prevInterfaceIdRef.current !== primaryInterface?.id) {
+      trafficHistoryRef.current = [];
+      prevTrafficRef.current = null;
+      setTrafficData(undefined);
+      prevInterfaceIdRef.current = primaryInterface?.id;
+    }
+
+    if (!primaryInterface?.txBytes && primaryInterface?.txBytes !== 0) return;
+
+    const rxBytes = primaryInterface.rxBytes ?? 0;
+    const txBytes = primaryInterface.txBytes ?? 0;
+    const now = Date.now();
+    const prev = prevTrafficRef.current;
+
+    if (prev) {
+      const elapsed = (now - prev.time) / 1000; // seconds
+      if (elapsed > 0) {
+        const rxRate = ((rxBytes - prev.rxBytes) / elapsed / 1_000_000) * 8; // Mb/s
+        const txRate = ((txBytes - prev.txBytes) / elapsed / 1_000_000) * 8; // Mb/s
+
+        // Only add positive rates (negative means counter reset)
+        if (rxRate >= 0 && txRate >= 0) {
+          trafficHistoryRef.current = [
+            ...trafficHistoryRef.current.slice(-(MAX_POINTS - 1)),
+            { time: 'now', download: Math.round(rxRate * 100) / 100, upload: Math.round(txRate * 100) / 100 },
+          ];
+
+          // Re-label time axis
+          const history = trafficHistoryRef.current;
+          setTrafficData(
+            history.map((point, i) => ({
+              ...point,
+              time: i === history.length - 1 ? 'now' : `-${(history.length - 1 - i) * 5}s`,
+            }))
+          );
+        }
+      }
+    }
+
+    prevTrafficRef.current = { rxBytes, txBytes, time: now };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [interfacesUpdatedAt]);
 
   // ─── Derived values ────────────────────────────────────────────────────────
 
@@ -169,6 +241,11 @@ export const OverviewTab = React.memo(function OverviewTab() {
     status === 'healthy' ? 'success' as const
     : status === 'warning' ? 'warning' as const
     : 'error' as const;
+
+  const statusBadgeLabel = (status: string) =>
+    status === 'healthy' ? 'Normal'
+    : status === 'warning' ? 'Warning'
+    : 'Critical';
 
   return (
     <div className="animate-fade-in-up px-page-mobile md:px-page-tablet lg:px-page-desktop py-4 md:py-6 mx-auto max-w-7xl space-y-6 pb-10">
@@ -265,7 +342,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
                   <Skeleton className="h-5 w-10" />
                 ) : (
                   <Badge variant={statusBadgeVariant(cpuStatus)}>
-                    {resourceData?.cpuLoad !== undefined ? `${Math.round(resourceData.cpuLoad)}%` : 'N/A'}
+                    {resourceData?.cpuLoad !== undefined ? statusBadgeLabel(cpuStatus) : 'N/A'}
                   </Badge>
                 )}
               </div>
@@ -299,7 +376,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
                   <Skeleton className="h-5 w-10" />
                 ) : (
                   <Badge variant={statusBadgeVariant(memoryStatus)}>
-                    {`${Math.round(memoryPercentage)}%`}
+                    {statusBadgeLabel(memoryStatus)}
                   </Badge>
                 )}
               </div>
@@ -334,7 +411,7 @@ export const OverviewTab = React.memo(function OverviewTab() {
                   <Skeleton className="h-5 w-10" />
                 ) : (
                   <Badge variant={statusBadgeVariant(diskStatus)}>
-                    {`${Math.round(diskPercentage)}%`}
+                    {statusBadgeLabel(diskStatus)}
                   </Badge>
                 )}
               </div>
@@ -378,7 +455,12 @@ export const OverviewTab = React.memo(function OverviewTab() {
             isLoading={dhcpLeasesLoading}
             linkTo="dhcp"
           />
-          <TrafficChart title="Network Traffic" showPlaceholder={true} height={140} />
+          <TrafficChart
+            title={`Network Traffic${primaryInterface ? ` (${primaryInterface.name})` : ''}`}
+            data={trafficData}
+            showPlaceholder={false}
+            height={140}
+          />
           <VPNClientsSummary
             connectedCount={vpnConnectedCount}
             clients={connectedVpnClients}

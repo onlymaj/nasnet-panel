@@ -29,11 +29,13 @@ interface RouterOSInterfaceResponse {
   '.id': string;
   name: string;
   type: string;
-  'mac-address': string;
+  macAddress: string;
   running?: boolean;
   disabled?: boolean;
   mtu?: number;
   comment?: string;
+  txByte?: number;
+  rxByte?: number;
 }
 
 /**
@@ -59,10 +61,12 @@ async function fetchInterfaces(routerIp: string): Promise<NetworkInterface[]> {
     name: iface.name,
     type: normalizeInterfaceType(iface.type),
     status: iface.disabled ? 'disabled' : 'running',
-    macAddress: iface['mac-address'] || '',
+    macAddress: iface.macAddress || '',
     linkStatus: iface.running ? 'up' : 'down',
     mtu: iface.mtu,
     comment: iface.comment,
+    txBytes: Number(iface.txByte) || 0,
+    rxBytes: Number(iface.rxByte) || 0,
   }));
 }
 
@@ -111,17 +115,18 @@ export function useInterfaces(routerIp: string): UseQueryResult<NetworkInterface
 
 /**
  * Response format from RouterOS /rest/interface/{type}
+ * Keys are camelCase after convertRouterOSResponse in makeRouterOSRequest
  */
 interface RouterOSTrafficResponse {
   '.id': string;
-  'tx-byte': number;
-  'rx-byte': number;
-  'tx-packet': number;
-  'rx-packet': number;
-  'tx-error': number;
-  'rx-error': number;
-  'tx-drop': number;
-  'rx-drop': number;
+  txByte: number;
+  rxByte: number;
+  txPacket: number;
+  rxPacket: number;
+  txError: number;
+  rxError: number;
+  txDrop: number;
+  rxDrop: number;
 }
 
 /**
@@ -149,14 +154,14 @@ async function fetchTrafficStats(
 
   return {
     interfaceId,
-    txBytes: data['tx-byte'] || 0,
-    rxBytes: data['rx-byte'] || 0,
-    txPackets: data['tx-packet'] || 0,
-    rxPackets: data['rx-packet'] || 0,
-    txErrors: data['tx-error'] || 0,
-    rxErrors: data['rx-error'] || 0,
-    txDrops: data['tx-drop'] || 0,
-    rxDrops: data['rx-drop'] || 0,
+    txBytes: data.txByte || 0,
+    rxBytes: data.rxByte || 0,
+    txPackets: data.txPacket || 0,
+    rxPackets: data.rxPacket || 0,
+    txErrors: data.txError || 0,
+    rxErrors: data.rxError || 0,
+    txDrops: data.txDrop || 0,
+    rxDrops: data.rxDrop || 0,
   };
 }
 

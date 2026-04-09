@@ -65,7 +65,6 @@ function DHCPSummaryCardComponent({
     <Card
       className={cn(
         'h-full transition-all duration-200',
-        linkTo && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md',
         className
       )}
       role={linkTo ? 'link' : 'region'}

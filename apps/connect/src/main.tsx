@@ -7,17 +7,6 @@ import { routeTree } from './routeTree.gen';
 
 import './styles.css';
 
-// Initialize XState Inspector in development mode
-// This provides visual debugging tools for state machines
-// @see NAS-4.6: Implement Complex Flows with XState
-if (import.meta.env.DEV) {
-  import('@statelyai/inspect').then(({ createBrowserInspector }) => {
-    createBrowserInspector({
-      // Opens in a new browser tab/window
-      autoStart: true,
-    });
-  });
-}
 
 // Create the router instance
 const router = createRouter({ routeTree });
