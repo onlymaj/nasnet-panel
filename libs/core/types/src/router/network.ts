@@ -58,6 +58,12 @@ export interface NetworkInterface {
 
   /** User comment */
   comment?: string;
+
+  /** Total bytes transmitted */
+  txBytes?: number;
+
+  /** Total bytes received */
+  rxBytes?: number;
 }
 
 /**

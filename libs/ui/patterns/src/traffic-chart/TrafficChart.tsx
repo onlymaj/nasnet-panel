@@ -18,7 +18,7 @@
 
 import * as React from 'react';
 
-import { Activity, ArrowDown, ArrowUp, Info } from 'lucide-react';
+import { Activity, ArrowDown, ArrowUp, Info, Loader2 } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle, cn } from '@nasnet/ui/primitives';
 
@@ -164,7 +164,7 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
   ) => {
     const chartData = data || (showPlaceholder ? defaultPlaceholderData : []);
     const maxValue = React.useMemo(
-      () => Math.max(...chartData.flatMap((d) => [d.download, d.upload]), 100) * 1.1, // Add 10% padding
+      () => Math.max(...chartData.flatMap((d) => [d.download, d.upload]), 0.01) * 1.2,
       [chartData]
     );
 
@@ -180,6 +180,34 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
 
     // Chart dimensions
     const chartWidth = 280;
+    const svgRef = React.useRef<SVGSVGElement>(null);
+    const [tooltip, setTooltip] = React.useState<{
+      x: number;
+      y: number;
+      download: string;
+      upload: string;
+      time: string;
+    } | null>(null);
+
+    const handlePointHover = React.useCallback(
+      (index: number, e: React.MouseEvent<SVGRectElement>) => {
+        const point = chartData[index];
+        if (!point || !svgRef.current) return;
+        const svgRect = svgRef.current.getBoundingClientRect();
+        const rect = e.currentTarget.getBoundingClientRect();
+        setTooltip({
+          x: rect.left + rect.width / 2 - svgRect.left,
+          y: Math.min(
+            height - 10 - (point.download / maxValue) * (height - 20),
+            height - 10 - (point.upload / maxValue) * (height - 20)
+          ) - 8,
+          download: formatBandwidth(point.download),
+          upload: formatBandwidth(point.upload),
+          time: point.time,
+        });
+      },
+      [chartData, maxValue, height]
+    );
 
     return (
       <Card
@@ -203,10 +231,19 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
           </div>
         </CardHeader>
         <CardContent className="pt-0">
+          {chartData.length === 0 ? (
+            <div
+              className="flex flex-col items-center justify-center gap-2 text-muted-foreground"
+              style={{ height: `${height + 80}px` }}
+            >
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <p className="text-xs">Collecting traffic data...</p>
+            </div>
+          ) : (<>
           {/* Current Stats */}
           <div className="mb-3 flex justify-between">
             <div className="flex items-center gap-2">
-              <ArrowDown className="text-statusConnected h-4 w-4" />
+              <ArrowDown className="text-success h-4 w-4" />
               <div>
                 <p className="text-foreground text-lg font-bold">
                   {formatBandwidth(currentDownload)}
@@ -215,7 +252,7 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <ArrowUp className="text-warning h-4 w-4" />
+              <ArrowUp className="text-primary h-4 w-4" />
               <div className="text-right">
                 <p className="text-foreground text-lg font-bold">
                   {formatBandwidth(currentUpload)}
@@ -228,10 +265,12 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
           {/* Chart */}
           <div className="relative">
             <svg
+              ref={svgRef}
               viewBox={`0 0 ${chartWidth} ${height}`}
               className="w-full"
               style={{ height: `${height}px` }}
               preserveAspectRatio="none"
+              onMouseLeave={() => setTooltip(null)}
             >
               {/* Gradient definitions */}
               <defs>
@@ -244,13 +283,13 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
                 >
                   <stop
                     offset="0%"
-                    stopColor="hsl(var(--success))"
-                    stopOpacity="0.3"
+                    stopColor="var(--semantic-color-success-DEFAULT)"
+                    stopOpacity="0.35"
                   />
                   <stop
                     offset="100%"
-                    stopColor="hsl(var(--success))"
-                    stopOpacity="0.05"
+                    stopColor="var(--semantic-color-success-DEFAULT)"
+                    stopOpacity="0.08"
                   />
                 </linearGradient>
                 <linearGradient
@@ -262,13 +301,13 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
                 >
                   <stop
                     offset="0%"
-                    stopColor="hsl(var(--warning))"
-                    stopOpacity="0.3"
+                    stopColor="var(--semantic-color-primary-DEFAULT)"
+                    stopOpacity="0.35"
                   />
                   <stop
                     offset="100%"
-                    stopColor="hsl(var(--warning))"
-                    stopOpacity="0.05"
+                    stopColor="var(--semantic-color-primary-DEFAULT)"
+                    stopOpacity="0.08"
                   />
                 </linearGradient>
               </defs>
@@ -281,7 +320,7 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
                   y1={height - 10 - ratio * (height - 20)}
                   x2={chartWidth - 10}
                   y2={height - 10 - ratio * (height - 20)}
-                  className="stroke-border"
+                  stroke="var(--semantic-color-border-DEFAULT)"
                   strokeWidth="1"
                   strokeDasharray="4 4"
                 />
@@ -305,7 +344,7 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
               <path
                 d={generatePath(chartData, 'download', chartWidth, height, maxValue)}
                 fill="none"
-                stroke="hsl(var(--success))"
+                stroke="var(--semantic-color-success-DEFAULT)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -316,7 +355,7 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
               <path
                 d={generatePath(chartData, 'upload', chartWidth, height, maxValue)}
                 fill="none"
-                stroke="hsl(var(--warning))"
+                stroke="var(--semantic-color-primary-DEFAULT)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -332,9 +371,9 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
                     key={`dl-${index}`}
                     cx={x}
                     cy={y}
-                    r="3"
-                    fill="hsl(var(--success))"
-                    className="transition-all duration-500"
+                    r={tooltip?.time === point.time ? 4 : 3}
+                    fill="var(--semantic-color-success-DEFAULT)"
+                    className="pointer-events-none transition-all duration-300"
                   />
                 );
               })}
@@ -348,13 +387,54 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
                     key={`ul-${index}`}
                     cx={x}
                     cy={y}
-                    r="3"
-                    fill="hsl(var(--warning))"
-                    className="transition-all duration-500"
+                    r={tooltip?.time === point.time ? 4 : 3}
+                    fill="var(--semantic-color-primary-DEFAULT)"
+                    className="pointer-events-none transition-all duration-300"
+                  />
+                );
+              })}
+
+              {/* Invisible hover columns per data point */}
+              {chartData.length > 1 && chartData.map((_, index) => {
+                const colWidth = (chartWidth - 20) / (chartData.length - 1);
+                const x = 10 + index * colWidth - colWidth / 2;
+                return (
+                  <rect
+                    key={`hover-${index}`}
+                    x={Math.max(0, x)}
+                    y={0}
+                    width={index === 0 || index === chartData.length - 1 ? colWidth / 2 + 10 : colWidth}
+                    height={height}
+                    fill="transparent"
+                    className="cursor-pointer"
+                    onMouseEnter={(e) => handlePointHover(index, e)}
+                    onMouseLeave={() => setTooltip(null)}
                   />
                 );
               })}
             </svg>
+
+            {/* Tooltip */}
+            {tooltip && (
+              <div
+                className="bg-popover text-popover-foreground border-border pointer-events-none absolute z-10 whitespace-nowrap rounded-lg border px-3 py-2 shadow-md"
+                style={{
+                  left: `${(tooltip.x / chartWidth) * 100}%`,
+                  top: `${(tooltip.y / height) * 100}%`,
+                  transform: 'translate(-50%, -100%)',
+                }}
+              >
+                <p className="text-muted-foreground mb-1 text-center text-[10px]">{tooltip.time}</p>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="bg-success inline-block h-2 w-2 rounded-full" />
+                  <span className="font-medium">↓ {tooltip.download}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="bg-primary inline-block h-2 w-2 rounded-full" />
+                  <span className="font-medium">↑ {tooltip.upload}</span>
+                </div>
+              </div>
+            )}
 
             {/* Time labels */}
             <div className="text-muted-foreground mt-1 flex justify-between text-xs">
@@ -370,10 +450,11 @@ const TrafficChartInner = React.forwardRef<HTMLDivElement, TrafficChartProps>(
               <span>Download</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="bg-warning h-2 w-2 rounded-full" />
+              <div className="bg-primary h-2 w-2 rounded-full" />
               <span>Upload</span>
             </div>
           </div>
+          </>)}
         </CardContent>
       </Card>
     );
