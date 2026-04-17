@@ -1,0 +1,138 @@
+{
+  "name": "NasNetConnect Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // Features: Docker-in-Docker, Go, Node
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.26"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  // VS Code customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "golang.go",
+        "graphql.vscode-graphql",
+        "graphql.vscode-graphql-syntax",
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "nrwl.angular-console",
+        "bradlc.vscode-tailwindcss",
+        "ZixuanChen.vitest-explorer",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-playwright.playwright"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "go.useLanguageServer": true,
+        "go.lintTool": "golangci-lint",
+        "go.lintFlags": ["--fast"],
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "[go]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "golang.go"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "files.associations": {
+          "*.css": "tailwindcss"
+        },
+        "tailwindCSS.experimental.classRegex": [
+          ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+          ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+        ]
+      }
+    },
+    // JetBrains Gateway compatibility settings
+    "jetbrains": {
+      "backend": {
+        "plugins": [
+          "org.jetbrains.plugins.go",
+          "JavaScript",
+          "NodeJS"
+        ]
+      }
+    }
+  },
+
+  // Port forwarding
+  "forwardPorts": [
+    5173,
+    8080,
+    4173,
+    6006,
+    4400,
+    4401
+  ],
+  "portsAttributes": {
+    "5173": { "label": "Frontend (Vite)", "onAutoForward": "notify" },
+    "8080": { "label": "Backend (Go)", "onAutoForward": "notify" },
+    "4173": { "label": "Preview", "onAutoForward": "silent" },
+    "6006": { "label": "Storybook (Connect)", "onAutoForward": "silent" },
+    "4400": { "label": "Storybook (Primitives)", "onAutoForward": "silent" },
+    "4401": { "label": "Storybook (Patterns)", "onAutoForward": "silent" }
+  },
+
+  // Lifecycle
+  "onCreateCommand": "bash .devcontainer/on-create.sh",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "echo 'NasNetConnect DevContainer ready! Run: npm run dev:all'",
+
+  // Environment
+  "containerEnv": {
+    "EDITOR": "code --wait",
+    "GIT_EDITOR": "code --wait",
+    "HISTFILE": "/home/vscode/.persistent_history/.bash_history"
+  },
+
+  // Mounts
+  "mounts": [
+    "source=nasnet-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=nasnet-go-pkg,target=/go/pkg,type=volume",
+    "source=nasnet-nx-cache,target=${containerWorkspaceFolder}/.nx/cache,type=volume",
+    "source=nasnet-bash-history,target=/home/vscode/.persistent_history,type=volume"
+  ],
+
+  "remoteUser": "vscode",
+
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "16gb"
+  },
+
+  "waitFor": "postCreateCommand"
+}
