@@ -44,12 +44,7 @@
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": "explicit"
         },
-        "eslint.validate": [
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact"
-        ],
+        "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
         "go.useLanguageServer": true,
         "go.lintTool": "golangci-lint",
         "go.lintFlags": ["--fast"],
@@ -79,24 +74,13 @@
     // JetBrains Gateway compatibility settings
     "jetbrains": {
       "backend": {
-        "plugins": [
-          "org.jetbrains.plugins.go",
-          "JavaScript",
-          "NodeJS"
-        ]
+        "plugins": ["org.jetbrains.plugins.go", "JavaScript", "NodeJS"]
       }
     }
   },
 
   // Port forwarding
-  "forwardPorts": [
-    5173,
-    8080,
-    4173,
-    6006,
-    4400,
-    4401
-  ],
+  "forwardPorts": [5173, 8080, 4173, 6006, 4400, 4401],
   "portsAttributes": {
     "5173": { "label": "Frontend (Vite)", "onAutoForward": "notify" },
     "8080": { "label": "Backend (Go)", "onAutoForward": "notify" },
