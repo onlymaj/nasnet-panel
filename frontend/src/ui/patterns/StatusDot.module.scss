@@ -1,0 +1,23 @@
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+}
+
+.online {
+  background: var(--color-success);
+}
+
+.offline {
+  background: var(--color-danger);
+}
+
+.degraded {
+  background: var(--color-warning);
+}
+
+.unknown {
+  background: var(--color-text-muted);
+}

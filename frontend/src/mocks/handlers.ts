@@ -1,0 +1,26 @@
+import { mockStore } from './handlers/store';
+import { routers, scanner } from './handlers/routers';
+import { system } from './handlers/system';
+import { wireless } from './handlers/wireless';
+import { vpn, getProtocolOptions } from './handlers/vpn';
+import { users } from './handlers/users';
+import { updates } from './handlers/updates';
+import { logs } from './handlers/logs';
+import { batch } from './handlers/batch';
+
+export { mockStore, getProtocolOptions };
+
+export const mockApi = {
+  routers,
+  scanner,
+  system,
+  wireless,
+  vpn,
+  users,
+  updates,
+  logs,
+  batch,
+};
+
+export type MockApi = typeof mockApi;
+export type MockStore = typeof mockStore;

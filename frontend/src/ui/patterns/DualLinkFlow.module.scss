@@ -1,0 +1,68 @@
+.wrap {
+  position: relative;
+  width: min(100%, 720px);
+  aspect-ratio: 5 / 2;
+  max-height: 100%;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  stroke-linecap: round;
+}
+
+.arrow {
+  fill: color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+.dotGreen {
+  fill: var(--color-success);
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--color-success) 80%, transparent));
+}
+
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.nodeAbove {
+  flex-direction: column-reverse;
+}
+
+.nodeIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.nodeLabel {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  font-size: var(--font-xs);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dotGreen {
+    display: none;
+  }
+}

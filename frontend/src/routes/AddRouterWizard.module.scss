@@ -1,0 +1,10 @@
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinningIcon {
+  display: inline-flex;
+  animation: spin 1.2s linear infinite;
+}

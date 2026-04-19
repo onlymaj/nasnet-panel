@@ -1,0 +1,96 @@
+.pageShell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: var(--font-2xl);
+  font-weight: var(--weight-semibold);
+}
+
+.pageSubtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+.pageActions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.sectionGrid {
+  display: grid;
+  width: 100%;
+  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.stack {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.inline {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.actionsRow {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
+.sectionHeading {
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  font-size: var(--font-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.code {
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow: auto;
+  max-height: 420px;
+  white-space: pre-wrap;
+}

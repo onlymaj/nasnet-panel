@@ -1,0 +1,28 @@
+.tabBarBand {
+  width: 100%;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tabBarInner {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-2xl);
+}
+
+.contentShell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.notFound {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,48 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.track {
+  position: relative;
+  height: 8px;
+  width: 100%;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  transition: width var(--transition-base);
+}
+
+.primary {
+  background: var(--color-primary);
+}
+
+.success {
+  background: var(--color-success);
+}
+
+.warning {
+  background: var(--color-warning);
+}
+
+.danger {
+  background: var(--color-danger);
+}
+
+.info {
+  background: var(--color-info);
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+}

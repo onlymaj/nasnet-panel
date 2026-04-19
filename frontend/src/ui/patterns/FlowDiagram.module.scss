@@ -1,0 +1,105 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.nodeIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.nodeLabel {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  font-size: var(--font-xs);
+  letter-spacing: 0.02em;
+}
+
+.connector {
+  flex: 0 0 130px;
+  position: relative;
+  height: 14px;
+  margin-bottom: calc(var(--font-xs) + 4px);
+}
+
+.track {
+  position: absolute;
+  inset: 50% 12px auto 0;
+  height: 2px;
+  transform: translateY(-50%);
+  background-image: linear-gradient(to right, var(--color-primary) 0 6px, transparent 6px 12px);
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+  opacity: 0.55;
+}
+
+.arrow {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+
+.dot {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-success) 80%, transparent);
+  transform: translate(-50%, -50%);
+  animation: flowDot 2.8s linear infinite;
+}
+
+.dot:nth-of-type(2) {
+  animation-delay: 0.9s;
+}
+
+.dot:nth-of-type(3) {
+  animation-delay: 1.8s;
+}
+
+@keyframes flowDot {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    display: none;
+  }
+}
