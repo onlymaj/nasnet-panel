@@ -23,6 +23,7 @@ This guide covers common issues when using the NasNetConnect DevContainer across
 ### Windows
 
 #### WSL 2 Backend Required
+
 The DevContainer requires WSL 2 as the Docker backend for optimal performance.
 
 ```powershell
@@ -34,20 +35,26 @@ wsl --set-version <distro-name> 2
 ```
 
 #### Slow File Performance
+
 Windows file system mounts can be slow. The DevContainer uses named volumes for `node_modules` to mitigate this.
 
 If you experience slowness:
+
 1. Clone the repository inside WSL: `\\wsl$\Ubuntu\home\<user>\projects\`
 2. Open VS Code from WSL: `code .` (inside the WSL terminal)
 
 #### Line Ending Issues
+
 Git may convert line endings. Configure:
+
 ```bash
 git config --global core.autocrlf input
 ```
 
 #### Path Too Long Errors
+
 Enable long paths in Windows:
+
 ```powershell
 # Run as Administrator
 New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
@@ -56,17 +63,23 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name
 ### macOS
 
 #### Docker Desktop Resource Limits
+
 Increase Docker Desktop resources:
+
 1. Docker Desktop → Preferences → Resources
 2. Set: CPUs: 4+, Memory: 8GB+, Disk: 64GB+
 
 #### VirtioFS for Better Performance
+
 Enable VirtioFS file sharing:
+
 1. Docker Desktop → Preferences → General
 2. Enable "Use VirtioFS for file sharing" (macOS 12.5+)
 
 #### Apple Silicon (M1/M2/M3)
+
 The DevContainer supports ARM64 architecture natively. If you see architecture warnings:
+
 ```bash
 # Force platform (usually not needed)
 export DOCKER_DEFAULT_PLATFORM=linux/arm64
@@ -75,14 +88,18 @@ export DOCKER_DEFAULT_PLATFORM=linux/arm64
 ### Linux
 
 #### Docker Permissions
+
 Add your user to the docker group:
+
 ```bash
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
 #### SELinux Issues (Fedora/RHEL)
+
 If you encounter permission errors:
+
 ```bash
 # Check SELinux status
 getenforce
@@ -94,7 +111,9 @@ sudo setenforce 0
 ```
 
 #### Rootless Docker
+
 If using rootless Docker, ensure the container can access the Docker socket:
+
 ```bash
 export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 ```
@@ -104,6 +123,7 @@ export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 ### "Error: ENOSPC: no space left on device"
 
 Docker ran out of space. Clean up:
+
 ```bash
 # Remove unused images and containers
 docker system prune -a
@@ -119,6 +139,7 @@ Increase Docker memory allocation in Docker Desktop settings.
 ### "npm ERR! code ENOENT" during post-create
 
 The volume mount for node_modules may have issues:
+
 ```bash
 # Remove the volume and rebuild
 docker volume rm nasnet-node-modules
@@ -128,6 +149,7 @@ docker volume rm nasnet-node-modules
 ### "Permission denied" when running npm/go commands
 
 Ensure the container is running as the correct user:
+
 ```json
 // In devcontainer.json
 "remoteUser": "vscode"
@@ -136,10 +158,12 @@ Ensure the container is running as the correct user:
 ### "Docker-in-Docker not working"
 
 The Docker-in-Docker feature requires:
+
 1. Docker Desktop with WSL 2 (Windows) or native (Linux/macOS)
 2. The container must be privileged (handled by the feature)
 
 Check if Docker is accessible inside the container:
+
 ```bash
 docker --version
 docker ps
@@ -148,6 +172,7 @@ docker ps
 ### VS Code Extensions Not Installing
 
 Extensions may fail to install if:
+
 1. Network is slow/restricted
 2. Extension IDs are incorrect
 
@@ -175,6 +200,7 @@ pnpm install
 ### Hot Reload Issues
 
 If Vite hot reload isn't working:
+
 ```bash
 # Check if ports are forwarded
 netstat -tlnp | grep 5173
