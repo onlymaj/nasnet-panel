@@ -1,0 +1,15 @@
+.wrap {
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+}
+
+.inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: var(--weight-bold);
+  font-size: var(--font-2xl);
+  color: var(--color-text);
+}

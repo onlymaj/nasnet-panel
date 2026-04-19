@@ -1,0 +1,48 @@
+.list {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  padding: 0;
+}
+
+.tab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--transition-fast),
+    border var(--transition-fast),
+    background var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--color-text);
+    background: var(--color-surface-alt);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    border-radius: 4px;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.tabActive {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  border-bottom-color: var(--color-success);
+}

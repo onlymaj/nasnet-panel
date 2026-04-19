@@ -1,0 +1,267 @@
+.bannerCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.bannerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.routerTitleRow {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+}
+
+.statusChip {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--color-text-muted);
+}
+
+.statusOnline {
+  background: var(--color-success);
+}
+
+.statusOffline {
+  background: var(--color-danger);
+}
+
+.statusDegraded {
+  background: var(--color-warning);
+}
+
+.bannerHost {
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.bannerStats {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-lg);
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  flex-wrap: wrap;
+}
+
+.bannerStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  svg {
+    color: var(--color-text-muted);
+  }
+}
+
+.bannerDivider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-border);
+}
+
+.statValue {
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+}
+
+.resourceCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+}
+
+.resourceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resourceTitle {
+  margin: 0;
+  font-size: var(--font-md);
+  font-weight: var(--weight-semibold);
+}
+
+.resourceBody {
+  display: grid;
+  place-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.resourceFooter {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+.miniBar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-pill);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--_pct, 0%);
+    background: var(--_tone, var(--color-success));
+    border-radius: inherit;
+  }
+}
+
+.networkCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 220px;
+  padding: var(--space-lg);
+}
+
+.trafficCard {
+  gap: var(--space-md);
+}
+
+.networkCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.networkCardTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: var(--weight-semibold);
+}
+
+.iconCircle {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.iconCircleInfo {
+  color: var(--color-info);
+}
+
+.iconCircleSuccess {
+  color: var(--color-success);
+}
+
+.networkEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+.trafficLine {
+  display: flex;
+  gap: var(--space-xl);
+}
+
+.trafficColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.trafficLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.trafficValue {
+  font-size: var(--font-xl);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartArea {
+  flex: 1;
+  min-height: 120px;
+  position: relative;
+}
+
+.chartAxis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartLegend {
+  display: inline-flex;
+  justify-content: center;
+  gap: 18px;
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.chartLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chartLegendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 10px 0;
+  font-size: var(--font-sm);
+  border-bottom: 1px dashed var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.infoKey {
+  color: var(--color-text-muted);
+}
+
+.infoVal {
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  text-align: right;
+}
