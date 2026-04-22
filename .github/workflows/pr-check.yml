@@ -61,6 +61,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch ${{ github.base_ref }} for lint diff
+        run: git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }} --depth=50
+
       - uses: ./.github/actions/setup-go-backend
 
       - name: Install golangci-lint v2
