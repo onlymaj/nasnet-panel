@@ -59,7 +59,7 @@ export const test = base.extend<TestFixtures>({
       };
       const results = devices.map((d) => ({ ...defaults, ...d }));
 
-      const envelope = <T,>(data: T, status = 200) =>
+      const envelope = <T>(data: T, status = 200) =>
         JSON.stringify({ status, message: 'OK', data });
 
       await context.route('**/api/scan', async (route) => {
