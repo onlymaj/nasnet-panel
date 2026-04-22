@@ -72,7 +72,6 @@ const OVERVIEW_REFRESH_MS = 3000;
 const TRAFFIC_WINDOW_MS = 20_000;
 const DEFAULT_TRAFFIC_INTERFACE = 'ether1';
 
-
 export function OverviewTab() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -289,11 +288,7 @@ export function OverviewTab() {
                 </div>
                 Default DHCP Server
               </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate(`/router/${id}/dhcp`)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => navigate(`/router/${id}/dhcp`)}>
                 View
               </Button>
             </div>
@@ -385,11 +380,7 @@ export function OverviewTab() {
                 </div>
                 VPN Clients
               </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate(`/router/${id}/vpn`)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => navigate(`/router/${id}/vpn`)}>
                 View
               </Button>
             </div>
