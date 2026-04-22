@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"log"
+
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
-	"log"
 )
 
 func RegisterGlobalMiddleware(e *echo.Echo) {
