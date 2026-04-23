@@ -14,10 +14,17 @@ export interface ScanMockDevice {
   services?: string[];
 }
 
+export interface OverviewBackendRouter {
+  id?: string;
+  model?: string;
+  version?: string;
+}
+
 export interface TestFixtures {
   resetMocks: () => Promise<void>;
   seedRouter: (input: SeedInput) => Promise<void>;
   mockBackendScan: (devices?: ScanMockDevice[]) => Promise<void>;
+  mockOverviewBackend: (router?: OverviewBackendRouter) => Promise<void>;
 }
 
 export const test = base.extend<TestFixtures>({
@@ -111,6 +118,118 @@ export const test = base.extend<TestFixtures>({
             cpuLoad: 12,
             uptime: '3d 4h 21m',
           }),
+        });
+      });
+    });
+  },
+  mockOverviewBackend: async ({ context }, use) => {
+    await use(async (router = {}) => {
+      const model = router.model ?? 'hAP ax3';
+      const version = router.version ?? '7.14';
+
+      if (router.id) {
+        await context.addInitScript((routerId) => {
+          try {
+            const key = 'nasnet-panel.session-credentials.v1';
+            const raw = window.sessionStorage.getItem(key);
+            const map = (raw ? JSON.parse(raw) : {}) as Record<
+              string,
+              { username: string; password: string }
+            >;
+            map[routerId] = { username: 'admin', password: 'test' };
+            window.sessionStorage.setItem(key, JSON.stringify(map));
+          } catch {
+            /* ignore */
+          }
+        }, router.id);
+      }
+
+      const envelope = <T>(data: T, status = 200) =>
+        JSON.stringify({ status, message: 'OK', data });
+
+      await context.route('**/api/system/info', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope({
+            model,
+            cpuLoad: 12,
+            uptime: '3d 4h 21m',
+            identity: 'MikroTik',
+            architecture: 'arm64',
+            boardName: model,
+            version,
+            buildTime: 'Jan/10/2026 15:30:00',
+            license: 'L4',
+            updateChannel: 'stable',
+          }),
+        });
+      });
+
+      await context.route('**/api/system/resources', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope({
+            uptime: '3d 4h 21m',
+            cpuCount: 4,
+            cpuLoad: 12,
+            cpuFrequency: '1400MHz',
+            memoryTotal: '1.00 GB',
+            memoryUsed: '256.00 MB',
+            memoryFree: '768.00 MB',
+            memoryTotalBytes: 1024 ** 3,
+            memoryUsedBytes: 256 * 1024 ** 2,
+            memoryFreeBytes: 768 * 1024 ** 2,
+            hddTotal: '128.00 MB',
+            hddFree: '96.00 MB',
+            hddTotalBytes: 128 * 1024 ** 2,
+            hddFreeBytes: 96 * 1024 ** 2,
+            badBlocks: '0',
+            version,
+            architecture: 'arm64',
+            boardName: model,
+          }),
+        });
+      });
+
+      await context.route('**/api/dhcp/leases', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope([]),
+        });
+      });
+
+      await context.route('**/api/interfaces', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope([
+            { id: '*1', name: 'ether1', type: 'ether', running: true, disabled: false },
+          ]),
+        });
+      });
+
+      await context.route('**/api/interfaces/*/traffic', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope({
+            name: 'ether1',
+            rxBitsPerSecond: 1_000_000,
+            txBitsPerSecond: 500_000,
+            rxPacketsPerSecond: 100,
+            txPacketsPerSecond: 50,
+          }),
+        });
+      });
+
+      await context.route('**/api/vpn/clients', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope([]),
         });
       });
     });
