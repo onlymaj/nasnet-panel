@@ -27,7 +27,7 @@ async function startScanTask(subnet: string, signal?: AbortSignal): Promise<stri
 }
 
 async function getScanStatus(taskId: string, signal?: AbortSignal): Promise<ScanStatusData> {
-  return apiRequest<ScanStatusData>(`/api/scan/status?task_id=${encodeURIComponent(taskId)}`, {
+  return apiRequest<ScanStatusData>(`/api/scan/status/${encodeURIComponent(taskId)}`, {
     method: 'GET',
     signal,
   });
