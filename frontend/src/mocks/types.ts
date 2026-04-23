@@ -60,6 +60,7 @@ export interface Interface {
 
 export interface SystemOverview {
   routerId: string;
+  identity: string;
   model: string;
   version: string;
   buildTime: string;

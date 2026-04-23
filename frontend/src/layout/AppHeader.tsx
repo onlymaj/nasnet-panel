@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
+import { Badge } from '@nasnet/ui';
 import { HeaderActions } from './HeaderActions';
 import { useSession } from '../state/SessionContext';
+import { useRouter } from '../state/RouterStoreContext';
 import styles from './AppHeader.module.scss';
 
 export function AppHeader() {
   const { activeRouterId } = useSession();
+  const router = useRouter(activeRouterId ?? undefined);
   const logoTarget = activeRouterId ? `/router/${activeRouterId}` : '/';
   return (
     <header className={styles.headerRoot}>
@@ -19,6 +22,12 @@ export function AppHeader() {
           </div>
         </Link>
         <div className={styles.actionsRight}>
+          {router?.name ? (
+            <>
+              <Badge tone="primary">{router.name}</Badge>
+              <span className={styles.separator} aria-hidden />
+            </>
+          ) : null}
           <HeaderActions />
         </div>
       </div>

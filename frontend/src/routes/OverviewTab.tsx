@@ -450,7 +450,7 @@ export function OverviewTab() {
             </CardHeader>
             <div className={styles.infoRow}>
               <span className={styles.infoKey}>Platform</span>
-              <span className={styles.infoVal}>MikroTik</span>
+              <span className={styles.infoVal}>{overview.identity || '—'}</span>
             </div>
             <div className={styles.infoRow}>
               <span className={styles.infoKey}>Board</span>

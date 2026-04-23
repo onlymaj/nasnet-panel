@@ -215,6 +215,7 @@ export async function fetchSystemOverview(
 
   return {
     routerId,
+    identity: info.identity || 'unknown',
     model: info.boardName || 'unknown',
     version: info.version || 'unknown',
     buildTime: info.buildTime || '',
