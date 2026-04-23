@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Globe, Network } from 'lucide-react';
+import { Network } from 'lucide-react';
 import {
   Button,
   Card,
@@ -56,12 +56,3 @@ export function DHCPPage() {
   );
 }
 
-export function DNSPage() {
-  return (
-    <StubShell
-      title="DNS"
-      description="Local DNS cache, static entries, and forwarders."
-      icon={<Globe size={22} />}
-    />
-  );
-}

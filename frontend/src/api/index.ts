@@ -52,6 +52,13 @@ export {
   type FetchLogsOptions,
   type LogSeverity,
 } from './logs';
+export {
+  fetchDnsInfo,
+  updateDnsConfig,
+  type DnsCredentials,
+  type DnsInfoResponse,
+  type UpdateDnsRequest,
+} from './dns';
 export { ApiError } from './http';
 export { isAbortError } from './abort';
 export { BACKEND_URL } from './config';
