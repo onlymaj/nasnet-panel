@@ -69,17 +69,4 @@ func RegisterRoutes(e *echo.Echo) {
 	{
 		logsGroup.GET("", handler.HandleGetLogs)
 	}
-
-	interfaceGroup := e.Group("/api/interfaces")
-	interfaceGroup.Use(middleware.RouterOSAuth)
-	{
-		interfaceGroup.GET("", handler.HandleListInterfaces)
-		interfaceGroup.GET("/:name/traffic", handler.HandleGetInterfaceTraffic)
-	}
-
-	vpnGroup := e.Group("/api/vpn")
-	vpnGroup.Use(middleware.RouterOSAuth)
-	{
-		vpnGroup.GET("/clients", handler.HandleListVPNClients)
-	}
 }

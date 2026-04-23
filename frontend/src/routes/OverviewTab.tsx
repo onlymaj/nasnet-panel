@@ -1,36 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Activity, Network as NetworkIcon, Shield, Timer, Users as UsersIcon } from 'lucide-react';
 import {
   Badge,
-  Button,
   Card,
   CardHeader,
   CardTitle,
   CircularProgress,
+  Inline,
   SectionGrid,
   SectionHeading,
-  Select,
-  Skeleton,
   Stack,
   StatusDot,
   TrafficChart,
 } from '@nasnet/ui';
-import {
-  fetchDHCPLeases,
-  fetchDynamicOverview,
-  fetchInterfaceTraffic,
-  fetchInterfaces,
-  fetchSystemOverview,
-  fetchVPNClients,
-  type DHCPLeaseResponse,
-  type InterfaceResponse,
-  type SystemOverview,
-  type TrafficSample,
-  type VPNActiveClient,
-} from '../api';
+import { api, type SystemOverview, type TopClient, type TrafficSample } from '../api';
 import { useRouter } from '../state/RouterStoreContext';
-import { useSession } from '../state/SessionContext';
 import { useThemeColors } from '../utils/theme-colors';
 import styles from './OverviewTab.module.scss';
 
@@ -66,111 +51,67 @@ const miniBarStyle = (pct: number, tone: 'success' | 'warning' | 'danger'): Reac
     ['--_tone' as string]: toneVar(tone),
   }) as React.CSSProperties;
 
-const formatMbps = (kbps: number) => `${(kbps / 1000).toFixed(2)} Mb/s`;
+const relativeLastSeen = (iso?: string): string => {
+  if (!iso) return 'Never';
+  const delta = Date.now() - new Date(iso).getTime();
+  if (delta < 60_000) return 'Just now';
+  if (delta < 3_600_000) return `${Math.round(delta / 60_000)} min ago`;
+  if (delta < 86_400_000) return `${Math.round(delta / 3_600_000)} hr ago`;
+  return `${Math.round(delta / 86_400_000)} d ago`;
+};
 
-const OVERVIEW_REFRESH_MS = 3000;
-const TRAFFIC_WINDOW_MS = 20_000;
-const DEFAULT_TRAFFIC_INTERFACE = 'ether1';
+const formatMbps = (kbps: number) => `${(kbps / 1000).toFixed(2)} Mb/s`;
 
 export function OverviewTab() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const router = useRouter(id);
-  const { getCredentials } = useSession();
   const [overview, setOverview] = useState<SystemOverview | null>(null);
   const [traffic, setTraffic] = useState<TrafficSample[]>([]);
-  const [vpnClients, setVpnClients] = useState<VPNActiveClient[]>([]);
-  const [dhcpLeaseList, setDhcpLeaseList] = useState<DHCPLeaseResponse[]>([]);
-  const [interfaces, setInterfaces] = useState<InterfaceResponse[]>([]);
-  const [selectedIface, setSelectedIface] = useState<string>(DEFAULT_TRAFFIC_INTERFACE);
+  const [topClients, setTopClients] = useState<TopClient[]>([]);
   const colors = useThemeColors();
 
   useEffect(() => {
     if (!id) return;
-    const creds = getCredentials(id);
-    const host = router?.host;
-    if (!creds || !host) return;
     let cancelled = false;
-
-    const loadInitial = async () => {
-      try {
-        const [ov, list] = await Promise.all([
-          fetchSystemOverview(id, { host, ...creds }),
-          fetchInterfaces({ host, ...creds }).catch(() => [] as InterfaceResponse[]),
-        ]);
-        if (cancelled) return;
-        setOverview(ov);
-        setInterfaces(list);
-        if (list.length > 0 && !list.some((i) => i.name === selectedIface)) {
-          const preferred = list.find((i) => i.running && i.type === 'ether') ?? list[0];
-          setSelectedIface(preferred.name);
-        }
-      } catch {
-        // keep loading state visible; errors surface via network tab
-      }
-    };
-
-    const pollDynamic = async () => {
-      try {
-        const [dynamic, trafficSample, vpnList, leases] = await Promise.all([
-          fetchDynamicOverview({ host, ...creds }),
-          fetchInterfaceTraffic({ host, ...creds }, selectedIface).catch(() => null),
-          fetchVPNClients({ host, ...creds }).catch(() => [] as VPNActiveClient[]),
-          fetchDHCPLeases({ host, ...creds }).catch(() => [] as DHCPLeaseResponse[]),
-        ]);
-        if (cancelled) return;
-        setOverview((prev) => (prev ? { ...prev, ...dynamic } : prev));
-        setDhcpLeaseList(leases.filter((l) => l.status === 'bound'));
-        setVpnClients(vpnList);
-        if (trafficSample) {
-          const sample: TrafficSample = {
-            t: Date.now(),
-            rxKbps: trafficSample.rxBitsPerSecond / 1000,
-            txKbps: trafficSample.txBitsPerSecond / 1000,
-          };
-          setTraffic((prev) => {
-            const cutoff = sample.t - TRAFFIC_WINDOW_MS;
-            return [...prev, sample].filter((s) => s.t >= cutoff);
-          });
-        }
-      } catch {
-        // keep previous values on transient failures
-      }
-    };
-
-    void loadInitial().then(() => {
+    const load = async () => {
+      const [ov, tr, clients] = await Promise.all([
+        api.system.overview(id),
+        api.system.trafficHistory(id),
+        api.system.topClients(id),
+      ]);
       if (cancelled) return;
-      void pollDynamic();
-    });
-    const interval = window.setInterval(() => {
-      void pollDynamic();
-    }, OVERVIEW_REFRESH_MS);
+      setOverview(ov);
+      setTraffic(tr);
+      setTopClients(clients);
+    };
+    void load();
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
     };
-  }, [id, router?.host, getCredentials, selectedIface]);
-
-  useEffect(() => {
-    setTraffic([]);
-  }, [selectedIface]);
+  }, [id]);
 
   const memoryPct = useMemo(() => {
-    if (!overview || !overview.memoryTotalBytes) return 0;
-    return Math.round((overview.memoryUsedBytes / overview.memoryTotalBytes) * 100);
+    if (!overview) return 0;
+    return Math.round((overview.memoryUsed / overview.memoryTotal) * 100);
   }, [overview]);
 
-  const diskPct = useMemo(() => {
-    if (!overview || !overview.hddTotalBytes) return 0;
-    return Math.round((overview.hddUsedBytes / overview.hddTotalBytes) * 100);
+  const diskUsedMb = useMemo(() => {
+    if (!overview) return 0;
+    return Math.round((overview.dhcpLeases * 1.7 + overview.vpnTunnels * 3.1 + 7.3) * 10) / 10;
   }, [overview]);
+  const diskTotalMb = 82.19;
+  const diskPct = Math.round((diskUsedMb / diskTotalMb) * 100);
 
   const latest = traffic[traffic.length - 1];
   const downloadKbps = latest?.rxKbps ?? 0;
   const uploadKbps = latest?.txKbps ?? 0;
 
   if (!id || !overview) {
-    return <OverviewSkeleton />;
+    return (
+      <Card>
+        <p aria-busy="true">Loading dashboard…</p>
+      </Card>
+    );
   }
 
   return (
@@ -201,6 +142,11 @@ export function OverviewTab() {
             <Activity size={14} aria-hidden />{' '}
             <span className={styles.statValue}>{overview.vpnTunnels}</span> <span>VPN</span>
           </span>
+          <span className={styles.bannerDivider} aria-hidden />
+          <span className={styles.bannerStat}>
+            <Timer size={14} aria-hidden />{' '}
+            <span className={styles.statValue}>{relativeLastSeen(router?.lastSeen)}</span>
+          </span>
         </div>
       </Card>
 
@@ -228,7 +174,7 @@ export function OverviewTab() {
               style={miniBarStyle(overview.cpuLoad, toneForPct(overview.cpuLoad))}
             />
             <div className={styles.resourceFooter} data-testid="overview-cpu">
-              {overview.cpuCount} {overview.cpuCount === 1 ? 'core' : 'cores'}
+              2 cores · {overview.cpuLoad} MHz
             </div>
           </Card>
 
@@ -251,7 +197,7 @@ export function OverviewTab() {
               style={miniBarStyle(memoryPct, toneForPct(memoryPct))}
             />
             <div className={styles.resourceFooter}>
-              {overview.memoryUsedLabel} / {overview.memoryTotalLabel}
+              {overview.memoryUsed} MB / {(overview.memoryTotal / 1024).toFixed(0)} GB
             </div>
           </Card>
 
@@ -271,7 +217,7 @@ export function OverviewTab() {
             </div>
             <div className={styles.miniBar} style={miniBarStyle(diskPct, toneForPct(diskPct))} />
             <div className={styles.resourceFooter}>
-              {overview.hddUsedLabel} / {overview.hddTotalLabel}
+              {diskUsedMb.toFixed(2)} MB / {diskTotalMb.toFixed(2)} MB
             </div>
           </Card>
         </SectionGrid>
@@ -288,33 +234,20 @@ export function OverviewTab() {
                 </div>
                 Default DHCP Server
               </div>
-              <Button variant="secondary" size="sm" onClick={() => navigate(`/router/${id}/dhcp`)}>
-                View
-              </Button>
+              <Badge tone="neutral">{overview.dhcpLeases ? 'Active' : 'Idle'}</Badge>
             </div>
-            {dhcpLeaseList.length === 0 ? (
-              <div className={styles.networkEmpty}>
-                <div className={cx(styles.iconCircle, styles.iconCircleInfo)} aria-hidden>
-                  <NetworkIcon size={16} />
-                </div>
+            <div className={styles.networkEmpty}>
+              <div className={cx(styles.iconCircle, styles.iconCircleInfo)} aria-hidden>
+                <NetworkIcon size={16} />
+              </div>
+              {overview.dhcpLeases === 0 ? (
                 <span>No active leases</span>
-              </div>
-            ) : (
-              <div className={styles.vpnList}>
-                {dhcpLeaseList.map((l) => (
-                  <div key={l.id} className={styles.vpnRow}>
-                    <StatusDot $status="online" className={styles.vpnDot} aria-hidden />
-                    <span className={styles.vpnName} title={l.hostName || l.macAddress}>
-                      {l.hostName || l.macAddress}
-                    </span>
-                    <Badge tone="neutral">{l.dynamic ? 'dynamic' : 'static'}</Badge>
-                    <span className={styles.vpnAddress} title={l.address}>
-                      {l.address}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+              ) : (
+                <span data-testid="overview-interface-count">
+                  {overview.dhcpLeases} active leases · {overview.interfaceCount} interfaces
+                </span>
+              )}
+            </div>
           </Card>
 
           <Card className={cx(styles.networkCard, styles.trafficCard)}>
@@ -323,21 +256,8 @@ export function OverviewTab() {
                 <div className={styles.iconCircle} aria-hidden>
                   <Activity size={16} />
                 </div>
-                Network Traffic
+                Network Traffic (ether1)
               </div>
-              {interfaces.length > 0 ? (
-                <Select
-                  className={styles.ifaceSelect}
-                  aria-label="Select interface for traffic"
-                  value={selectedIface}
-                  onChange={setSelectedIface}
-                  options={interfaces.map((i) => ({
-                    value: i.name,
-                    label: i.running ? i.name : `${i.name} (down)`,
-                    disabled: i.disabled,
-                  }))}
-                />
-              ) : null}
             </div>
             <div className={styles.trafficLine}>
               <div className={styles.trafficColumn}>
@@ -357,7 +277,11 @@ export function OverviewTab() {
               <TrafficChart data={traffic} colors={colors} formatValue={formatMbps} />
             </div>
             <div className={styles.chartAxis}>
-              <span>{traffic.length > 1 ? `-${Math.round(TRAFFIC_WINDOW_MS / 1000)}s` : ''}</span>
+              <span>
+                {traffic.length > 1
+                  ? `-${Math.max(1, Math.round((traffic.length * 10) / 60))}m`
+                  : ''}
+              </span>
               <span>now</span>
             </div>
             <div className={styles.chartLegend}>
@@ -380,11 +304,9 @@ export function OverviewTab() {
                 </div>
                 VPN Clients
               </div>
-              <Button variant="secondary" size="sm" onClick={() => navigate(`/router/${id}/vpn`)}>
-                View
-              </Button>
+              <Badge tone="neutral">{overview.vpnTunnels ? 'Active' : 'Idle'}</Badge>
             </div>
-            {vpnClients.length === 0 ? (
+            {overview.vpnTunnels === 0 ? (
               <div className={styles.networkEmpty}>
                 <div className={cx(styles.iconCircle, styles.iconCircleSuccess)} aria-hidden>
                   <Shield size={16} />
@@ -392,22 +314,17 @@ export function OverviewTab() {
                 <span>No clients connected</span>
               </div>
             ) : (
-              <div className={styles.vpnList}>
-                {vpnClients.map((c) => (
-                  <div key={`${c.protocol}-${c.id}`} className={styles.vpnRow}>
-                    <StatusDot $status="online" className={styles.vpnDot} aria-hidden />
-                    <span className={styles.vpnName} title={c.name}>
-                      {c.name}
+              <Stack $gap="6px">
+                {topClients.slice(0, 3).map((c) => (
+                  <Inline key={c.mac}>
+                    <StatusDot $status="online" aria-hidden />
+                    <span style={{ fontWeight: colors.fontWeights.medium }}>{c.hostname}</span>
+                    <span style={{ color: colors.textMuted, fontSize: colors.fontSizes.xs }}>
+                      {c.ip}
                     </span>
-                    <Badge tone="neutral">{c.protocol}</Badge>
-                    {c.address ? (
-                      <span className={styles.vpnAddress} title={c.address}>
-                        {c.address}
-                      </span>
-                    ) : null}
-                  </div>
+                  </Inline>
                 ))}
-              </div>
+              </Stack>
             )}
           </Card>
         </SectionGrid>
@@ -428,12 +345,12 @@ export function OverviewTab() {
             </div>
             <div className={styles.infoRow}>
               <span className={styles.infoKey}>RouterOS</span>
-              <span className={styles.infoVal}>{overview.version}</span>
+              <span className={styles.infoVal}>{overview.version} (stable)</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.infoKey}>Build Time</span>
-              <span className={styles.infoVal} data-testid="overview-build-time">
-                {overview.buildTime || '—'}
+              <span className={styles.infoKey}>Uptime</span>
+              <span className={styles.infoVal} data-testid="overview-uptime">
+                {overview.uptime}
               </span>
             </div>
             <div className={styles.infoRow}>
@@ -454,103 +371,18 @@ export function OverviewTab() {
               <span className={styles.infoVal}>{overview.model}</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.infoKey}>Update Channel</span>
-              <span className={styles.infoVal}>{overview.updateChannel || '—'}</span>
+              <span className={styles.infoKey}>Total Memory</span>
+              <span className={styles.infoVal}>{overview.memoryTotal} MB</span>
             </div>
             <div className={styles.infoRow}>
-              <span className={styles.infoKey}>License</span>
-              <span className={styles.infoVal}>{overview.license || '—'}</span>
+              <span className={styles.infoKey}>Total Storage</span>
+              <span className={styles.infoVal}>{diskTotalMb.toFixed(0)} MB</span>
             </div>
             <div className={styles.infoRow}>
               <span className={styles.infoKey}>Serial</span>
               <span className={styles.infoVal}>{overview.serial}</span>
             </div>
           </Card>
-        </SectionGrid>
-      </div>
-    </Stack>
-  );
-}
-
-function OverviewSkeleton() {
-  return (
-    <Stack aria-busy="true" aria-label="Loading overview">
-      <Card className={styles.bannerCard}>
-        <div className={styles.bannerLeft}>
-          <Skeleton width={180} height={22} />
-          <Skeleton width={120} height={14} style={{ marginTop: 8 }} />
-        </div>
-        <div className={styles.bannerStats}>
-          <Skeleton width={80} height={14} />
-          <Skeleton width={80} height={14} />
-          <Skeleton width={80} height={14} />
-        </div>
-      </Card>
-
-      <div>
-        <SectionHeading>Resources</SectionHeading>
-        <SectionGrid>
-          {[0, 1, 2].map((i) => (
-            <Card key={i} className={styles.resourceCard}>
-              <div className={styles.resourceHeader}>
-                <Skeleton width={60} height={16} />
-                <Skeleton width={56} height={18} radius={999} />
-              </div>
-              <div className={styles.resourceBody}>
-                <Skeleton width={96} height={96} radius="50%" />
-              </div>
-              <Skeleton width="100%" height={4} />
-              <div className={styles.resourceFooter}>
-                <Skeleton width={100} height={12} />
-              </div>
-            </Card>
-          ))}
-        </SectionGrid>
-      </div>
-
-      <div>
-        <SectionHeading>Network</SectionHeading>
-        <SectionGrid>
-          <Card className={styles.networkCard}>
-            <div className={styles.networkCardHeader}>
-              <Skeleton width={160} height={16} />
-              <Skeleton width={48} height={18} radius={999} />
-            </div>
-            <Skeleton width="60%" height={14} style={{ marginTop: 12 }} />
-          </Card>
-          <Card className={cx(styles.networkCard, styles.trafficCard)}>
-            <div className={styles.networkCardHeader}>
-              <Skeleton width={160} height={16} />
-              <Skeleton width={140} height={28} />
-            </div>
-            <Skeleton width="100%" height={140} style={{ marginTop: 12 }} />
-          </Card>
-          <Card className={styles.networkCard}>
-            <div className={styles.networkCardHeader}>
-              <Skeleton width={120} height={16} />
-              <Skeleton width={48} height={18} radius={999} />
-            </div>
-            <Skeleton width="50%" height={14} style={{ marginTop: 12 }} />
-          </Card>
-        </SectionGrid>
-      </div>
-
-      <div>
-        <SectionHeading>System</SectionHeading>
-        <SectionGrid>
-          {[0, 1].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton width={160} height={18} />
-              </CardHeader>
-              {[0, 1, 2, 3].map((row) => (
-                <div key={row} className={styles.infoRow}>
-                  <Skeleton width={90} height={14} />
-                  <Skeleton width={120} height={14} />
-                </div>
-              ))}
-            </Card>
-          ))}
         </SectionGrid>
       </div>
     </Stack>

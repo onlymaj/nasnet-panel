@@ -70,52 +70,6 @@ type VirtualInterfaceConfig struct {
 	Comment  string
 }
 
-type InterfaceTraffic struct {
-	Name               string
-	RxBitsPerSecond    int64
-	TxBitsPerSecond    int64
-	RxPacketsPerSecond int64
-	TxPacketsPerSecond int64
-}
-
-func (c *Client) MonitorTraffic(name string) (*InterfaceTraffic, error) {
-	reply, err := c.conn.Run("/interface/monitor-traffic",
-		"=interface="+name, "=once=")
-	if err != nil {
-		return nil, fmt.Errorf("failed to monitor interface traffic: %w", err)
-	}
-
-	var m map[string]string
-	if len(reply.Re) > 0 {
-		m = reply.Re[0].Map
-	} else if reply.Done != nil {
-		m = make(map[string]string, len(reply.Done.List))
-		for _, p := range reply.Done.List {
-			m[p.Key] = p.Value
-		}
-	} else {
-		return nil, fmt.Errorf("no monitor-traffic data returned for %s", name)
-	}
-
-	rxBps, _ := strconv.ParseInt(m["rx-bits-per-second"], 10, 64)
-	txBps, _ := strconv.ParseInt(m["tx-bits-per-second"], 10, 64)
-	rxPps, _ := strconv.ParseInt(m["rx-packets-per-second"], 10, 64)
-	txPps, _ := strconv.ParseInt(m["tx-packets-per-second"], 10, 64)
-
-	interfaceName := m["name"]
-	if interfaceName == "" {
-		interfaceName = name
-	}
-
-	return &InterfaceTraffic{
-		Name:               interfaceName,
-		RxBitsPerSecond:    rxBps,
-		TxBitsPerSecond:    txBps,
-		RxPacketsPerSecond: rxPps,
-		TxPacketsPerSecond: txPps,
-	}, nil
-}
-
 func (c *Client) ListInterfaces() ([]InterfaceInfo, error) {
 	results, err := c.GetAll("/interface")
 	if err != nil {
