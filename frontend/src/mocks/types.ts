@@ -58,34 +58,53 @@ export interface SystemOverview {
   routerId: string;
   model: string;
   version: string;
+  buildTime: string;
+  updateChannel: string;
+  license: string;
   serial: string;
   uptime: string;
   cpuLoad: number;
-  memoryUsed: number;
-  memoryTotal: number;
+  cpuCount: number;
+  memoryUsedBytes: number;
+  memoryTotalBytes: number;
+  memoryUsedLabel: string;
+  memoryTotalLabel: string;
+  hddUsedBytes: number;
+  hddTotalBytes: number;
+  hddUsedLabel: string;
+  hddTotalLabel: string;
   temperatureC: number;
   interfaceCount: number;
   dhcpLeases: number;
   vpnTunnels: number;
 }
 
+export type VPNProtocolLabel =
+  | 'ppp'
+  | 'wireguard'
+  | 'ipsec'
+  | 'l2tp-client'
+  | 'pptp-client'
+  | 'ovpn-client'
+  | 'sstp-client';
+
+export interface VPNActiveClient {
+  id: string;
+  protocol: VPNProtocolLabel;
+  name: string;
+  service?: string;
+  address?: string;
+  uptime?: string;
+  rxBytes?: number;
+  txBytes?: number;
+  callerId?: string;
+  interface?: string;
+}
+
 export interface TrafficSample {
   t: number;
   rxKbps: number;
   txKbps: number;
-}
-
-export interface ResourceSample {
-  t: number;
-  cpu: number;
-  memoryPct: number;
-}
-
-export interface TopClient {
-  ip: string;
-  hostname: string;
-  mac: string;
-  totalKbps: number;
 }
 
 export type LogLevel = 'info' | 'warning' | 'error' | 'debug';
