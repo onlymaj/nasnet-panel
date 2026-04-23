@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import styles from './Select.module.scss';
 
 export interface SelectOption {
@@ -7,46 +7,107 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
-export interface SelectProps {
+interface BaseSelectProps {
   options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
   name?: string;
   className?: string;
+  searchable?: boolean;
+  searchPlaceholder?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;
 }
 
+export interface SingleSelectProps extends BaseSelectProps {
+  multiple?: false;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export interface MultipleSelectProps extends BaseSelectProps {
+  multiple: true;
+  value: string[];
+  onChange: (value: string[]) => void;
+}
+
+export type SelectProps = SingleSelectProps | MultipleSelectProps;
+
 const cx = (...parts: Array<string | undefined | false>) => parts.filter(Boolean).join(' ');
 
-export const Select: React.FC<SelectProps> = ({
-  options,
-  value,
-  onChange,
-  placeholder = 'Select…',
-  disabled,
-  id,
-  name,
-  className,
-  'aria-label': ariaLabel,
-  'aria-labelledby': ariaLabelledBy,
-}) => {
+export const Select: React.FC<SelectProps> = (props) => {
+  const {
+    options,
+    placeholder = 'Select…',
+    disabled,
+    id,
+    name,
+    className,
+    searchable = false,
+    searchPlaceholder = 'Search…',
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    multiple = false,
+  } = props;
+
+  const selectedValues: string[] = props.multiple
+    ? props.value
+    : props.value
+      ? [props.value]
+      : [];
+
+  const emitChange = (nextValues: string[]) => {
+    if (props.multiple) {
+      props.onChange(nextValues);
+    } else {
+      props.onChange(nextValues[0] ?? '');
+    }
+  };
+
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const [activeIdx, setActiveIdx] = useState<number>(() =>
     Math.max(
       0,
-      options.findIndex((o) => o.value === value),
+      options.findIndex((o) => selectedValues.includes(o.value)),
     ),
   );
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
   const listboxId = useId();
   const triggerId = id ?? `${listboxId}-trigger`;
 
-  const selected = options.find((o) => o.value === value);
+  const selectedOptions = options.filter((o) => selectedValues.includes(o.value));
+  const triggerLabel =
+    selectedOptions.length === 0
+      ? placeholder
+      : multiple && selectedOptions.length > 2
+        ? `${selectedOptions.length} selected`
+        : selectedOptions.map((o) => o.label).join(', ');
+
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !query) return options;
+    const q = query.toLowerCase();
+    return options.filter((o) => o.label.toLowerCase().includes(q));
+  }, [options, searchable, query]);
+
+  useEffect(() => {
+    if (!open) {
+      setQuery('');
+      return;
+    }
+    if (searchable) {
+      searchRef.current?.focus();
+    }
+  }, [open, searchable]);
+
+  useEffect(() => {
+    if (activeIdx >= filteredOptions.length) {
+      setActiveIdx(filteredOptions.length > 0 ? 0 : -1);
+    }
+  }, [filteredOptions.length, activeIdx]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -63,23 +124,30 @@ export const Select: React.FC<SelectProps> = ({
   }, [open]);
 
   const selectAt = (idx: number) => {
-    const opt = options[idx];
+    const opt = filteredOptions[idx];
     if (!opt || opt.disabled) return;
-    onChange(opt.value);
-    close();
+    if (multiple) {
+      const next = selectedValues.includes(opt.value)
+        ? selectedValues.filter((v) => v !== opt.value)
+        : [...selectedValues, opt.value];
+      emitChange(next);
+    } else {
+      emitChange([opt.value]);
+      close();
+    }
   };
 
   const move = (delta: number) => {
-    if (options.length === 0) return;
-    let next = activeIdx;
-    for (let i = 0; i < options.length; i++) {
-      next = (next + delta + options.length) % options.length;
-      if (!options[next].disabled) break;
+    if (filteredOptions.length === 0) return;
+    let next = activeIdx < 0 ? 0 : activeIdx;
+    for (let i = 0; i < filteredOptions.length; i++) {
+      next = (next + delta + filteredOptions.length) % filteredOptions.length;
+      if (!filteredOptions[next].disabled) break;
     }
     setActiveIdx(next);
   };
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  const handleNavKey = (e: React.KeyboardEvent, allowSpaceToSelect: boolean) => {
     if (disabled) return;
     switch (e.key) {
       case 'ArrowDown':
@@ -95,14 +163,14 @@ export const Select: React.FC<SelectProps> = ({
       case 'Home':
         if (open) {
           e.preventDefault();
-          setActiveIdx(options.findIndex((o) => !o.disabled));
+          setActiveIdx(filteredOptions.findIndex((o) => !o.disabled));
         }
         break;
       case 'End':
         if (open) {
           e.preventDefault();
-          for (let i = options.length - 1; i >= 0; i--) {
-            if (!options[i].disabled) {
+          for (let i = filteredOptions.length - 1; i >= 0; i--) {
+            if (!filteredOptions[i].disabled) {
               setActiveIdx(i);
               break;
             }
@@ -110,7 +178,12 @@ export const Select: React.FC<SelectProps> = ({
         }
         break;
       case 'Enter':
+        e.preventDefault();
+        if (!open) setOpen(true);
+        else selectAt(activeIdx);
+        break;
       case ' ':
+        if (!allowSpaceToSelect) return;
         e.preventDefault();
         if (!open) setOpen(true);
         else selectAt(activeIdx);
@@ -127,6 +200,9 @@ export const Select: React.FC<SelectProps> = ({
     }
   };
 
+  const onTriggerKeyDown = (e: React.KeyboardEvent) => handleNavKey(e, true);
+  const onSearchKeyDown = (e: React.KeyboardEvent) => handleNavKey(e, false);
+
   return (
     <div ref={wrapperRef} className={cx(styles.wrap, className)}>
       <button
@@ -142,10 +218,10 @@ export const Select: React.FC<SelectProps> = ({
         disabled={disabled}
         className={cx(styles.trigger, open && styles.triggerOpen)}
         onClick={() => !disabled && setOpen((o) => !o)}
-        onKeyDown={onKeyDown}
+        onKeyDown={onTriggerKeyDown}
       >
-        <span className={cx(styles.value, !selected && styles.placeholder)}>
-          {selected ? selected.label : placeholder}
+        <span className={cx(styles.value, selectedOptions.length === 0 && styles.placeholder)}>
+          {triggerLabel}
         </span>
         <svg className={styles.chevron} width={14} height={14} viewBox="0 0 20 20" aria-hidden>
           <path
@@ -158,59 +234,83 @@ export const Select: React.FC<SelectProps> = ({
           />
         </svg>
       </button>
-      {name ? <input type="hidden" name={name} value={value} /> : null}
+      {name ? <input type="hidden" name={name} value={selectedValues.join(',')} /> : null}
       {open ? (
-        <ul
-          id={listboxId}
-          role="listbox"
-          aria-labelledby={triggerId}
-          className={styles.menu}
-          tabIndex={-1}
-        >
-          {options.map((opt, idx) => {
-            const selectedOpt = opt.value === value;
-            const active = idx === activeIdx;
-            return (
-              <li
-                key={opt.value}
-                role="option"
-                aria-selected={selectedOpt}
-                aria-disabled={opt.disabled || undefined}
-                className={cx(
-                  styles.option,
-                  active && styles.optionActive,
-                  selectedOpt && styles.optionSelected,
-                  opt.disabled && styles.optionDisabled,
-                )}
-                onMouseEnter={() => !opt.disabled && setActiveIdx(idx)}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  selectAt(idx);
-                }}
-              >
-                <span>{opt.label}</span>
-                {selectedOpt ? (
-                  <svg
-                    className={styles.check}
-                    width={14}
-                    height={14}
-                    viewBox="0 0 20 20"
-                    aria-hidden
-                  >
-                    <path
-                      d="M5 10.5l3.5 3.5L15 6.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ) : null}
+        <div className={styles.menu}>
+          {searchable ? (
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setActiveIdx(0);
+              }}
+              onKeyDown={onSearchKeyDown}
+              placeholder={searchPlaceholder}
+              aria-label="Search options"
+              aria-controls={listboxId}
+              className={styles.search}
+            />
+          ) : null}
+          <ul
+            id={listboxId}
+            role="listbox"
+            aria-labelledby={triggerId}
+            className={styles.list}
+            tabIndex={-1}
+          >
+            {filteredOptions.length === 0 ? (
+              <li className={styles.emptyOption} role="presentation">
+                No matches
               </li>
-            );
-          })}
-        </ul>
+            ) : (
+              filteredOptions.map((opt, idx) => {
+                const selectedOpt = selectedValues.includes(opt.value);
+                const active = idx === activeIdx;
+                return (
+                  <li
+                    key={opt.value}
+                    role="option"
+                    aria-selected={selectedOpt}
+                    aria-disabled={opt.disabled || undefined}
+                    className={cx(
+                      styles.option,
+                      active && styles.optionActive,
+                      selectedOpt && styles.optionSelected,
+                      opt.disabled && styles.optionDisabled,
+                    )}
+                    onMouseEnter={() => !opt.disabled && setActiveIdx(idx)}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      selectAt(idx);
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedOpt ? (
+                      <svg
+                        className={styles.check}
+                        width={14}
+                        height={14}
+                        viewBox="0 0 20 20"
+                        aria-hidden
+                      >
+                        <path
+                          d="M5 10.5l3.5 3.5L15 6.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : null}
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
       ) : null}
     </div>
   );

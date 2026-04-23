@@ -30,8 +30,6 @@ import { fetchLogs, type LogEntryResponse, type LogSeverity } from '../api';
 import { useSession } from '../state/SessionContext';
 import { useRouter } from '../state/RouterStoreContext';
 
-type LevelFilter = LogSeverity | 'all';
-
 const toneForLevel = (
   level: LogEntryResponse['level'],
 ): 'success' | 'warning' | 'danger' | 'info' =>
@@ -48,9 +46,9 @@ export function LogsPage() {
   const router = useRouter(id);
   const { getCredentials } = useSession();
   const [logs, setLogs] = useState<LogEntryResponse[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [level, setLevel] = useState<LevelFilter>('all');
-  const [topic, setTopic] = useState<string>('');
+  const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<LogSeverity[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [search, setSearch] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,12 +74,12 @@ export function LogsPage() {
         {
           limit: 200,
           text: debouncedSearch || undefined,
-          topic: topic || undefined,
-          severity: level === 'all' ? undefined : level,
+          topic: selectedTopics.length > 0 ? selectedTopics.join(',') : undefined,
+          severity: selectedLevels.length === 1 ? selectedLevels[0] : undefined,
         },
       );
       setLogs(response.entries ?? []);
-      setTopics(response.availableTopics ?? []);
+      setAvailableTopics(response.availableTopics ?? []);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load logs.';
       setError(message);
@@ -89,7 +87,7 @@ export function LogsPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, router?.host, getCredentials, level, topic, debouncedSearch]);
+  }, [id, router?.host, getCredentials, selectedLevels, selectedTopics, debouncedSearch]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -102,6 +100,11 @@ export function LogsPage() {
     void reload();
   }, [reload]);
 
+  const visibleLogs = useMemo(() => {
+    if (selectedLevels.length <= 1) return logs;
+    return logs.filter((l) => selectedLevels.includes(l.level));
+  }, [logs, selectedLevels]);
+
   const counts = useMemo(() => {
     const c: Record<LogSeverity, number> = {
       info: 0,
@@ -110,22 +113,22 @@ export function LogsPage() {
       debug: 0,
       critical: 0,
     };
-    for (const l of logs) c[l.level] += 1;
+    for (const l of visibleLogs) c[l.level] += 1;
     return c;
-  }, [logs]);
+  }, [visibleLogs]);
 
   const isSearching = loading || search !== debouncedSearch;
 
-  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(visibleLogs.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pagedLogs = useMemo(
-    () => logs.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [logs, currentPage],
+    () => visibleLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [visibleLogs, currentPage],
   );
 
   useEffect(() => {
     setPage(1);
-  }, [level, topic, debouncedSearch]);
+  }, [selectedLevels, selectedTopics, debouncedSearch]);
 
   return (
     <Stack>
@@ -153,10 +156,13 @@ export function LogsPage() {
               <span>Level</span>
               <Select
                 aria-label="Level"
-                value={level}
-                onChange={(v) => setLevel(v as LevelFilter)}
+                multiple
+                searchable
+                searchPlaceholder="Search level…"
+                placeholder="All levels"
+                value={selectedLevels}
+                onChange={(v) => setSelectedLevels(v as LogSeverity[])}
                 options={[
-                  { value: 'all', label: 'all' },
                   { value: 'info', label: 'info' },
                   { value: 'warning', label: 'warning' },
                   { value: 'error', label: 'error' },
@@ -169,12 +175,13 @@ export function LogsPage() {
               <span>Topic</span>
               <Select
                 aria-label="Topic"
-                value={topic}
-                onChange={(v) => setTopic(v)}
-                options={[
-                  { value: '', label: 'all topics' },
-                  ...topics.map((t) => ({ value: t, label: t })),
-                ]}
+                multiple
+                searchable
+                searchPlaceholder="Search topic…"
+                placeholder="All topics"
+                value={selectedTopics}
+                onChange={(v) => setSelectedTopics(v)}
+                options={availableTopics.map((t) => ({ value: t, label: t }))}
               />
             </Label>
             <Label>
@@ -215,7 +222,7 @@ export function LogsPage() {
             <SearchX size={28} aria-hidden className={styles.emptyIcon} />
             <p>{error}</p>
           </div>
-        ) : logs.length === 0 ? (
+        ) : visibleLogs.length === 0 ? (
           <div className={styles.emptyNote}>
             <SearchX size={28} aria-hidden className={styles.emptyIcon} />
             <p>No logs match the current filters.</p>
@@ -249,11 +256,11 @@ export function LogsPage() {
                 ))}
               </motion.div>
             </AnimatePresence>
-            {logs.length > pageSize ? (
+            {visibleLogs.length > pageSize ? (
               <div className={styles.pagination}>
                 <span className={styles.paginationInfo}>
                   Showing {(currentPage - 1) * pageSize + 1}–
-                  {Math.min(currentPage * pageSize, logs.length)} of {logs.length}
+                  {Math.min(currentPage * pageSize, visibleLogs.length)} of {visibleLogs.length}
                 </span>
                 <div className={styles.paginationControls}>
                   <Button
