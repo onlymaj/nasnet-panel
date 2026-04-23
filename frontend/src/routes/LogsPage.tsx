@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  RefreshCw,
-  ScrollText,
-  SearchX,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, RefreshCw, ScrollText, SearchX } from 'lucide-react';
 import styles from './LogsPage.module.scss';
 import {
   Badge,
@@ -83,7 +76,6 @@ export function LogsPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load logs.';
       setError(message);
-      console.error('[logs] fetch failed', err);
     } finally {
       setLoading(false);
     }
@@ -208,8 +200,8 @@ export function LogsPage() {
       <Card data-testid="log-stream">
         {isSearching ? (
           <div data-testid="log-skeleton">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className={styles.logRow}>
+            {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((k) => (
+              <div key={`skeleton-${k}`} className={styles.logRow}>
                 <Skeleton width={160} height={14} />
                 <Skeleton width={70} height={18} radius={9} />
                 <Skeleton width={110} height={12} />

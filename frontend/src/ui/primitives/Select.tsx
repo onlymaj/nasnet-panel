@@ -39,6 +39,8 @@ const cx = (...parts: Array<string | undefined | false>) => parts.filter(Boolean
 export const Select: React.FC<SelectProps> = (props) => {
   const {
     options,
+    value,
+    onChange,
     placeholder = 'Select…',
     disabled,
     id,
@@ -51,17 +53,13 @@ export const Select: React.FC<SelectProps> = (props) => {
     multiple = false,
   } = props;
 
-  const selectedValues: string[] = props.multiple
-    ? props.value
-    : props.value
-      ? [props.value]
-      : [];
+  const selectedValues: string[] = Array.isArray(value) ? value : value ? [value] : [];
 
   const emitChange = (nextValues: string[]) => {
-    if (props.multiple) {
-      props.onChange(nextValues);
+    if (multiple) {
+      (onChange as (v: string[]) => void)(nextValues);
     } else {
-      props.onChange(nextValues[0] ?? '');
+      (onChange as (v: string) => void)(nextValues[0] ?? '');
     }
   };
 

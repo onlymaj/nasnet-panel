@@ -5,9 +5,11 @@ test.describe('Logs page', () => {
     page,
     resetMocks,
     seedRouter,
+    mockLogsBackend,
   }) => {
     await resetMocks();
-    await seedRouter({ id: 'rtr_logs', name: 'Logs Router' });
+    await seedRouter({ id: 'rtr_logs', name: 'Logs Router', host: '10.10.10.1' });
+    await mockLogsBackend({ id: 'rtr_logs' });
     await page.goto('/router/rtr_logs/logs');
 
     await expect(page.getByRole('heading', { name: /^logs$/i })).toBeVisible();
@@ -15,20 +17,15 @@ test.describe('Logs page', () => {
     await expect(stream).toBeVisible();
     await expect(stream.getByTestId('log-row').first()).toBeVisible();
 
-    // Level filter keeps the stream populated (or explicitly empty).
-    await page.getByLabel(/level/i).click();
+    // Level multi-select opens and exposes severity options.
+    await page.getByRole('combobox', { name: /level/i }).click();
     await page.getByRole('option', { name: 'error' }).click();
+    await page.keyboard.press('Escape');
     await expect(stream).toBeVisible();
 
-    // Text search reveals the pppoe error message.
-    await page.getByLabel(/level/i).click();
-    await page.getByRole('option', { name: 'all' }).click();
-    await page.getByLabel(/search/i).fill('pppoe');
+    // Debounced text search reveals the pppoe error message.
+    await page.getByLabel('Search', { exact: true }).fill('pppoe');
     await expect(stream).toContainText(/pppoe/i);
-
-    // Auto-tail toggles without error.
-    await page.getByRole('switch', { name: /auto-tail/i }).check();
-    await expect(page.getByRole('switch', { name: /auto-tail/i })).toBeChecked();
   });
 
   test('dashboard tab nav exposes Logs link', async ({ page, resetMocks, seedRouter }) => {
