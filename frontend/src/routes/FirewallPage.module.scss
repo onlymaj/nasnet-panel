@@ -59,7 +59,10 @@
   border: 2px solid var(--color-border);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
 }
 
 .boardNodeEndpoint {
