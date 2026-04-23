@@ -53,6 +53,13 @@ export {
   type LogSeverity,
 } from './logs';
 export {
+  fetchDnsInfo,
+  updateDnsConfig,
+  type DnsCredentials,
+  type DnsInfoResponse,
+  type UpdateDnsRequest,
+} from './dns';
+export {
   fetchDhcpLeases,
   fetchDhcpClients,
   fetchDhcpServers,
