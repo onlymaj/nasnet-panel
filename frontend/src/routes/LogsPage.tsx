@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Filter, RefreshCw, ScrollText } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  RefreshCw,
+  ScrollText,
+  SearchX,
+} from 'lucide-react';
 import styles from './LogsPage.module.scss';
 import {
   Badge,
@@ -16,15 +23,19 @@ import {
   Inline,
   Label,
   Select,
+  Skeleton,
   Stack,
-  Switch,
 } from '@nasnet/ui';
-import { api, type LogEntry, type LogLevel } from '../api';
+import { fetchLogs, type LogEntryResponse, type LogSeverity } from '../api';
+import { useSession } from '../state/SessionContext';
+import { useRouter } from '../state/RouterStoreContext';
 
-type LevelFilter = LogLevel | 'all';
+type LevelFilter = LogSeverity | 'all';
 
-const toneForLevel = (level: LogEntry['level']): 'success' | 'warning' | 'danger' | 'info' =>
-  level === 'error'
+const toneForLevel = (
+  level: LogEntryResponse['level'],
+): 'success' | 'warning' | 'danger' | 'info' =>
+  level === 'critical' || level === 'error'
     ? 'danger'
     : level === 'warning'
       ? 'warning'
@@ -34,51 +45,76 @@ const toneForLevel = (level: LogEntry['level']): 'success' | 'warning' | 'danger
 
 export function LogsPage() {
   const { id } = useParams<{ id: string }>();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const router = useRouter(id);
+  const { getCredentials } = useSession();
+  const [logs, setLogs] = useState<LogEntryResponse[]>([]);
   const [topics, setTopics] = useState<string[]>([]);
   const [level, setLevel] = useState<LevelFilter>('all');
   const [topic, setTopic] = useState<string>('');
   const [search, setSearch] = useState<string>('');
-  const [tail, setTail] = useState<boolean>(false);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const pageSize = 20;
-  const [selected, setSelected] = useState<LogEntry | null>(null);
+  const [selected, setSelected] = useState<LogEntryResponse | null>(null);
 
   const reload = useCallback(async () => {
     if (!id) return;
+    const creds = getCredentials(id);
+    const host = router?.host;
+    if (!creds || !host) {
+      setLoading(false);
+      setError('Missing router credentials for this session.');
+      return;
+    }
     setLoading(true);
-    const [l, t] = await Promise.all([
-      api.logs.list(id, {
-        level,
-        topic: topic || undefined,
-        search: search || undefined,
-        limit: 200,
-      }),
-      api.logs.topics(id),
-    ]);
-    setLogs(l);
-    setTopics(t);
-    setLoading(false);
-  }, [id, level, topic, search]);
+    setError(null);
+    try {
+      const response = await fetchLogs(
+        { host, ...creds },
+        {
+          limit: 200,
+          text: debouncedSearch || undefined,
+          topic: topic || undefined,
+          severity: level === 'all' ? undefined : level,
+        },
+      );
+      setLogs(response.entries ?? []);
+      setTopics(response.availableTopics ?? []);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load logs.';
+      setError(message);
+      console.error('[logs] fetch failed', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, router?.host, getCredentials, level, topic, debouncedSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
 
-  useEffect(() => {
-    if (!tail || !id) return;
-    const timer = window.setInterval(() => {
-      void reload();
-    }, 2000);
-    return () => window.clearInterval(timer);
-  }, [tail, id, reload]);
-
   const counts = useMemo(() => {
-    const c: Record<LogLevel, number> = { info: 0, warning: 0, error: 0, debug: 0 };
+    const c: Record<LogSeverity, number> = {
+      info: 0,
+      warning: 0,
+      error: 0,
+      debug: 0,
+      critical: 0,
+    };
     for (const l of logs) c[l.level] += 1;
     return c;
   }, [logs]);
+
+  const isSearching = loading || search !== debouncedSearch;
 
   const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -89,7 +125,7 @@ export function LogsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [level, topic, search]);
+  }, [level, topic, debouncedSearch]);
 
   return (
     <Stack>
@@ -106,7 +142,6 @@ export function LogsPage() {
             </CardDescription>
           </div>
           <div className={styles.headerActions}>
-            <Switch label="Auto-tail" checked={tail} onChange={(e) => setTail(e.target.checked)} />
             <Button size="sm" variant="secondary" onClick={reload} disabled={loading}>
               <RefreshCw size={14} aria-hidden /> Refresh
             </Button>
@@ -125,6 +160,7 @@ export function LogsPage() {
                   { value: 'info', label: 'info' },
                   { value: 'warning', label: 'warning' },
                   { value: 'error', label: 'error' },
+                  { value: 'critical', label: 'critical' },
                   { value: 'debug', label: 'debug' },
                 ]}
               />
@@ -156,14 +192,34 @@ export function LogsPage() {
             <Badge tone="success">info · {counts.info}</Badge>
             <Badge tone="warning">warning · {counts.warning}</Badge>
             <Badge tone="danger">error · {counts.error}</Badge>
+            <Badge tone="danger">critical · {counts.critical}</Badge>
             <Badge tone="info">debug · {counts.debug}</Badge>
           </Inline>
         </Stack>
       </Card>
 
       <Card data-testid="log-stream">
-        {logs.length === 0 && !loading ? (
-          <p className={styles.emptyNote}>No logs match the current filters.</p>
+        {isSearching ? (
+          <div data-testid="log-skeleton">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className={styles.logRow}>
+                <Skeleton width={160} height={14} />
+                <Skeleton width={70} height={18} radius={9} />
+                <Skeleton width={110} height={12} />
+                <Skeleton height={14} />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className={styles.emptyNote}>
+            <SearchX size={28} aria-hidden className={styles.emptyIcon} />
+            <p>{error}</p>
+          </div>
+        ) : logs.length === 0 ? (
+          <div className={styles.emptyNote}>
+            <SearchX size={28} aria-hidden className={styles.emptyIcon} />
+            <p>No logs match the current filters.</p>
+          </div>
         ) : (
           <div>
             <AnimatePresence mode="wait" initial={false}>
@@ -183,7 +239,7 @@ export function LogsPage() {
                     onClick={() => setSelected(log)}
                     aria-label={`Open details for log ${log.id}`}
                   >
-                    <span className={styles.timestamp}>{new Date(log.ts).toLocaleString()}</span>
+                    <span className={styles.timestamp}>{log.time}</span>
                     <Badge className={styles.logLevel} tone={toneForLevel(log.level)}>
                       {log.level}
                     </Badge>
@@ -243,8 +299,7 @@ export function LogsPage() {
           <div className={styles.detailGrid}>
             <div className={styles.detailLabel}>Timestamp</div>
             <div className={styles.detailValue}>
-              <div>{new Date(selected.ts).toLocaleString()}</div>
-              <div className={styles.detailMuted}>{selected.ts}</div>
+              <div>{selected.time}</div>
             </div>
 
             <div className={styles.detailLabel}>Level</div>
@@ -267,10 +322,30 @@ export function LogsPage() {
               <code className={styles.detailMono}>{selected.id}</code>
             </div>
 
-            <div className={styles.detailLabel}>Router ID</div>
-            <div className={styles.detailValue}>
-              <code className={styles.detailMono}>{selected.routerId}</code>
-            </div>
+            {selected.prefix ? (
+              <>
+                <div className={styles.detailLabel}>Prefix</div>
+                <div className={styles.detailValue}>
+                  <code className={styles.detailMono}>{selected.prefix}</code>
+                </div>
+              </>
+            ) : null}
+
+            {selected.account ? (
+              <>
+                <div className={styles.detailLabel}>Account</div>
+                <div className={styles.detailValue}>
+                  <code className={styles.detailMono}>{selected.account}</code>
+                </div>
+              </>
+            ) : null}
+
+            {selected.count && selected.count > 1 ? (
+              <>
+                <div className={styles.detailLabel}>Count</div>
+                <div className={styles.detailValue}>{selected.count}</div>
+              </>
+            ) : null}
           </div>
         ) : null}
       </Dialog>
