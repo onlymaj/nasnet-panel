@@ -9,12 +9,10 @@ import {
   Cpu,
   Flame,
   Globe,
-  RefreshCw,
   ShieldOff,
 } from 'lucide-react';
 import {
   Badge,
-  Button,
   Card,
   CardDescription,
   CardHeader,
@@ -297,28 +295,34 @@ export function FirewallPage() {
     return { host, username: c.username, password: c.password };
   }, [id, router?.host, getCredentials]);
 
-  const reload = useCallback(async () => {
-    if (!creds) {
-      setLoading(false);
-      setError('Missing router credentials for this session.');
-      return;
-    }
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchFirewallRules(creds);
-      setRules(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load firewall rules.';
-      setError(message);
-      setRules([]);
-    } finally {
-      inFlightRef.current = false;
-      setLoading(false);
-    }
-  }, [creds]);
+  const reload = useCallback(
+    async (silent = false) => {
+      if (!creds) {
+        setLoading(false);
+        setError('Missing router credentials for this session.');
+        return;
+      }
+      if (inFlightRef.current) return;
+      inFlightRef.current = true;
+      if (!silent) {
+        setLoading(true);
+        setError(null);
+      }
+      try {
+        const data = await fetchFirewallRules(creds);
+        setRules(data);
+        if (silent) setError(null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load firewall rules.';
+        setError(message);
+        if (!silent) setRules([]);
+      } finally {
+        inFlightRef.current = false;
+        setLoading(false);
+      }
+    },
+    [creds],
+  );
 
   const visibleRules = useMemo(
     () => (chain ? rules.filter((r) => r.chain === chain) : rules),
@@ -327,6 +331,10 @@ export function FirewallPage() {
 
   useEffect(() => {
     void reload();
+    const interval = window.setInterval(() => {
+      void reload(true);
+    }, 3000);
+    return () => window.clearInterval(interval);
   }, [reload]);
 
   const columns: DataTableColumn<FirewallRule>[] = [
@@ -477,9 +485,6 @@ export function FirewallPage() {
                 options={CHAIN_OPTIONS}
               />
             </Label>
-            <Button size="sm" variant="secondary" onClick={reload} disabled={loading}>
-              <RefreshCw size={14} aria-hidden /> Refresh
-            </Button>
           </div>
         </CardHeader>
 
