@@ -1,7 +1,12 @@
 import { test, expect } from './fixtures';
 
 test.describe('Router dashboard + Overview tab', () => {
-  test('shows header, tabs, and overview cards', async ({ page, resetMocks, seedRouter }) => {
+  test('shows header, tabs, and overview cards', async ({
+    page,
+    resetMocks,
+    seedRouter,
+    mockOverviewBackend,
+  }) => {
     await resetMocks();
     await seedRouter({
       id: 'rtr_over',
@@ -10,6 +15,7 @@ test.describe('Router dashboard + Overview tab', () => {
       model: 'hAP ax3',
       version: '7.13.2',
     });
+    await mockOverviewBackend({ id: 'rtr_over', model: 'hAP ax3', version: '7.13.2' });
     await page.goto('/router/rtr_over');
 
     await expect(page.getByText('Overview Router', { exact: false }).first()).toBeVisible();

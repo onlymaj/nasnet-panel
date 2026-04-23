@@ -5,9 +5,11 @@ test.describe('Add router — manual credentials', () => {
     page,
     resetMocks,
     mockBackendScan,
+    mockOverviewBackend,
   }) => {
     await resetMocks();
     await mockBackendScan();
+    await mockOverviewBackend();
     await page.goto('/routers/new');
     await expect(page).toHaveURL(/\/routers\/new/);
 

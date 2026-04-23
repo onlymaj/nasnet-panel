@@ -189,7 +189,10 @@ export function OverviewTab() {
         <div className={styles.bannerStats}>
           <span className={styles.bannerStat}>
             <Timer size={14} aria-hidden />{' '}
-            <span className={styles.statValue}>{overview.uptime}</span> <span>uptime</span>
+            <span className={styles.statValue} data-testid="overview-uptime">
+              {overview.uptime}
+            </span>{' '}
+            <span>uptime</span>
           </span>
           <span className={styles.bannerDivider} aria-hidden />
           <span className={styles.bannerStat}>

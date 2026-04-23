@@ -5,9 +5,11 @@ test.describe('Real dashboard overview', () => {
     page,
     resetMocks,
     seedRouter,
+    mockOverviewBackend,
   }) => {
     await resetMocks();
     await seedRouter({ id: 'rtr_dash', name: 'Dashboard Router', host: '10.10.10.1' });
+    await mockOverviewBackend({ id: 'rtr_dash' });
     await page.goto('/router/rtr_dash');
 
     // Banner
