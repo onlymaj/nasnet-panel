@@ -112,6 +112,26 @@ export async function updateWifiInterface(
   });
 }
 
+export interface UpdateWifiSettingsRequest {
+  ssid?: string;
+  password?: string;
+  securityTypes?: string;
+}
+
+export async function updateWifiSettings(
+  creds: WifiCredentials,
+  name: string,
+  settings: UpdateWifiSettingsRequest,
+  signal?: AbortSignal,
+): Promise<void> {
+  await apiRequest(`/api/wifi/settings/${encodeURIComponent(name)}`, {
+    method: 'PUT',
+    headers: authHeaders(creds),
+    body: JSON.stringify(settings),
+    signal,
+  });
+}
+
 export async function removeWifiClient(
   creds: WifiCredentials,
   mac: string,

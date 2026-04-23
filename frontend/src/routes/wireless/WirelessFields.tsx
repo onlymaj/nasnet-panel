@@ -1,16 +1,10 @@
-import { FieldRow, FieldStack, Input, Label, PasswordInput, Select, Switch } from '@nasnet/ui';
+import { Checkbox, FieldRow, FieldStack, Inline, Input, Label, PasswordInput } from '@nasnet/ui';
 import type { WirelessSettings } from '../../api';
-import styles from '../WirelessPage.module.scss';
 
-const SECURITY_OPTIONS = [
-  { value: 'WPA2-PSK', label: 'WPA2-PSK' },
-  { value: 'WPA3-PSK', label: 'WPA3-PSK' },
-  { value: 'open', label: 'Open' },
-];
-
-const BAND_OPTIONS = [
-  { value: '2.4ghz', label: '2.4 GHz' },
-  { value: '5ghz', label: '5 GHz' },
+const SECURITY_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'wpa-psk', label: 'WPA-PSK' },
+  { value: 'wpa2-psk', label: 'WPA2-PSK' },
+  { value: 'wpa3-psk', label: 'WPA3-PSK' },
 ];
 
 interface Props {
@@ -19,6 +13,13 @@ interface Props {
 }
 
 export function WirelessFields({ draft, onPatch }: Props) {
+  const toggleType = (value: string, on: boolean) => {
+    const next = on
+      ? Array.from(new Set([...draft.securityTypes, value]))
+      : draft.securityTypes.filter((t) => t !== value);
+    onPatch('securityTypes', next);
+  };
+
   return (
     <FieldStack>
       <FieldRow>
@@ -39,42 +40,19 @@ export function WirelessFields({ draft, onPatch }: Props) {
           />
         </Label>
       </FieldRow>
-      <FieldRow>
-        <Label>
-          <span>Security</span>
-          <Select
-            aria-label="Security"
-            value={draft.security}
-            onChange={(v) => onPatch('security', v as WirelessSettings['security'])}
-            options={SECURITY_OPTIONS}
-          />
-        </Label>
-        <Label>
-          <span>Band</span>
-          <Select
-            aria-label="Band"
-            value={draft.band}
-            onChange={(v) => onPatch('band', v as WirelessSettings['band'])}
-            options={BAND_OPTIONS}
-          />
-        </Label>
-        <Label>
-          <span>Country code</span>
-          <Input
-            value={draft.countryCode}
-            onChange={(e) => onPatch('countryCode', e.target.value)}
-            aria-label="Country code"
-          />
-        </Label>
-        <Label as="div" className={styles.hiddenToggle}>
-          <span>Hide network</span>
-          <Switch
-            aria-label="Hide network from broadcast"
-            checked={draft.hidden}
-            onChange={(e) => onPatch('hidden', e.target.checked)}
-          />
-        </Label>
-      </FieldRow>
+      <Label as="div">
+        <span>Security</span>
+        <Inline $gap="16px">
+          {SECURITY_OPTIONS.map((opt) => (
+            <Checkbox
+              key={opt.value}
+              label={opt.label}
+              checked={draft.securityTypes.includes(opt.value)}
+              onChange={(e) => toggleType(opt.value, e.target.checked)}
+            />
+          ))}
+        </Inline>
+      </Label>
     </FieldStack>
   );
 }

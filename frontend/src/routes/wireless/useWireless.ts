@@ -5,14 +5,14 @@ import {
   fetchWifiInterfaces,
   fetchWifiPassphrase,
   updateWifiInterface,
-  updateWifiPassphrase,
+  updateWifiSettings,
   type Interface,
+  type UpdateWifiSettingsRequest,
   type WifiConnectedClientResponse,
   type WifiCredentials,
   type WifiInterfaceResponse,
   type WirelessBand,
   type WirelessClient,
-  type WirelessSecurity,
   type WirelessSettings,
 } from '../../api';
 import { useRouter } from '../../state/RouterStoreContext';
@@ -20,13 +20,6 @@ import { useSession } from '../../state/SessionContext';
 
 const toBand = (value: string | undefined): WirelessBand =>
   value && value.toLowerCase().startsWith('5') ? '5ghz' : '2.4ghz';
-
-const toSecurity = (value: string | undefined): WirelessSecurity => {
-  const v = (value ?? '').toLowerCase();
-  if (v.includes('wpa3')) return 'WPA3-PSK';
-  if (v === 'none' || v === 'open' || v === '') return 'open';
-  return 'WPA2-PSK';
-};
 
 const parseNumber = (value: string | undefined): number => {
   if (!value) return 0;
@@ -46,7 +39,8 @@ const toInterface = (wi: WifiInterfaceResponse): Interface => ({
   name: wi.name || wi.interface,
   type: 'wireless',
   mac: wi.macAddress,
-  running: wi.running && !wi.disabled,
+  running: wi.running,
+  disabled: wi.disabled,
   comment: wi.comment,
   ssid: wi.ssid,
   band: toBand(wi.band),
@@ -72,7 +66,7 @@ const toSettings = (
   return {
     ssid: primary.ssid,
     password: passphrase,
-    security: toSecurity(primary.securityType),
+    securityTypes: parseSecurityTypes(primary.securityType),
     band: toBand(primary.band),
     countryCode: '',
     hidden: false,
@@ -171,7 +165,7 @@ export function useWireless(id: string | undefined) {
       setEditingSettings({
         ssid: iface.ssid ?? '',
         password: passphrase,
-        security: toSecurity(iface.securityTypes?.join(',')),
+        securityTypes: iface.securityTypes ?? [],
         band: iface.band ?? '2.4ghz',
         countryCode: settings?.countryCode ?? '',
         hidden: false,
@@ -187,17 +181,33 @@ export function useWireless(id: string | undefined) {
 
   const save = async (next: WirelessSettings) => {
     if (!creds || !editingIface) return;
-    if (next.password && next.password !== editingSettings?.password) {
-      await updateWifiPassphrase(creds, editingIface.name, next.password);
+    const patch: UpdateWifiSettingsRequest = {};
+    if (next.ssid !== editingSettings?.ssid) patch.ssid = next.ssid;
+    if (next.password !== editingSettings?.password) patch.password = next.password;
+    const nextTypes = [...next.securityTypes].sort().join(',');
+    const prevTypes = [...(editingSettings?.securityTypes ?? [])].sort().join(',');
+    if (nextTypes !== prevTypes) patch.securityTypes = next.securityTypes.join(',');
+    if (Object.keys(patch).length === 0) {
+      closeEdit();
+      return;
     }
-    toast.notify({ title: 'Wireless settings saved', tone: 'success' });
-    closeEdit();
+    try {
+      await updateWifiSettings(creds, editingIface.name, patch);
+      toast.notify({ title: 'Wireless settings saved', tone: 'success' });
+      closeEdit();
+      void reload();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save wireless settings';
+      toast.notify({ title: 'Save failed', description: message, tone: 'danger' });
+    }
   };
 
   const toggleInterface = async (ifaceName: string, running: boolean) => {
     if (!creds) return;
     await updateWifiInterface(creds, ifaceName, running);
-    setInterfaces((prev) => prev.map((i) => (i.name === ifaceName ? { ...i, running } : i)));
+    setInterfaces((prev) =>
+      prev.map((i) => (i.name === ifaceName ? { ...i, disabled: !running } : i)),
+    );
     toast.notify({
       title: `${ifaceName} ${running ? 'enabled' : 'disabled'}`,
       tone: 'success',

@@ -341,6 +341,24 @@ export const test = base.extend<TestFixtures>({
           body: envelope({ interfaceName, passphrase }),
         });
       });
+
+      await context.route('**/api/wifi/settings/*', async (route) => {
+        if (route.request().method() === 'PUT') {
+          const body = route.request().postDataJSON() as {
+            ssid?: string;
+            password?: string;
+            securityTypes?: string;
+          } | null;
+          if (body?.password) passphrase = body.password;
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: envelope({ ok: true }),
+          });
+          return;
+        }
+        await route.fallback();
+      });
     });
   },
   mockLogsBackend: async ({ context }, use) => {
