@@ -27,12 +27,17 @@ export interface WifiBackendRouter {
   interfaceName?: string;
 }
 
+export interface LogsBackendOptions {
+  id?: string;
+}
+
 export interface TestFixtures {
   resetMocks: () => Promise<void>;
   seedRouter: (input: SeedInput) => Promise<void>;
   mockBackendScan: (devices?: ScanMockDevice[]) => Promise<void>;
   mockOverviewBackend: (router?: OverviewBackendRouter) => Promise<void>;
   mockWifiBackend: (router?: WifiBackendRouter) => Promise<void>;
+  mockLogsBackend: (options?: LogsBackendOptions) => Promise<void>;
 }
 
 export const test = base.extend<TestFixtures>({
@@ -329,6 +334,66 @@ export const test = base.extend<TestFixtures>({
           status: 200,
           contentType: 'application/json',
           body: envelope({ interfaceName, passphrase }),
+        });
+      });
+    });
+  },
+  mockLogsBackend: async ({ context }, use) => {
+    await use(async (options = {}) => {
+      if (options.id) {
+        await context.addInitScript((routerId) => {
+          try {
+            const key = 'nasnet-panel.session-credentials.v1';
+            const raw = window.sessionStorage.getItem(key);
+            const map = (raw ? JSON.parse(raw) : {}) as Record<
+              string,
+              { username: string; password: string }
+            >;
+            map[routerId] = { username: 'admin', password: 'test' };
+            window.sessionStorage.setItem(key, JSON.stringify(map));
+          } catch {
+            /* ignore */
+          }
+        }, options.id);
+      }
+
+      const envelope = <T>(data: T, status = 200) =>
+        JSON.stringify({ status, message: 'OK', data });
+
+      const entries = [
+        {
+          id: '0',
+          time: 'apr/23 10:00:00',
+          topic: 'system,info',
+          level: 'info',
+          message: 'system started',
+        },
+        {
+          id: '1',
+          time: 'apr/23 10:01:00',
+          topic: 'pppoe,error',
+          level: 'error',
+          message: 'pppoe connection failed',
+        },
+        {
+          id: '2',
+          time: 'apr/23 10:02:00',
+          topic: 'dhcp,warning',
+          level: 'warning',
+          message: 'lease expired for 192.168.1.50',
+        },
+      ];
+
+      await context.route('**/api/logs**', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope({
+            count: entries.length,
+            entries,
+            availableTopics: ['system', 'info', 'pppoe', 'error', 'dhcp', 'warning'],
+            availableLevels: ['debug', 'info', 'warning', 'error', 'critical'],
+          }),
         });
       });
     });

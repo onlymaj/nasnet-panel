@@ -75,15 +75,12 @@ export async function fetchWifiInterface(
   name: string,
   signal?: AbortSignal,
 ): Promise<WifiInterfaceResponse> {
-  return apiRequest<WifiInterfaceResponse>(
-    `/api/wifi/interfaces/${encodeURIComponent(name)}`,
-    {
-      method: 'GET',
-      headers: authHeaders(creds),
-      cache: 'no-store',
-      signal,
-    },
-  );
+  return apiRequest<WifiInterfaceResponse>(`/api/wifi/interfaces/${encodeURIComponent(name)}`, {
+    method: 'GET',
+    headers: authHeaders(creds),
+    cache: 'no-store',
+    signal,
+  });
 }
 
 export async function fetchWifiClients(
@@ -92,15 +89,12 @@ export async function fetchWifiClients(
   signal?: AbortSignal,
 ): Promise<WifiConnectedClientResponse[]> {
   const query = interfaceName ? `?interface=${encodeURIComponent(interfaceName)}` : '';
-  const list = await apiRequest<WifiConnectedClientResponse[] | null>(
-    `/api/wifi/clients${query}`,
-    {
-      method: 'GET',
-      headers: authHeaders(creds),
-      cache: 'no-store',
-      signal,
-    },
-  );
+  const list = await apiRequest<WifiConnectedClientResponse[] | null>(`/api/wifi/clients${query}`, {
+    method: 'GET',
+    headers: authHeaders(creds),
+    cache: 'no-store',
+    signal,
+  });
   return list ?? [];
 }
 
@@ -135,15 +129,12 @@ export async function fetchWifiPassphrase(
   name: string,
   signal?: AbortSignal,
 ): Promise<WifiPassphraseResponse> {
-  return apiRequest<WifiPassphraseResponse>(
-    `/api/wifi/passphrase/${encodeURIComponent(name)}`,
-    {
-      method: 'GET',
-      headers: authHeaders(creds),
-      cache: 'no-store',
-      signal,
-    },
-  );
+  return apiRequest<WifiPassphraseResponse>(`/api/wifi/passphrase/${encodeURIComponent(name)}`, {
+    method: 'GET',
+    headers: authHeaders(creds),
+    cache: 'no-store',
+    signal,
+  });
 }
 
 export async function updateWifiPassphrase(

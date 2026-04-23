@@ -34,8 +34,7 @@ const parseNumber = (value: string | undefined): number => {
   return Number.isFinite(n) ? n : 0;
 };
 
-const bpsToKbps = (value: string | undefined): number =>
-  Math.round(parseNumber(value) / 1000);
+const bpsToKbps = (value: string | undefined): number => Math.round(parseNumber(value) / 1000);
 
 const parseSecurityTypes = (value: string | undefined): string[] =>
   (value ?? '')
@@ -110,8 +109,7 @@ export function useWireless(id: string | undefined) {
         fetchWifiInterfaces(creds),
         fetchWifiClients(creds).catch(() => [] as WifiConnectedClientResponse[]),
       ]);
-      const primary =
-        rawInterfaces.find((i) => i.running && !i.disabled) ?? rawInterfaces[0];
+      const primary = rawInterfaces.find((i) => i.running && !i.disabled) ?? rawInterfaces[0];
       let passphrase = primary?.passphrase ?? '';
       if (primary && !passphrase) {
         try {
