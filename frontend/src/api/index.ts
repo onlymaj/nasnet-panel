@@ -59,6 +59,18 @@ export {
   type DnsInfoResponse,
   type UpdateDnsRequest,
 } from './dns';
+export {
+  fetchDhcpLeases,
+  fetchDhcpClients,
+  fetchDhcpServers,
+  makeDhcpLeaseStatic,
+  removeDhcpLease,
+  type DhcpCredentials,
+  type DhcpLease,
+  type DhcpClient,
+  type DhcpServer,
+  type DhcpLeaseAction,
+} from './dhcp';
 export { ApiError } from './http';
 export { isAbortError } from './abort';
 export { BACKEND_URL } from './config';

@@ -1,10 +1,53 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
+
+	"nasnet-panel/pkg/routeros" //nolint:misspell // intentional package name
 )
+
+// validateSecurityTypes validates security types format.
+func validateSecurityTypes(securityTypes string) error {
+	if securityTypes == "" {
+		return nil
+	}
+
+	validTypes := map[string]bool{
+		"wpa-psk":  true,
+		"wpa2-psk": true,
+		"wpa3-psk": true,
+	}
+
+	parts := strings.Split(securityTypes, ",")
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed == "" {
+			return fmt.Errorf("invalid security types format")
+		}
+		if !validTypes[trimmed] {
+			return fmt.Errorf("invalid security type: %s. Must be one of: wpa-psk, wpa2-psk, wpa3-psk", trimmed)
+		}
+	}
+
+	return nil
+}
+
+// validatePassword validates password length.
+func validatePassword(password string) error {
+	if password == "" {
+		return nil
+	}
+
+	if len(password) < 8 {
+		return fmt.Errorf("password must be at least 8 characters long")
+	}
+
+	return nil
+}
 
 // HandleListWiFiInterfaces godoc
 // @Summary List WiFi interfaces
@@ -24,7 +67,7 @@ func HandleListWiFiInterfaces(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	interfaces, err := client.ListWifiInterfaces()
 	if err != nil {
@@ -62,7 +105,7 @@ func HandleGetWiFiInterface(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	iface, err := client.GetWifiInterface(name)
 	if err != nil {
@@ -97,7 +140,7 @@ func HandleListWiFiConnectedClients(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	if interfaceName != "" {
 		iface, err := client.GetWifiInterface(interfaceName)
@@ -149,7 +192,7 @@ func HandleRemoveWiFiConnectedClient(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	err = client.RemoveWifiConnectedClient(mac)
 	if err != nil {
@@ -186,7 +229,7 @@ func HandleGetWiFiPassphrase(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	password, err := client.GetWifiPassword(name)
 	if err != nil {
@@ -238,11 +281,16 @@ func HandleChangeWiFiPassphrase(c echo.Context) error {
 		return ErrorResponse(c, http.StatusBadRequest, "Passphrase is required", nil)
 	}
 
+	// Validate password length.
+	if err := validatePassword(req.Passphrase); err != nil {
+		return ErrorResponse(c, http.StatusBadRequest, "Invalid passphrase", err)
+	}
+
 	client, err := GetRouterOSClient(c)
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	err = client.ChangeWifiPassphrase(name, req.Passphrase)
 	if err != nil {
@@ -286,7 +334,7 @@ func HandleUpdateWiFiInterface(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	iface, err := client.GetWifiInterface(name)
 	if err != nil {
@@ -327,4 +375,93 @@ func HandleUpdateWiFiInterface(c echo.Context) error {
 		status = "disabled"
 	}
 	return SimpleSuccessResponse(c, http.StatusOK, "WiFi interface already "+status)
+}
+
+// HandleUpdateWiFiSettings godoc
+// @Summary Update WiFi interface settings
+// @Description Update SSID, password, and security types for a WiFi interface
+// @Tags WiFi
+// @Accept json
+// @Produce json
+// @Security BasicAuth
+// @Param X-RouterOS-Host header string true "RouterOS host address"
+// @Param name path string true "Interface name"
+// @Param body body UpdateWiFiSettingsRequest true "WiFi settings"
+// @Success 200 {object} map[string]interface{} "WiFi settings updated"
+// @Failure 400 {object} map[string]interface{} "Bad request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Interface not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/wifi/settings/{name} [put].
+func HandleUpdateWiFiSettings(c echo.Context) error {
+	name := c.Param("name")
+	if name == "" {
+		return ErrorResponse(c, http.StatusBadRequest, "Interface name is required", nil)
+	}
+
+	var req UpdateWiFiSettingsRequest
+	if err := c.Bind(&req); err != nil {
+		return ErrorResponse(c, http.StatusBadRequest, "Invalid request", err)
+	}
+
+	// Validate password if provided.
+	if req.Password != nil {
+		if err := validatePassword(*req.Password); err != nil {
+			return ErrorResponse(c, http.StatusBadRequest, "Invalid password", err)
+		}
+	}
+
+	// Validate security types if provided.
+	if req.SecurityTypes != nil {
+		if err := validateSecurityTypes(*req.SecurityTypes); err != nil {
+			return ErrorResponse(c, http.StatusBadRequest, "Invalid security types", err)
+		}
+	}
+
+	client, err := GetRouterOSClient(c)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = client.Close() }()
+
+	// Verify interface exists
+	iface, err := client.GetWifiInterface(name)
+	if err != nil {
+		if IsCredentialError(err) {
+			return ErrorResponse(c, http.StatusUnauthorized, "Invalid RouterOS credentials", err)
+		}
+		return ErrorResponse(c, http.StatusNotFound, "WiFi interface not found", err)
+	}
+
+	if iface == nil {
+		return ErrorResponse(c, http.StatusNotFound, "WiFi interface not found", nil)
+	}
+
+	// Update settings.
+	settings := routeros.WiFiSettings{ //nolint:misspell // intentional package name
+		SSID:          req.SSID,
+		Password:      req.Password,
+		SecurityTypes: req.SecurityTypes,
+	}
+
+	err = client.UpdateWiFiSettings(name, settings)
+	if err != nil {
+		if IsCredentialError(err) {
+			return ErrorResponse(c, http.StatusUnauthorized, "Invalid RouterOS credentials", err)
+		}
+		return ErrorResponse(c, http.StatusInternalServerError, "Failed to update WiFi settings", err)
+	}
+
+	// Fetch updated interface to return in response
+	updated, err := client.GetWifiInterface(name)
+	if err == nil && updated != nil {
+		response := UpdateWiFiSettingsResponse{
+			Name:         updated.Name,
+			SSID:         updated.SSID,
+			SecurityType: updated.SecurityType,
+		}
+		return SuccessResponse(c, http.StatusOK, "WiFi settings updated successfully", response)
+	}
+
+	return SimpleSuccessResponse(c, http.StatusOK, "WiFi settings updated successfully")
 }
