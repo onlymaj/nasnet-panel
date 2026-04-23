@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"nasnet-panel/pkg/routeros" //nolint:misspell // intentional package name
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,11 +23,30 @@ import (
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/firewall/rules [get]
 func HandleListFirewallRules(c echo.Context) error {
+	client, err := GetRouterOSClient(c)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = client.Close() }()
+
 	chain := c.QueryParam("chain")
 
-	filter := ""
+	var rules []routeros.FirewallRule //nolint:misspell // intentional package name
 	if chain != "" {
-		filter = " (chain: " + chain + ")"
+		rules, err = client.GetFirewallRulesByChain(chain)
+	} else {
+		rules, err = client.ListFirewallRules()
 	}
-	return SuccessResponse(c, http.StatusOK, "Firewall rules"+filter, []FirewallRuleResponse{})
+	if err != nil {
+		if IsCredentialError(err) {
+			return ErrorResponse(c, http.StatusUnauthorized, "Invalid RouterOS credentials", err)
+		}
+		return ErrorResponse(c, http.StatusInternalServerError, "Failed to list firewall rules", err)
+	}
+
+	response := ToFirewallRulesResponse(rules)
+	if response == nil {
+		response = []FirewallRuleResponse{}
+	}
+	return SuccessResponse(c, http.StatusOK, "Firewall rules retrieved", response)
 }

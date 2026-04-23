@@ -16,6 +16,7 @@ import { LogsPage } from './routes/LogsPage';
 import { UpdatesPage } from './routes/UpdatesPage';
 import { DHCPPage } from './routes/DHCPPage';
 import { DNSPage } from './routes/DNSPage';
+import { FirewallPage } from './routes/FirewallPage';
 
 function AddRouterEntry() {
   const [params] = useSearchParams();
@@ -57,6 +58,7 @@ export function App() {
                   <Route path="logs" element={<LogsPage />} />
                   <Route path="dhcp" element={<DHCPPage />} />
                   <Route path="dns" element={<DNSPage />} />
+                  <Route path="firewall" element={<FirewallPage />} />
                 </Route>
                 <Route
                   path="/updates"

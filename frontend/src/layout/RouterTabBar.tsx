@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
+  Flame,
   Globe,
   LayoutGrid,
   Network,
@@ -20,6 +21,7 @@ export const ROUTER_TABS: Array<TabItem & { path: string }> = [
   { id: 'vpn', label: 'VPN', path: 'vpn', icon: <Shield size={16} /> },
   { id: 'dhcp', label: 'DHCP', path: 'dhcp', icon: <Network size={16} /> },
   { id: 'dns', label: 'DNS', path: 'dns', icon: <Globe size={16} /> },
+  { id: 'firewall', label: 'Firewall', path: 'firewall', icon: <Flame size={16} /> },
   { id: 'logs', label: 'Logs', path: 'logs', icon: <ScrollText size={16} /> },
   { id: 'users', label: 'Users', path: 'users', icon: <UsersIcon size={16} /> },
   { id: 'wizard', label: 'Wizard', path: 'config', icon: <Wand2 size={16} /> },

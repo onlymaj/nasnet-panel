@@ -71,6 +71,11 @@ export {
   type DhcpServer,
   type DhcpLeaseAction,
 } from './dhcp';
+export {
+  fetchFirewallRules,
+  type FirewallCredentials,
+  type FirewallRule,
+} from './firewall';
 export { ApiError } from './http';
 export { isAbortError } from './abort';
 export { BACKEND_URL } from './config';
