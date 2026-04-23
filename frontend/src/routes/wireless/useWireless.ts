@@ -37,12 +37,21 @@ const parseNumber = (value: string | undefined): number => {
 const bpsToKbps = (value: string | undefined): number =>
   Math.round(parseNumber(value) / 1000);
 
+const parseSecurityTypes = (value: string | undefined): string[] =>
+  (value ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const toInterface = (wi: WifiInterfaceResponse): Interface => ({
   name: wi.name || wi.interface,
   type: 'wireless',
   mac: wi.macAddress,
   running: wi.running && !wi.disabled,
   comment: wi.comment,
+  ssid: wi.ssid,
+  band: toBand(wi.band),
+  securityTypes: parseSecurityTypes(wi.securityType),
 });
 
 const toWirelessClient = (c: WifiConnectedClientResponse): WirelessClient => ({
@@ -75,11 +84,11 @@ export function useWireless(id: string | undefined) {
   const router = useRouter(id);
   const { getCredentials } = useSession();
   const [settings, setSettings] = useState<WirelessSettings | null>(null);
-  const [primaryName, setPrimaryName] = useState<string | null>(null);
   const [interfaces, setInterfaces] = useState<Interface[]>([]);
   const [clients, setClients] = useState<WirelessClient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [restarting, setRestarting] = useState(false);
+  const [editingIface, setEditingIface] = useState<Interface | null>(null);
+  const [editingSettings, setEditingSettings] = useState<WirelessSettings | null>(null);
   const toast = useToast();
 
   const creds = useMemo<WifiCredentials | null>(() => {
@@ -115,7 +124,6 @@ export function useWireless(id: string | undefined) {
       setInterfaces(rawInterfaces.map(toInterface));
       setClients(rawClients.map(toWirelessClient));
       setSettings(toSettings(primary, passphrase));
-      setPrimaryName(primary ? primary.name || primary.interface : null);
     } finally {
       setLoading(false);
     }
@@ -125,13 +133,67 @@ export function useWireless(id: string | undefined) {
     void reload();
   }, [reload]);
 
+  useEffect(() => {
+    if (!creds) return;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const [rawInterfaces, rawClients] = await Promise.all([
+          fetchWifiInterfaces(creds),
+          fetchWifiClients(creds).catch(() => [] as WifiConnectedClientResponse[]),
+        ]);
+        if (cancelled) return;
+        setInterfaces(rawInterfaces.map(toInterface));
+        setClients(rawClients.map(toWirelessClient));
+      } catch {
+        // keep previous values on transient failures
+      }
+    };
+    const interval = window.setInterval(() => {
+      void tick();
+    }, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [creds]);
+
+  const openEdit = useCallback(
+    async (iface: Interface) => {
+      let passphrase = '';
+      if (creds) {
+        try {
+          const p = await fetchWifiPassphrase(creds, iface.name);
+          passphrase = p.passphrase;
+        } catch {
+          // passphrase unavailable — leave blank
+        }
+      }
+      setEditingIface(iface);
+      setEditingSettings({
+        ssid: iface.ssid ?? '',
+        password: passphrase,
+        security: toSecurity(iface.securityTypes?.join(',')),
+        band: iface.band ?? '2.4ghz',
+        countryCode: settings?.countryCode ?? '',
+        hidden: false,
+      });
+    },
+    [creds, settings?.countryCode],
+  );
+
+  const closeEdit = useCallback(() => {
+    setEditingIface(null);
+    setEditingSettings(null);
+  }, []);
+
   const save = async (next: WirelessSettings) => {
-    if (!creds || !primaryName) return;
-    if (next.password && next.password !== settings?.password) {
-      await updateWifiPassphrase(creds, primaryName, next.password);
+    if (!creds || !editingIface) return;
+    if (next.password && next.password !== editingSettings?.password) {
+      await updateWifiPassphrase(creds, editingIface.name, next.password);
     }
-    setSettings(next);
     toast.notify({ title: 'Wireless settings saved', tone: 'success' });
+    closeEdit();
   };
 
   const toggleInterface = async (ifaceName: string, running: boolean) => {
@@ -144,33 +206,17 @@ export function useWireless(id: string | undefined) {
     });
   };
 
-  const restart = async () => {
-    if (!creds) return;
-    setRestarting(true);
-    try {
-      const wirelessIfaces = interfaces.filter((i) => i.type === 'wireless');
-      for (const iface of wirelessIfaces) {
-        await updateWifiInterface(creds, iface.name, false);
-      }
-      for (const iface of wirelessIfaces) {
-        await updateWifiInterface(creds, iface.name, true);
-      }
-      await reload();
-      toast.notify({ title: 'Wireless restarted', tone: 'success' });
-    } finally {
-      setRestarting(false);
-    }
-  };
-
   return {
     settings,
     interfaces,
     clients,
     loading,
-    restarting,
+    editingIface,
+    editingSettings,
+    openEdit,
+    closeEdit,
     reload,
     save,
     toggleInterface,
-    restart,
   };
 }
