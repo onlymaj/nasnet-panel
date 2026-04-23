@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Filter, RefreshCw, ScrollText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, RefreshCw, ScrollText, SearchX } from 'lucide-react';
 import styles from './LogsPage.module.scss';
 import {
   Badge,
@@ -16,15 +16,17 @@ import {
   Inline,
   Label,
   Select,
+  Skeleton,
   Stack,
-  Switch,
 } from '@nasnet/ui';
-import { api, type LogEntry, type LogLevel } from '../api';
+import { fetchLogs, type LogEntryResponse, type LogSeverity } from '../api';
+import { useSession } from '../state/SessionContext';
+import { useRouter } from '../state/RouterStoreContext';
 
-type LevelFilter = LogLevel | 'all';
-
-const toneForLevel = (level: LogEntry['level']): 'success' | 'warning' | 'danger' | 'info' =>
-  level === 'error'
+const toneForLevel = (
+  level: LogEntryResponse['level'],
+): 'success' | 'warning' | 'danger' | 'info' =>
+  level === 'critical' || level === 'error'
     ? 'danger'
     : level === 'warning'
       ? 'warning'
@@ -34,62 +36,91 @@ const toneForLevel = (level: LogEntry['level']): 'success' | 'warning' | 'danger
 
 export function LogsPage() {
   const { id } = useParams<{ id: string }>();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [topics, setTopics] = useState<string[]>([]);
-  const [level, setLevel] = useState<LevelFilter>('all');
-  const [topic, setTopic] = useState<string>('');
+  const router = useRouter(id);
+  const { getCredentials } = useSession();
+  const [logs, setLogs] = useState<LogEntryResponse[]>([]);
+  const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<LogSeverity[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [search, setSearch] = useState<string>('');
-  const [tail, setTail] = useState<boolean>(false);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const pageSize = 20;
-  const [selected, setSelected] = useState<LogEntry | null>(null);
+  const [selected, setSelected] = useState<LogEntryResponse | null>(null);
 
   const reload = useCallback(async () => {
     if (!id) return;
+    const creds = getCredentials(id);
+    const host = router?.host;
+    if (!creds || !host) {
+      setLoading(false);
+      setError('Missing router credentials for this session.');
+      return;
+    }
     setLoading(true);
-    const [l, t] = await Promise.all([
-      api.logs.list(id, {
-        level,
-        topic: topic || undefined,
-        search: search || undefined,
-        limit: 200,
-      }),
-      api.logs.topics(id),
-    ]);
-    setLogs(l);
-    setTopics(t);
-    setLoading(false);
-  }, [id, level, topic, search]);
+    setError(null);
+    try {
+      const response = await fetchLogs(
+        { host, ...creds },
+        {
+          limit: 200,
+          text: debouncedSearch || undefined,
+          topic: selectedTopics.length > 0 ? selectedTopics.join(',') : undefined,
+          severity: selectedLevels.length === 1 ? selectedLevels[0] : undefined,
+        },
+      );
+      setLogs(response.entries ?? []);
+      setAvailableTopics(response.availableTopics ?? []);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load logs.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [id, router?.host, getCredentials, selectedLevels, selectedTopics, debouncedSearch]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
 
-  useEffect(() => {
-    if (!tail || !id) return;
-    const timer = window.setInterval(() => {
-      void reload();
-    }, 2000);
-    return () => window.clearInterval(timer);
-  }, [tail, id, reload]);
+  const visibleLogs = useMemo(() => {
+    if (selectedLevels.length <= 1) return logs;
+    return logs.filter((l) => selectedLevels.includes(l.level));
+  }, [logs, selectedLevels]);
 
   const counts = useMemo(() => {
-    const c: Record<LogLevel, number> = { info: 0, warning: 0, error: 0, debug: 0 };
-    for (const l of logs) c[l.level] += 1;
+    const c: Record<LogSeverity, number> = {
+      info: 0,
+      warning: 0,
+      error: 0,
+      debug: 0,
+      critical: 0,
+    };
+    for (const l of visibleLogs) c[l.level] += 1;
     return c;
-  }, [logs]);
+  }, [visibleLogs]);
 
-  const totalPages = Math.max(1, Math.ceil(logs.length / pageSize));
+  const isSearching = loading || search !== debouncedSearch;
+
+  const totalPages = Math.max(1, Math.ceil(visibleLogs.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pagedLogs = useMemo(
-    () => logs.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [logs, currentPage],
+    () => visibleLogs.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [visibleLogs, currentPage],
   );
 
   useEffect(() => {
     setPage(1);
-  }, [level, topic, search]);
+  }, [selectedLevels, selectedTopics, debouncedSearch]);
 
   return (
     <Stack>
@@ -106,7 +137,6 @@ export function LogsPage() {
             </CardDescription>
           </div>
           <div className={styles.headerActions}>
-            <Switch label="Auto-tail" checked={tail} onChange={(e) => setTail(e.target.checked)} />
             <Button size="sm" variant="secondary" onClick={reload} disabled={loading}>
               <RefreshCw size={14} aria-hidden /> Refresh
             </Button>
@@ -118,13 +148,17 @@ export function LogsPage() {
               <span>Level</span>
               <Select
                 aria-label="Level"
-                value={level}
-                onChange={(v) => setLevel(v as LevelFilter)}
+                multiple
+                searchable
+                searchPlaceholder="Search level…"
+                placeholder="All levels"
+                value={selectedLevels}
+                onChange={(v) => setSelectedLevels(v as LogSeverity[])}
                 options={[
-                  { value: 'all', label: 'all' },
                   { value: 'info', label: 'info' },
                   { value: 'warning', label: 'warning' },
                   { value: 'error', label: 'error' },
+                  { value: 'critical', label: 'critical' },
                   { value: 'debug', label: 'debug' },
                 ]}
               />
@@ -133,12 +167,13 @@ export function LogsPage() {
               <span>Topic</span>
               <Select
                 aria-label="Topic"
-                value={topic}
-                onChange={(v) => setTopic(v)}
-                options={[
-                  { value: '', label: 'all topics' },
-                  ...topics.map((t) => ({ value: t, label: t })),
-                ]}
+                multiple
+                searchable
+                searchPlaceholder="Search topic…"
+                placeholder="All topics"
+                value={selectedTopics}
+                onChange={(v) => setSelectedTopics(v)}
+                options={availableTopics.map((t) => ({ value: t, label: t }))}
               />
             </Label>
             <Label>
@@ -156,14 +191,34 @@ export function LogsPage() {
             <Badge tone="success">info · {counts.info}</Badge>
             <Badge tone="warning">warning · {counts.warning}</Badge>
             <Badge tone="danger">error · {counts.error}</Badge>
+            <Badge tone="danger">critical · {counts.critical}</Badge>
             <Badge tone="info">debug · {counts.debug}</Badge>
           </Inline>
         </Stack>
       </Card>
 
       <Card data-testid="log-stream">
-        {logs.length === 0 && !loading ? (
-          <p className={styles.emptyNote}>No logs match the current filters.</p>
+        {isSearching ? (
+          <div data-testid="log-skeleton">
+            {['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((k) => (
+              <div key={`skeleton-${k}`} className={styles.logRow}>
+                <Skeleton width={160} height={14} />
+                <Skeleton width={70} height={18} radius={9} />
+                <Skeleton width={110} height={12} />
+                <Skeleton height={14} />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className={styles.emptyNote}>
+            <SearchX size={28} aria-hidden className={styles.emptyIcon} />
+            <p>{error}</p>
+          </div>
+        ) : visibleLogs.length === 0 ? (
+          <div className={styles.emptyNote}>
+            <SearchX size={28} aria-hidden className={styles.emptyIcon} />
+            <p>No logs match the current filters.</p>
+          </div>
         ) : (
           <div>
             <AnimatePresence mode="wait" initial={false}>
@@ -183,7 +238,7 @@ export function LogsPage() {
                     onClick={() => setSelected(log)}
                     aria-label={`Open details for log ${log.id}`}
                   >
-                    <span className={styles.timestamp}>{new Date(log.ts).toLocaleString()}</span>
+                    <span className={styles.timestamp}>{log.time}</span>
                     <Badge className={styles.logLevel} tone={toneForLevel(log.level)}>
                       {log.level}
                     </Badge>
@@ -193,11 +248,11 @@ export function LogsPage() {
                 ))}
               </motion.div>
             </AnimatePresence>
-            {logs.length > pageSize ? (
+            {visibleLogs.length > pageSize ? (
               <div className={styles.pagination}>
                 <span className={styles.paginationInfo}>
                   Showing {(currentPage - 1) * pageSize + 1}–
-                  {Math.min(currentPage * pageSize, logs.length)} of {logs.length}
+                  {Math.min(currentPage * pageSize, visibleLogs.length)} of {visibleLogs.length}
                 </span>
                 <div className={styles.paginationControls}>
                   <Button
@@ -243,8 +298,7 @@ export function LogsPage() {
           <div className={styles.detailGrid}>
             <div className={styles.detailLabel}>Timestamp</div>
             <div className={styles.detailValue}>
-              <div>{new Date(selected.ts).toLocaleString()}</div>
-              <div className={styles.detailMuted}>{selected.ts}</div>
+              <div>{selected.time}</div>
             </div>
 
             <div className={styles.detailLabel}>Level</div>
@@ -267,10 +321,30 @@ export function LogsPage() {
               <code className={styles.detailMono}>{selected.id}</code>
             </div>
 
-            <div className={styles.detailLabel}>Router ID</div>
-            <div className={styles.detailValue}>
-              <code className={styles.detailMono}>{selected.routerId}</code>
-            </div>
+            {selected.prefix ? (
+              <>
+                <div className={styles.detailLabel}>Prefix</div>
+                <div className={styles.detailValue}>
+                  <code className={styles.detailMono}>{selected.prefix}</code>
+                </div>
+              </>
+            ) : null}
+
+            {selected.account ? (
+              <>
+                <div className={styles.detailLabel}>Account</div>
+                <div className={styles.detailValue}>
+                  <code className={styles.detailMono}>{selected.account}</code>
+                </div>
+              </>
+            ) : null}
+
+            {selected.count && selected.count > 1 ? (
+              <>
+                <div className={styles.detailLabel}>Count</div>
+                <div className={styles.detailValue}>{selected.count}</div>
+              </>
+            ) : null}
           </div>
         ) : null}
       </Dialog>
