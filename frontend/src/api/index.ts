@@ -31,6 +31,19 @@ export {
   type InterfaceTrafficResponse,
   type InterfaceResponse,
 } from './system';
+export {
+  fetchWifiInterfaces,
+  fetchWifiInterface,
+  fetchWifiClients,
+  updateWifiInterface,
+  removeWifiClient,
+  fetchWifiPassphrase,
+  updateWifiPassphrase,
+  type WifiCredentials,
+  type WifiInterfaceResponse,
+  type WifiConnectedClientResponse,
+  type WifiPassphraseResponse,
+} from './wifi';
 export { ApiError } from './http';
 export { isAbortError } from './abort';
 export { BACKEND_URL } from './config';
