@@ -51,6 +51,7 @@ export interface Interface {
   type: 'ether' | 'wireless' | 'bridge' | 'vlan';
   mac: string;
   running: boolean;
+  disabled?: boolean;
   comment?: string;
   ssid?: string;
   band?: WirelessBand;
@@ -121,13 +122,12 @@ export interface LogEntry {
   message: string;
 }
 
-export type WirelessSecurity = 'WPA2-PSK' | 'WPA3-PSK' | 'open';
 export type WirelessBand = '2.4ghz' | '5ghz';
 
 export interface WirelessSettings {
   ssid: string;
   password: string;
-  security: WirelessSecurity;
+  securityTypes: string[];
   band: WirelessBand;
   countryCode: string;
   hidden: boolean;

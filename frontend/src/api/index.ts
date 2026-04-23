@@ -36,6 +36,7 @@ export {
   fetchWifiInterface,
   fetchWifiClients,
   updateWifiInterface,
+  updateWifiSettings,
   removeWifiClient,
   fetchWifiPassphrase,
   updateWifiPassphrase,
@@ -43,6 +44,7 @@ export {
   type WifiInterfaceResponse,
   type WifiConnectedClientResponse,
   type WifiPassphraseResponse,
+  type UpdateWifiSettingsRequest,
 } from './wifi';
 export {
   fetchLogs,

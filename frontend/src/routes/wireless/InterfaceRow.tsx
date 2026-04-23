@@ -12,6 +12,7 @@ interface Props {
 }
 
 export function InterfaceRow({ iface, settings, onToggle, onEdit }: Props) {
+  const enabled = !iface.disabled;
   return (
     <div className={styles.interfaceRow}>
       <div className={cx(styles.iconTone, toneClass('primary'))}>
@@ -21,12 +22,10 @@ export function InterfaceRow({ iface, settings, onToggle, onEdit }: Props) {
         <strong>{iface.ssid ?? settings.ssid}</strong>{' '}
         <span className={styles.interfaceName}>({iface.name})</span>
         <div>
-          <Badge tone={iface.running ? 'success' : 'neutral'}>
-            {iface.running ? 'enabled' : 'disabled'}
-          </Badge>{' '}
+          {enabled && !iface.running ? <Badge tone="warning">down</Badge> : null}{' '}
           {(iface.securityTypes && iface.securityTypes.length > 0
             ? iface.securityTypes
-            : [settings.security]
+            : settings.securityTypes
           ).map((s) => (
             <Badge key={s} tone="neutral">
               {s}
@@ -39,7 +38,7 @@ export function InterfaceRow({ iface, settings, onToggle, onEdit }: Props) {
       <Inline $gap="12px">
         <Switch
           aria-label={`Enable ${iface.name}`}
-          checked={iface.running}
+          checked={enabled}
           onChange={(e) => onToggle(e.target.checked)}
         />
         <Button size="sm" variant="secondary" onClick={() => onEdit(iface)}>
