@@ -23,6 +23,8 @@ export {
   fetchInterfaceTraffic,
   fetchInterfaces,
   fetchVPNClients,
+  rebootSystem,
+  shutdownSystem,
   type SystemCredentials,
   type SystemInfoResponse,
   type ResourceInfoResponse,

@@ -143,6 +143,20 @@ export async function fetchVPNClients(
   return clients ?? [];
 }
 
+export async function rebootSystem(creds: SystemCredentials): Promise<void> {
+  await apiRequest<void>('/api/system/reboot', {
+    method: 'POST',
+    headers: authHeaders(creds),
+  });
+}
+
+export async function shutdownSystem(creds: SystemCredentials): Promise<void> {
+  await apiRequest<void>('/api/system/shutdown', {
+    method: 'POST',
+    headers: authHeaders(creds),
+  });
+}
+
 export async function fetchInterfaceTraffic(
   creds: SystemCredentials,
   interfaceName: string,

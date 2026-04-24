@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Activity, Network as NetworkIcon, Shield, Timer, Users as UsersIcon } from 'lucide-react';
+import {
+  Activity,
+  Network as NetworkIcon,
+  Power,
+  RotateCw,
+  Shield,
+  Timer,
+  Users as UsersIcon,
+} from 'lucide-react';
 import {
   Badge,
   Button,
@@ -8,13 +16,16 @@ import {
   CardHeader,
   CardTitle,
   CircularProgress,
+  ConfirmDialog,
   SectionGrid,
   SectionHeading,
   Select,
   Skeleton,
   Stack,
   StatusDot,
+  Tooltip,
   TrafficChart,
+  useToast,
 } from '@nasnet/ui';
 import {
   fetchDHCPLeases,
@@ -23,6 +34,8 @@ import {
   fetchInterfaces,
   fetchSystemOverview,
   fetchVPNClients,
+  rebootSystem,
+  shutdownSystem,
   type DHCPLeaseResponse,
   type InterfaceResponse,
   type SystemOverview,
@@ -83,7 +96,37 @@ export function OverviewTab() {
   const [dhcpLeaseList, setDhcpLeaseList] = useState<DHCPLeaseResponse[]>([]);
   const [interfaces, setInterfaces] = useState<InterfaceResponse[]>([]);
   const [selectedIface, setSelectedIface] = useState<string>(DEFAULT_TRAFFIC_INTERFACE);
+  const [powerAction, setPowerAction] = useState<'reboot' | 'shutdown' | null>(null);
+  const [powerBusy, setPowerBusy] = useState<'reboot' | 'shutdown' | null>(null);
   const colors = useThemeColors();
+  const toast = useToast();
+
+  const runPowerAction = async (action: 'reboot' | 'shutdown') => {
+    setPowerAction(null);
+    if (!id) return;
+    const creds = getCredentials(id);
+    const host = router?.host;
+    if (!creds || !host) return;
+    setPowerBusy(action);
+    try {
+      if (action === 'reboot') {
+        await rebootSystem({ host, ...creds });
+        toast.notify({ title: 'Reboot initiated', tone: 'warning' });
+      } else {
+        await shutdownSystem({ host, ...creds });
+        toast.notify({ title: 'Shutdown initiated', tone: 'warning' });
+      }
+      navigate('/');
+    } catch (err) {
+      toast.notify({
+        title: `Failed to ${action} router`,
+        description: err instanceof Error ? err.message : undefined,
+        tone: 'danger',
+      });
+    } finally {
+      setPowerBusy(null);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -204,6 +247,37 @@ export function OverviewTab() {
             <Activity size={14} aria-hidden />{' '}
             <span className={styles.statValue}>{overview.vpnTunnels}</span> <span>VPN</span>
           </span>
+          <span className={styles.bannerDivider} aria-hidden />
+          <div style={{ display: 'inline-flex', gap: 'var(--space-sm)' }}>
+            <Tooltip label="Reboot router">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPowerAction('reboot')}
+                loading={powerBusy === 'reboot'}
+                disabled={powerBusy !== null}
+                aria-label="Reboot router"
+                className={styles.rebootBtn}
+                data-testid="overview-reboot"
+              >
+                <RotateCw size={14} aria-hidden />
+              </Button>
+            </Tooltip>
+            <Tooltip label="Shutdown router">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setPowerAction('shutdown')}
+                loading={powerBusy === 'shutdown'}
+                disabled={powerBusy !== null}
+                aria-label="Shutdown router"
+                className={styles.shutdownBtn}
+                data-testid="overview-shutdown"
+              >
+                <Power size={14} aria-hidden />
+              </Button>
+            </Tooltip>
+          </div>
         </div>
       </Card>
 
@@ -471,6 +545,24 @@ export function OverviewTab() {
           </Card>
         </SectionGrid>
       </div>
+
+      <ConfirmDialog
+        open={powerAction !== null}
+        title={powerAction === 'shutdown' ? 'Shutdown router?' : 'Reboot router?'}
+        description={
+          powerAction === 'shutdown'
+            ? 'The router will power off. You will need physical access to turn it back on.'
+            : 'The router will restart. Connectivity drops briefly.'
+        }
+        destructive
+        confirmLabel={powerAction === 'shutdown' ? 'Shutdown' : 'Reboot'}
+        onConfirm={() => {
+          if (powerAction) {
+            void runPowerAction(powerAction);
+          }
+        }}
+        onCancel={() => setPowerAction(null)}
+      />
     </Stack>
   );
 }

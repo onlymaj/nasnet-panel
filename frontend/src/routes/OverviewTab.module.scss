@@ -80,6 +80,18 @@
   font-weight: var(--weight-semibold);
 }
 
+.rebootBtn:not(:disabled):hover {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: #000;
+}
+
+.shutdownBtn:not(:disabled):hover {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+}
+
 .resourceCard {
   display: flex;
   flex-direction: column;
