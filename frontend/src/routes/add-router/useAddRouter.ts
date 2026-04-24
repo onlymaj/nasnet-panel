@@ -86,7 +86,7 @@ export function useAddRouter(
         username: state.username,
         password: state.password,
       });
-      await finishAndNavigate(router);
+      await finishAndNavigate({ ...router, hostname: verification.hostname });
     } catch (err) {
       dispatch({ type: 'error', message: (err as Error).message ?? 'Connection failed' });
     } finally {

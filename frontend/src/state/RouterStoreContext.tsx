@@ -56,7 +56,12 @@ function reducer(state: State, action: Action): State {
       const merged = action.remote.map((incoming) => {
         const existing = existingById.get(incoming.id);
         if (!existing) return incoming;
-        return { ...incoming, status: existing.status, lastSeen: existing.lastSeen };
+        return {
+          ...incoming,
+          status: existing.status,
+          lastSeen: existing.lastSeen,
+          hostname: incoming.hostname ?? existing.hostname,
+        };
       });
       return { ...state, routers: merged };
     }
@@ -107,7 +112,18 @@ export const RouterStoreProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const toStore = {
+        ...state,
+        routers: state.routers.map((r) => ({
+          id: r.id,
+          name: r.name,
+          host: r.host,
+          hostname: r.hostname,
+          status: r.status,
+          lastSeen: r.lastSeen,
+        })),
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     } catch {
       /* ignore quota errors */
     }
