@@ -44,8 +44,18 @@ export function useRouterStatusPolling(
         if (!current) return;
         const nextStatus: Router['status'] = result.isOnline ? 'online' : 'offline';
         const nextLastSeen = result.isOnline ? new Date().toISOString() : current.lastSeen;
-        if (current.status !== nextStatus || current.lastSeen !== nextLastSeen) {
-          upsertRef.current({ ...current, status: nextStatus, lastSeen: nextLastSeen });
+        const nextHostname = result.hostname ?? current.hostname;
+        if (
+          current.status !== nextStatus ||
+          current.lastSeen !== nextLastSeen ||
+          current.hostname !== nextHostname
+        ) {
+          upsertRef.current({
+            ...current,
+            status: nextStatus,
+            lastSeen: nextLastSeen,
+            hostname: nextHostname,
+          });
         }
         markProbed(id);
       } catch {

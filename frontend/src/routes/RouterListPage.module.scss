@@ -96,6 +96,10 @@
   color: var(--color-text-muted);
 }
 
+.hostnameBadge {
+  text-transform: lowercase;
+}
+
 .motionGrid {
   display: grid;
   width: 100%;

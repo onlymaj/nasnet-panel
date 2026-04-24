@@ -5,6 +5,7 @@ export interface Router {
   id: string;
   name: string;
   host: string;
+  hostname?: string;
   port: number;
   platform: RouterPlatform;
   model?: string;

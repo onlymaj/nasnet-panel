@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Activity, Router as RouterIcon, Trash2 } from 'lucide-react';
+import { Globe, Router as RouterIcon, Trash2 } from 'lucide-react';
 import { Badge, Card, CardDescription, CardTitle, Inline, Skeleton, StatusDot } from '@nasnet/ui';
 import type { Router } from '../api';
 import styles from './RouterListPage.module.scss';
@@ -34,10 +34,16 @@ export function RouterCard({ router, isProbed, onOpen, onRemove }: Props) {
             </div>
           </div>
           <Inline>
-            <Badge tone="neutral">
-              <Activity size={12} aria-hidden />
-              {router.model ?? router.platform}
-            </Badge>
+            {router.hostname || isProbed ? (
+              <Badge tone="neutral" className={styles.hostnameBadge}>
+                <Globe size={12} aria-hidden />
+                {router.hostname ?? '—'}
+              </Badge>
+            ) : (
+              <Skeleton width={140} height={20} radius={999} />
+            )}
+          </Inline>
+          <div className={styles.cardBottomRow}>
             {isProbed ? (
               <Badge tone={toneFor(router.status)}>
                 <StatusDot $status={router.status} aria-hidden /> {router.status}
@@ -45,9 +51,6 @@ export function RouterCard({ router, isProbed, onOpen, onRemove }: Props) {
             ) : (
               <Skeleton width={78} height={20} radius={999} />
             )}
-          </Inline>
-          <div className={styles.cardBottomRow}>
-            <span>RouterOS {router.version ?? '—'}</span>
             <span>
               {router.lastSeen
                 ? `seen ${new Date(router.lastSeen).toLocaleDateString()}`
