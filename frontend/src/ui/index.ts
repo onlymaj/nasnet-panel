@@ -25,6 +25,8 @@ export { Dialog, ConfirmDialog } from './patterns/Dialog';
 export type { DialogProps, ConfirmDialogProps } from './patterns/Dialog';
 export { ToastProvider, useToast } from './patterns/Toast';
 export type { ToastTone } from './patterns/Toast';
+export { Tooltip } from './patterns/Tooltip';
+export type { TooltipProps } from './patterns/Tooltip';
 export { DataTable } from './patterns/DataTable';
 export type { DataTableColumn, DataTableProps } from './patterns/DataTable';
 export { FileDrop } from './patterns/FileDrop';
