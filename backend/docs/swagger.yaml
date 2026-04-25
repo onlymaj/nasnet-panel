@@ -34,21 +34,46 @@ definitions:
       ip:
         type: string
     type: object
+  handler.L2TPUserSecret:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   handler.L2tpServerDetailsResponse:
     properties:
       auth:
         type: string
+      changeTcpMss:
+        type: string
+      dnsServer:
+        type: string
       enabled:
         type: boolean
       ipsec:
-        type: boolean
+        type: string
       ipsecSecret:
+        type: string
+      localAddress:
         type: string
       oneSessionPerHost:
         type: boolean
+      onlyOne:
+        type: string
       profile:
         type: string
       protocol:
+        type: string
+      remoteAddress:
+        type: string
+      secrets:
+        items:
+          $ref: '#/definitions/handler.L2TPUserSecret'
+        type: array
+      useCompression:
+        type: string
+      useEncryption:
         type: string
     type: object
   handler.LogEntryResponse:
@@ -99,9 +124,27 @@ definitions:
     properties:
       auth:
         type: string
+      changeTcpMss:
+        type: string
+      dnsServer:
+        type: string
       enabled:
         type: boolean
+      localAddress:
+        type: string
+      onlyOne:
+        type: string
       profile:
+        type: string
+      remoteAddress:
+        type: string
+      secrets:
+        items:
+          $ref: '#/definitions/handler.L2TPUserSecret'
+        type: array
+      useCompression:
+        type: string
+      useEncryption:
         type: string
     type: object
   handler.Response:
@@ -142,17 +185,35 @@ definitions:
         type: string
       certificate:
         type: string
+      changeTcpMss:
+        type: string
       ciphers:
+        type: string
+      dnsServer:
         type: string
       enabled:
         type: boolean
+      localAddress:
+        type: string
+      onlyOne:
+        type: string
       pfs:
         type: string
       port:
         type: integer
       profile:
         type: string
+      remoteAddress:
+        type: string
+      secrets:
+        items:
+          $ref: '#/definitions/handler.L2TPUserSecret'
+        type: array
       tlsVersion:
+        type: string
+      useCompression:
+        type: string
+      useEncryption:
         type: string
       verifyClientCertificate:
         type: boolean
