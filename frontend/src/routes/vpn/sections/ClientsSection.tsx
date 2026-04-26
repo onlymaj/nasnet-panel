@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Card, ConfirmDialog, Stack } from '@nasnet/ui';
-import type { VPNClient } from '../../../api';
-import { ClientFormDialog } from '../dialogs/ClientFormDialog';
+import { Card, Stack } from '@nasnet/ui';
+import type { VPNClient, VPNCredentials } from '../../../api';
+// import { useState } from 'react';
+// import { ConfirmDialog } from '@nasnet/ui';
+// import { ClientFormDialog } from '../dialogs/ClientFormDialog';
+// import { useClientActions } from '../hooks/useClientActions';
 import { PaginationControls } from '../PaginationControls';
 import { usePagedFilter } from '../hooks/usePagedFilter';
-import { useClientActions } from '../hooks/useClientActions';
 import { PAGE_SIZE } from '../utils';
 import { ClientsTable } from './ClientsTable';
 import { SectionHeader } from './SectionHeader';
@@ -17,26 +18,28 @@ const matches = (c: VPNClient, q: string) =>
 
 interface Props {
   routerId: string;
+  creds: VPNCredentials | null;
   clients: VPNClient[];
   onChanged: () => void;
 }
 
-export function ClientsSection({ routerId, clients, onChanged }: Props) {
-  const [editing, setEditing] = useState<Partial<VPNClient> | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+export function ClientsSection({ creds, clients, onChanged }: Props) {
   const paged = usePagedFilter(clients, matches);
-  const actions = useClientActions(routerId, onChanged);
+  // Add/Edit/Delete are hidden until the backend exposes create/delete endpoints.
+  // const [editing, setEditing] = useState<Partial<VPNClient> | null>(null);
+  // const [deletingId, setDeletingId] = useState<string | null>(null);
+  // const actions = useClientActions(routerId, onChanged);
 
-  const onSave = async (draft: Partial<VPNClient>) => {
-    await actions.save(draft);
-    setEditing(null);
-  };
+  // const onSave = async (draft: Partial<VPNClient>) => {
+  //   await actions.save(draft);
+  //   setEditing(null);
+  // };
 
-  const onConfirmDelete = async () => {
-    if (!deletingId) return;
-    await actions.remove(deletingId);
-    setDeletingId(null);
-  };
+  // const onConfirmDelete = async () => {
+  //   if (!deletingId) return;
+  //   await actions.remove(deletingId);
+  //   setDeletingId(null);
+  // };
 
   return (
     <Stack>
@@ -51,18 +54,19 @@ export function ClientsSection({ routerId, clients, onChanged }: Props) {
             ariaLabel: 'Search clients',
             onChange: paged.setSearch,
           }}
-          action={{
-            label: 'Add client',
-            onClick: () => setEditing({ protocol: 'wireguard', enabled: true }),
-          }}
+          // action={{
+          //   label: 'Add client',
+          //   onClick: () => setEditing({ protocol: 'wireguard', enabled: true }),
+          // }}
         />
         <div style={{ marginTop: 16 }}>
           <ClientsTable
             rows={paged.pagedRows}
             totalRows={clients.length}
-            onEdit={setEditing}
-            onDelete={setDeletingId}
+            creds={creds}
             onToggled={onChanged}
+            // onEdit={setEditing}
+            // onDelete={setDeletingId}
           />
           <PaginationControls
             page={paged.page}
@@ -74,7 +78,7 @@ export function ClientsSection({ routerId, clients, onChanged }: Props) {
           />
         </div>
       </Card>
-      {editing ? (
+      {/* {editing ? (
         <ClientFormDialog value={editing} onCancel={() => setEditing(null)} onSave={onSave} />
       ) : null}
       <ConfirmDialog
@@ -83,7 +87,7 @@ export function ClientsSection({ routerId, clients, onChanged }: Props) {
         destructive
         onConfirm={onConfirmDelete}
         onCancel={() => setDeletingId(null)}
-      />
+      /> */}
     </Stack>
   );
 }

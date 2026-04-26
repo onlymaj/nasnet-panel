@@ -12,7 +12,7 @@ interface Props {
     ariaLabel: string;
     onChange: (value: string) => void;
   };
-  action: {
+  action?: {
     label: string;
     disabled?: boolean;
     onClick: () => void;
@@ -38,9 +38,11 @@ export function SectionHeader({ title, count, description, search, action }: Pro
             aria-label={search.ariaLabel}
           />
         ) : null}
-        <Button variant="success" onClick={action.onClick} disabled={action.disabled}>
-          <Plus size={14} aria-hidden /> {action.label}
-        </Button>
+        {action ? (
+          <Button variant="success" onClick={action.onClick} disabled={action.disabled}>
+            <Plus size={14} aria-hidden /> {action.label}
+          </Button>
+        ) : null}
       </div>
     </CardHeader>
   );

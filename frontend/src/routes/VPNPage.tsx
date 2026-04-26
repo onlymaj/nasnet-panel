@@ -1,29 +1,62 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Stack } from '@nasnet/ui';
-import { api, type VPNClient, type VPNPeer, type VPNProtocol, type VPNServer } from '../api';
+import { Stack, useToast } from '@nasnet/ui';
+import {
+  ApiError,
+  fetchVPNServersStatus,
+  listVPNClients,
+  type VPNClient,
+  type VPNCredentials,
+  type VPNPeer,
+  type VPNProtocol,
+  type VPNServer,
+} from '../api';
+import { useRouter } from '../state/RouterStoreContext';
+import { useSession } from '../state/SessionContext';
+import { mapClientFromBE, mapServersStatusToList } from './vpn/adapters';
 import { StatsStrip } from './vpn/StatsStrip';
 import { ClientsSection } from './vpn/sections/ClientsSection';
 import { ServersSection } from './vpn/sections/ServersSection';
-import { PeersSection } from './vpn/sections/PeersSection';
+// import { PeersSection } from './vpn/sections/PeersSection';
+// TODO: re-enable PeersSection when /api/vpn/peers exists on the backend.
 
 export function VPNPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter(id);
+  const { getCredentials } = useSession();
+  const toast = useToast();
+
   const [clients, setClients] = useState<VPNClient[]>([]);
   const [servers, setServers] = useState<VPNServer[]>([]);
-  const [peers, setPeers] = useState<VPNPeer[]>([]);
+  const peers: VPNPeer[] = [];
+
+  const creds = useMemo<VPNCredentials | null>(() => {
+    if (!id) return null;
+    const c = getCredentials(id);
+    const host = router?.host;
+    if (!c || !host) return null;
+    return { host, username: c.username, password: c.password };
+  }, [id, router?.host, getCredentials]);
 
   const reload = useCallback(async () => {
-    if (!id) return;
-    const [c, s, p] = await Promise.all([
-      api.vpn.listClients(id),
-      api.vpn.listServers(id),
-      api.vpn.listPeers(id),
-    ]);
-    setClients(c);
-    setServers(s);
-    setPeers(p);
-  }, [id]);
+    if (!id || !creds) return;
+    try {
+      const [rawClients, serversStatus] = await Promise.all([
+        listVPNClients(creds),
+        fetchVPNServersStatus(creds),
+      ]);
+      setClients(rawClients.map((c) => mapClientFromBE(c, id)));
+      setServers(mapServersStatusToList(serversStatus, id));
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Failed to load VPN data.';
+      toast.notify({ title: 'Failed to load VPN', description: message, tone: 'danger' });
+    }
+  }, [id, creds, toast]);
 
   useEffect(() => {
     void reload();
@@ -36,12 +69,14 @@ export function VPNPage() {
     return [...set];
   }, [clients, servers]);
 
+  if (!id) return null;
+
   return (
     <Stack>
       <StatsStrip clients={clients} servers={servers} peers={peers} protocols={protocols} />
-      <ClientsSection routerId={id!} clients={clients} onChanged={reload} />
-      <ServersSection routerId={id!} servers={servers} onChanged={reload} />
-      <PeersSection routerId={id!} peers={peers} servers={servers} onChanged={reload} />
+      <ClientsSection routerId={id} creds={creds} clients={clients} onChanged={reload} />
+      <ServersSection routerId={id} creds={creds} servers={servers} onChanged={reload} />
+      {/* <PeersSection routerId={id} peers={peers} servers={servers} onChanged={reload} /> */}
     </Stack>
   );
 }

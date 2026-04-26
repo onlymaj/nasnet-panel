@@ -1,0 +1,17 @@
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.spinner {
+  display: inline-flex;
+  color: var(--color-text-muted);
+  animation: clients-spin 0.7s linear infinite;
+}
+
+@keyframes clients-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

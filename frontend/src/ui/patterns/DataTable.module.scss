@@ -54,3 +54,10 @@
   color: var(--color-text-muted);
   font-size: var(--font-sm);
 }
+
+.emptyIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-muted);
+}
