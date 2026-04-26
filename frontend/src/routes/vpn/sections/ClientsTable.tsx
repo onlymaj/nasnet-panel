@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Badge, DataTable, Switch, useToast } from '@nasnet/ui';
-import { Cable, Loader2 } from 'lucide-react';
+import { Cable } from 'lucide-react';
 import { ApiError, updateVPNClient, type VPNClient, type VPNCredentials } from '../../../api';
-import styles from './ClientsTable.module.scss';
 
 interface Props {
   rows: VPNClient[];
@@ -46,46 +45,39 @@ export function ClientsTable({ rows, totalRows, creds, onToggled }: Props) {
             const busy = isPending(c.id);
             const next = !checkedFor(c);
             return (
-              <span className={styles.cell}>
-                <Switch
-                  aria-label="Enabled"
-                  checked={checkedFor(c)}
-                  disabled={!creds || busy}
-                  onChange={async () => {
-                    if (!creds) return;
-                    setOptimistic((m) => ({ ...m, [c.id]: next }));
-                    setRowPending(c.id, true);
-                    try {
-                      await updateVPNClient(creds, c.name, { disabled: !next });
-                    } catch (err) {
-                      setOptimistic((m) => {
-                        const next = { ...m };
-                        delete next[c.id];
-                        return next;
-                      });
-                      const message =
-                        err instanceof ApiError
+              <Switch
+                aria-label="Enabled"
+                checked={checkedFor(c)}
+                disabled={!creds || busy}
+                onChange={async () => {
+                  if (!creds) return;
+                  setOptimistic((m) => ({ ...m, [c.id]: next }));
+                  setRowPending(c.id, true);
+                  try {
+                    await updateVPNClient(creds, c.name, { disabled: !next });
+                  } catch (err) {
+                    setOptimistic((m) => {
+                      const reverted = { ...m };
+                      delete reverted[c.id];
+                      return reverted;
+                    });
+                    const message =
+                      err instanceof ApiError
+                        ? err.message
+                        : err instanceof Error
                           ? err.message
-                          : err instanceof Error
-                            ? err.message
-                            : 'Failed to update client.';
-                      toast.notify({
-                        title: 'Failed to update client',
-                        description: message,
-                        tone: 'danger',
-                      });
-                    } finally {
-                      setRowPending(c.id, false);
-                      onToggled();
-                    }
-                  }}
-                />
-                {busy ? (
-                  <span className={styles.spinner} aria-label="Saving">
-                    <Loader2 size={14} aria-hidden />
-                  </span>
-                ) : null}
-              </span>
+                          : 'Failed to update client.';
+                    toast.notify({
+                      title: 'Failed to update client',
+                      description: message,
+                      tone: 'danger',
+                    });
+                  } finally {
+                    setRowPending(c.id, false);
+                    onToggled();
+                  }
+                }}
+              />
             );
           },
           width: '120px',
