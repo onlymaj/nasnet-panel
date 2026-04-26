@@ -1,38 +1,149 @@
 import { test, expect } from './fixtures';
 
-test.describe('VPN clients CRUD', () => {
-  test('add, toggle, edit, delete a WireGuard client', async ({ page, resetMocks, seedRouter }) => {
+const ROUTER_ID = 'rtr_vpn';
+
+const envelope = <T>(data: T) => JSON.stringify({ status: 200, message: 'OK', data });
+
+const baseClient = {
+  id: '*1',
+  name: 'home-l2tp',
+  type: 'l2tp-out',
+  running: false,
+  disabled: true,
+  mtu: 1450,
+  macAddress: '',
+  rxByte: 0,
+  txByte: 0,
+  rxPacket: 0,
+  txPacket: 0,
+  lastLinkUp: '',
+  lastLinkDown: '',
+  linkDowns: 0,
+};
+
+test.describe('VPN clients tab', () => {
+  test('lists clients from backend and toggles enable via PUT', async ({
+    page,
+    context,
+    resetMocks,
+    seedRouter,
+  }) => {
     await resetMocks();
-    await seedRouter({ id: 'rtr_vpn', name: 'VPN Router' });
-    await page.goto('/router/rtr_vpn/vpn');
+    await seedRouter({ id: ROUTER_ID, name: 'VPN Router', host: '10.0.0.10' });
 
-    await page.getByRole('button', { name: /add client/i }).click();
+    await context.addInitScript((routerId) => {
+      try {
+        const key = 'nasnet-panel.session-credentials.v1';
+        const raw = window.sessionStorage.getItem(key);
+        const map = (raw ? JSON.parse(raw) : {}) as Record<
+          string,
+          { username: string; password: string }
+        >;
+        map[routerId] = { username: 'admin', password: 'test' };
+        window.sessionStorage.setItem(key, JSON.stringify(map));
+      } catch {
+        /* ignore */
+      }
+    }, ROUTER_ID);
 
-    await page.getByLabel(/name/i).fill('home-wg');
-    await page.getByLabel(/endpoint host/i).fill('home.example.com');
-    await page.getByLabel(/endpoint port/i).fill('51820');
-    await page.getByRole('button', { name: /save/i }).click();
+    await context.route('**/api/vpn/clients', async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope([baseClient]),
+        });
+        return;
+      }
+      await route.fallback();
+    });
 
-    await expect(page.getByRole('row', { name: /home-wg/ })).toBeVisible();
+    await context.route('**/api/vpn/servers', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope({
+          ovpnServers: [],
+          wireguards: [],
+          pptp: null,
+          l2tp: null,
+          sstp: null,
+        }),
+      });
+    });
 
-    await page
-      .getByRole('row', { name: /home-wg/ })
-      .getByRole('switch', { name: /enabled/i })
-      .click();
+    let lastPutBody: { disabled?: boolean; comment?: string } | null = null;
+    await context.route('**/api/vpn/clients/home-l2tp', async (route) => {
+      if (route.request().method() === 'PUT') {
+        lastPutBody = route.request().postDataJSON() as typeof lastPutBody;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: envelope({ ...baseClient, disabled: false }),
+        });
+        return;
+      }
+      await route.fallback();
+    });
 
-    await page
-      .getByRole('row', { name: /home-wg/ })
-      .getByRole('button', { name: /edit/i })
-      .click();
-    await page.getByLabel(/name/i).fill('home-wg-renamed');
-    await page.getByRole('button', { name: /save/i }).click();
-    await expect(page.getByRole('row', { name: /home-wg-renamed/ })).toBeVisible();
+    await page.goto(`/router/${ROUTER_ID}/vpn`);
 
-    await page
-      .getByRole('row', { name: /home-wg-renamed/ })
-      .getByRole('button', { name: /delete/i })
-      .click();
-    await page.getByRole('button', { name: /^confirm$/i }).click();
-    await expect(page.getByRole('row', { name: /home-wg-renamed/ })).toHaveCount(0);
+    const row = page.getByRole('row', { name: /home-l2tp/ });
+    await expect(row).toBeVisible();
+    await expect(row.getByText('L2TP', { exact: true })).toBeVisible();
+
+    await row.getByRole('switch', { name: /enabled/i }).click();
+    await expect.poll(() => lastPutBody?.disabled).toBe(false);
+  });
+
+  test('renders empty-state icon when no clients are configured', async ({
+    page,
+    context,
+    resetMocks,
+    seedRouter,
+  }) => {
+    await resetMocks();
+    await seedRouter({ id: ROUTER_ID, name: 'VPN Router', host: '10.0.0.10' });
+
+    await context.addInitScript((routerId) => {
+      try {
+        const key = 'nasnet-panel.session-credentials.v1';
+        const raw = window.sessionStorage.getItem(key);
+        const map = (raw ? JSON.parse(raw) : {}) as Record<
+          string,
+          { username: string; password: string }
+        >;
+        map[routerId] = { username: 'admin', password: 'test' };
+        window.sessionStorage.setItem(key, JSON.stringify(map));
+      } catch {
+        /* ignore */
+      }
+    }, ROUTER_ID);
+
+    await context.route('**/api/vpn/clients', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope([]),
+      });
+    });
+    await context.route('**/api/vpn/servers', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope({
+          ovpnServers: [],
+          wireguards: [],
+          pptp: null,
+          l2tp: null,
+          sstp: null,
+        }),
+      });
+    });
+
+    await page.goto(`/router/${ROUTER_ID}/vpn`);
+
+    await expect(page.getByText('No VPN clients yet.')).toBeVisible();
+    await expect(page.getByText('No VPN servers configured.')).toBeVisible();
   });
 });

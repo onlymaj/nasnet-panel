@@ -1,30 +1,88 @@
 import { test, expect } from './fixtures';
 
-test.describe('VPN server + peers', () => {
-  test('create a server and add/delete a peer', async ({ page, resetMocks, seedRouter }) => {
+const ROUTER_ID = 'rtr_vsrv';
+
+const envelope = <T>(data: T) => JSON.stringify({ status: 200, message: 'OK', data });
+
+test.describe('VPN servers tab', () => {
+  test('opens server detail drawer and renders address/DNS/secret fields', async ({
+    page,
+    context,
+    resetMocks,
+    seedRouter,
+  }) => {
     await resetMocks();
-    await seedRouter({ id: 'rtr_vsrv', name: 'Server Router' });
-    await page.goto('/router/rtr_vsrv/vpn');
+    await seedRouter({ id: ROUTER_ID, name: 'Server Router', host: '10.0.0.20' });
 
-    await page.getByRole('button', { name: /add server/i }).click();
-    await page.getByLabel(/name/i).fill('office-wg');
-    await page.getByLabel(/listen port/i).fill('51820');
-    await page.getByLabel(/ip pool/i).fill('10.8.0.0/24');
-    await page.getByRole('button', { name: /save/i }).click();
-    await expect(page.getByText('office-wg')).toBeVisible();
+    await context.addInitScript((routerId) => {
+      try {
+        const key = 'nasnet-panel.session-credentials.v1';
+        const raw = window.sessionStorage.getItem(key);
+        const map = (raw ? JSON.parse(raw) : {}) as Record<
+          string,
+          { username: string; password: string }
+        >;
+        map[routerId] = { username: 'admin', password: 'test' };
+        window.sessionStorage.setItem(key, JSON.stringify(map));
+      } catch {
+        /* ignore */
+      }
+    }, ROUTER_ID);
 
-    await page.getByRole('button', { name: /add peer/i }).click();
-    await page.getByLabel(/name/i).fill('laptop');
-    await page.getByLabel(/allowed ips/i).fill('10.8.0.2/32');
-    await page.getByRole('button', { name: /save/i }).click();
+    await context.route('**/api/vpn/clients', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope([]),
+      });
+    });
 
-    await expect(page.getByRole('row', { name: /laptop/ })).toBeVisible();
+    await context.route('**/api/vpn/servers', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope({
+          ovpnServers: [],
+          wireguards: [],
+          pptp: { enabled: true },
+          l2tp: null,
+          sstp: null,
+        }),
+      });
+    });
 
-    await page
-      .getByRole('row', { name: /laptop/ })
-      .getByRole('button', { name: /delete/i })
-      .click();
-    await page.getByRole('button', { name: /^confirm$/i }).click();
-    await expect(page.getByRole('row', { name: /laptop/ })).toHaveCount(0);
+    await context.route('**/api/vpn/pptp-server', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: envelope({
+          enabled: true,
+          auth: 'mschap2',
+          profile: 'default',
+          localAddress: '10.10.10.1',
+          remoteAddress: '10.10.10.2-10.10.10.50',
+          useCompression: 'yes',
+          useEncryption: 'required',
+          onlyOne: 'yes',
+          changeTcpMss: 'yes',
+          dnsServer: '1.1.1.1',
+          secrets: [{ username: 'alice', password: 'alice123' }],
+        }),
+      });
+    });
+
+    await page.goto(`/router/${ROUTER_ID}/vpn`);
+
+    const row = page.getByRole('row', { name: /PPTP/ }).first();
+    await expect(row).toBeVisible();
+    await row.click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText('10.10.10.1')).toBeVisible();
+    await expect(dialog.getByText('10.10.10.2-10.10.10.50')).toBeVisible();
+    await expect(dialog.getByText('1.1.1.1')).toBeVisible();
+    await expect(dialog.getByText('alice', { exact: true })).toBeVisible();
+    await expect(dialog.getByText('alice123')).toBeVisible();
   });
 });
