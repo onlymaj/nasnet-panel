@@ -1,0 +1,263 @@
+import { useEffect, useState } from 'react';
+import { Badge, Button, Dialog } from '@nasnet/ui';
+import {
+  ApiError,
+  fetchL2tpServerDetails,
+  fetchOvpnServerDetails,
+  fetchPptpServerDetails,
+  fetchSstpServerDetails,
+  fetchWireguardServerDetails,
+  isAbortError,
+  type L2tpServerDetailsResponse,
+  type OvpnServerDetailsResponse,
+  type PptpServerDetailsResponse,
+  type SstpServerDetailsResponse,
+  type VPNCredentials,
+  type VPNServer,
+  type WireguardServerDetailsResponse,
+} from '../../../api';
+
+type Details =
+  | { kind: 'openvpn'; data: OvpnServerDetailsResponse }
+  | { kind: 'wireguard'; data: WireguardServerDetailsResponse }
+  | { kind: 'pptp'; data: PptpServerDetailsResponse }
+  | { kind: 'l2tp'; data: L2tpServerDetailsResponse }
+  | { kind: 'sstp'; data: SstpServerDetailsResponse };
+
+interface Props {
+  server: VPNServer | null;
+  creds: VPNCredentials | null;
+  onClose: () => void;
+}
+
+export function ServerDetailsDialog({ server, creds, onClose }: Props) {
+  const [details, setDetails] = useState<Details | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!server || !creds) return;
+    const controller = new AbortController();
+    setDetails(null);
+    setError(null);
+    setLoading(true);
+
+    (async () => {
+      try {
+        const next = await loadDetails(server, creds, controller.signal);
+        setDetails(next);
+      } catch (err) {
+        if (isAbortError(err)) return;
+        const message =
+          err instanceof ApiError
+            ? err.message
+            : err instanceof Error
+              ? err.message
+              : 'Failed to load server details.';
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [server, creds]);
+
+  return (
+    <Dialog
+      open={!!server}
+      onClose={onClose}
+      title={server ? `${server.protocol.toUpperCase()} server: ${server.name}` : ''}
+      size="lg"
+      footer={
+        <Button variant="ghost" onClick={onClose}>
+          Close
+        </Button>
+      }
+    >
+      {loading ? <p>Loading…</p> : null}
+      {error ? <p style={{ color: 'var(--color-danger)' }}>{error}</p> : null}
+      {details ? <DetailsBody details={details} /> : null}
+    </Dialog>
+  );
+}
+
+async function loadDetails(
+  server: VPNServer,
+  creds: VPNCredentials,
+  signal: AbortSignal,
+): Promise<Details> {
+  switch (server.protocol) {
+    case 'openvpn': {
+      const name = server.id.replace(/^ovpn:/, '');
+      return { kind: 'openvpn', data: await fetchOvpnServerDetails(creds, name, signal) };
+    }
+    case 'wireguard': {
+      const name = server.id.replace(/^wg:/, '');
+      return { kind: 'wireguard', data: await fetchWireguardServerDetails(creds, name, signal) };
+    }
+    case 'pptp':
+      return { kind: 'pptp', data: await fetchPptpServerDetails(creds, signal) };
+    case 'l2tp':
+      return { kind: 'l2tp', data: await fetchL2tpServerDetails(creds, signal) };
+    case 'sstp':
+      return { kind: 'sstp', data: await fetchSstpServerDetails(creds, signal) };
+    default:
+      throw new Error(`No detail endpoint for protocol "${server.protocol}".`);
+  }
+}
+
+function DetailsBody({ details }: { details: Details }) {
+  switch (details.kind) {
+    case 'openvpn': {
+      const d = details.data;
+      return (
+        <DList>
+          <Row label="Name" value={d.name} />
+          <Row label="Enabled" value={<BoolBadge value={d.enabled} />} />
+          <Row label="Port" value={d.port} />
+          <Row label="Mode" value={d.mode} />
+          <Row label="Protocol" value={d.protocol} />
+          <Row label="MAC address" value={d.macAddress} />
+          <Row label="Certificate" value={d.certificate} />
+          <Row
+            label="Require client cert"
+            value={<BoolBadge value={d.requireClientCertificate} />}
+          />
+          <Row label="Auth" value={d.auth} />
+          <Row label="Cipher" value={d.cipher} />
+          <Row label="User auth method" value={d.userAuthMethod} />
+        </DList>
+      );
+    }
+    case 'wireguard': {
+      const d = details.data;
+      return (
+        <DList>
+          <Row label="Name" value={d.name} />
+          <Row label="Enabled" value={<BoolBadge value={d.enabled} />} />
+          <Row label="Running" value={<BoolBadge value={d.running} />} />
+          <Row label="Port" value={d.port} />
+          <Row label="Public key" value={<code>{d.publicKey}</code>} />
+          <Row label="Private key" value={<code>{d.privateKey}</code>} />
+        </DList>
+      );
+    }
+    case 'pptp': {
+      const d = details.data;
+      return (
+        <DList>
+          <Row label="Enabled" value={<BoolBadge value={d.enabled} />} />
+          <Row label="Auth" value={d.auth} />
+          <Row label="Profile" value={d.profile} />
+          <Row label="Local address" value={d.localAddress} />
+          <Row label="Remote address" value={d.remoteAddress} />
+          <Row label="DNS server" value={d.dnsServer} />
+          <Row label="Use compression" value={d.useCompression} />
+          <Row label="Use encryption" value={d.useEncryption} />
+          <Row label="Only one" value={d.onlyOne} />
+          <Row label="Change TCP MSS" value={d.changeTcpMss} />
+          <SecretsRow secrets={d.secrets} />
+        </DList>
+      );
+    }
+    case 'l2tp': {
+      const d = details.data;
+      return (
+        <DList>
+          <Row label="Enabled" value={<BoolBadge value={d.enabled} />} />
+          <Row label="Auth" value={d.auth} />
+          <Row label="Profile" value={d.profile} />
+          <Row label="Protocol" value={d.protocol} />
+          <Row label="IPsec" value={d.ipsec} />
+          <Row label="IPsec secret" value={d.ipsecSecret ? <code>{d.ipsecSecret}</code> : '–'} />
+          <Row label="One session per host" value={<BoolBadge value={d.oneSessionPerHost} />} />
+          <Row label="Local address" value={d.localAddress} />
+          <Row label="Remote address" value={d.remoteAddress} />
+          <Row label="DNS server" value={d.dnsServer} />
+          <Row label="Use compression" value={d.useCompression} />
+          <Row label="Use encryption" value={d.useEncryption} />
+          <Row label="Only one" value={d.onlyOne} />
+          <Row label="Change TCP MSS" value={d.changeTcpMss} />
+          <SecretsRow secrets={d.secrets} />
+        </DList>
+      );
+    }
+    case 'sstp': {
+      const d = details.data;
+      return (
+        <DList>
+          <Row label="Enabled" value={<BoolBadge value={d.enabled} />} />
+          <Row label="Port" value={d.port} />
+          <Row label="Auth" value={d.auth} />
+          <Row label="Profile" value={d.profile} />
+          <Row label="Certificate" value={d.certificate} />
+          <Row label="Verify client cert" value={<BoolBadge value={d.verifyClientCertificate} />} />
+          <Row label="TLS version" value={d.tlsVersion} />
+          <Row label="Ciphers" value={d.ciphers} />
+          <Row label="PFS" value={d.pfs} />
+          <Row label="Local address" value={d.localAddress} />
+          <Row label="Remote address" value={d.remoteAddress} />
+          <Row label="DNS server" value={d.dnsServer} />
+          <Row label="Use compression" value={d.useCompression} />
+          <Row label="Use encryption" value={d.useEncryption} />
+          <Row label="Only one" value={d.onlyOne} />
+          <Row label="Change TCP MSS" value={d.changeTcpMss} />
+          <SecretsRow secrets={d.secrets} />
+        </DList>
+      );
+    }
+  }
+}
+
+function DList({ children }: { children: React.ReactNode }) {
+  return (
+    <dl
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '180px 1fr',
+        rowGap: 8,
+        columnGap: 16,
+        margin: 0,
+      }}
+    >
+      {children}
+    </dl>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  const empty = value === '' || value === null || value === undefined;
+  return (
+    <>
+      <dt style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-sm)' }}>{label}</dt>
+      <dd style={{ margin: 0, fontSize: 'var(--font-sm)', wordBreak: 'break-all' }}>
+        {empty ? '–' : value}
+      </dd>
+    </>
+  );
+}
+
+function BoolBadge({ value }: { value: boolean }) {
+  return <Badge tone={value ? 'success' : 'neutral'}>{value ? 'Yes' : 'No'}</Badge>;
+}
+
+function SecretsRow({ secrets }: { secrets: Array<{ username: string; password: string }> }) {
+  if (!secrets || secrets.length === 0) {
+    return <Row label="Secrets" value="–" />;
+  }
+  return (
+    <Row
+      label="Secrets"
+      value={
+        <ul style={{ margin: 0, paddingLeft: 16 }}>
+          {secrets.map((s, i) => (
+            <li key={`${s.username}-${i}`}>
+              <strong>{s.username}</strong> · <code>{s.password}</code>
+            </li>
+          ))}
+        </ul>
+      }
+    />
+  );
+}

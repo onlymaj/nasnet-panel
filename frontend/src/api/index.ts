@@ -76,6 +76,28 @@ export {
   type DhcpLeaseAction,
 } from './dhcp';
 export { fetchFirewallRules, type FirewallCredentials, type FirewallRule } from './firewall';
+export {
+  listVPNClients,
+  updateVPNClient,
+  fetchVPNServersStatus,
+  fetchOvpnServerDetails,
+  fetchPptpServerDetails,
+  fetchL2tpServerDetails,
+  fetchSstpServerDetails,
+  fetchWireguardServerDetails,
+  type VPNCredentials,
+  type VPNClientResponse,
+  type UpdateVPNClientRequest,
+  type VPNServersStatusResponse,
+  type ServerStatusItem,
+  type SingleServerStatus,
+  type OvpnServerDetailsResponse,
+  type PptpServerDetailsResponse,
+  type L2tpServerDetailsResponse,
+  type SstpServerDetailsResponse,
+  type WireguardServerDetailsResponse,
+  type L2TPUserSecret,
+} from './vpn';
 export { ApiError } from './http';
 export { isAbortError } from './abort';
 export { BACKEND_URL } from './config';

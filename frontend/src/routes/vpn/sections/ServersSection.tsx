@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { Card, Stack, useToast } from '@nasnet/ui';
-import { api, type VPNProtocol, type VPNServer } from '../../../api';
-import { ServerFormDialog } from '../dialogs/ServerFormDialog';
+import { Card, Stack } from '@nasnet/ui';
+import type { VPNCredentials, VPNServer } from '../../../api';
+// import { useToast } from '@nasnet/ui';
+// import { api, type VPNProtocol } from '../../../api';
+// import { ServerFormDialog } from '../dialogs/ServerFormDialog';
+import { ServerDetailsDialog } from '../dialogs/ServerDetailsDialog';
 import { PaginationControls } from '../PaginationControls';
 import { usePagedFilter } from '../hooks/usePagedFilter';
 import { PAGE_SIZE } from '../utils';
@@ -15,30 +18,31 @@ const matches = (s: VPNServer, q: string) =>
   String(s.listenPort).includes(q);
 
 interface Props {
-  routerId: string;
+  creds: VPNCredentials | null;
   servers: VPNServer[];
-  onChanged: () => void;
 }
 
-export function ServersSection({ routerId, servers, onChanged }: Props) {
-  const [editing, setEditing] = useState<Partial<VPNServer> | null>(null);
-  const toast = useToast();
+export function ServersSection({ creds, servers }: Props) {
   const paged = usePagedFilter(servers, matches);
+  const [selected, setSelected] = useState<VPNServer | null>(null);
+  // Add server is hidden until the backend exposes a server-create endpoint.
+  // const [editing, setEditing] = useState<Partial<VPNServer> | null>(null);
+  // const toast = useToast();
 
-  const save = async (draft: Partial<VPNServer>) => {
-    await api.vpn.createServer({
-      routerId,
-      name: draft.name ?? 'new-server',
-      protocol: (draft.protocol ?? 'wireguard') as VPNProtocol,
-      listenPort: draft.listenPort ?? 51820,
-      ipPool: draft.ipPool ?? '10.8.0.0/24',
-      dns: draft.dns,
-      running: true,
-    });
-    setEditing(null);
-    onChanged();
-    toast.notify({ title: 'Server created', tone: 'success' });
-  };
+  // const save = async (draft: Partial<VPNServer>) => {
+  //   await api.vpn.createServer({
+  //     routerId,
+  //     name: draft.name ?? 'new-server',
+  //     protocol: (draft.protocol ?? 'wireguard') as VPNProtocol,
+  //     listenPort: draft.listenPort ?? 51820,
+  //     ipPool: draft.ipPool ?? '10.8.0.0/24',
+  //     dns: draft.dns,
+  //     running: true,
+  //   });
+  //   setEditing(null);
+  //   onChanged();
+  //   toast.notify({ title: 'Server created', tone: 'success' });
+  // };
 
   return (
     <Stack>
@@ -53,13 +57,17 @@ export function ServersSection({ routerId, servers, onChanged }: Props) {
             ariaLabel: 'Search servers',
             onChange: paged.setSearch,
           }}
-          action={{
-            label: 'Add server',
-            onClick: () => setEditing({ protocol: 'wireguard', listenPort: 51820 }),
-          }}
+          // action={{
+          //   label: 'Add server',
+          //   onClick: () => setEditing({ protocol: 'wireguard', listenPort: 51820 }),
+          // }}
         />
         <div style={{ marginTop: 16 }}>
-          <ServersTable rows={paged.pagedRows} totalRows={servers.length} />
+          <ServersTable
+            rows={paged.pagedRows}
+            totalRows={servers.length}
+            onRowClick={setSelected}
+          />
           <PaginationControls
             page={paged.page}
             totalPages={paged.totalPages}
@@ -70,9 +78,10 @@ export function ServersSection({ routerId, servers, onChanged }: Props) {
           />
         </div>
       </Card>
-      {editing ? (
+      {/* {editing ? (
         <ServerFormDialog value={editing} onCancel={() => setEditing(null)} onSave={save} />
-      ) : null}
+      ) : null} */}
+      <ServerDetailsDialog server={selected} creds={creds} onClose={() => setSelected(null)} />
     </Stack>
   );
 }

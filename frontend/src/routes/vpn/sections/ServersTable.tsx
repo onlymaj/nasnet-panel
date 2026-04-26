@@ -1,12 +1,14 @@
 import { Badge, DataTable } from '@nasnet/ui';
+import { Server as ServerIcon } from 'lucide-react';
 import type { VPNServer } from '../../../api';
 
 interface Props {
   rows: VPNServer[];
   totalRows: number;
+  onRowClick?: (server: VPNServer) => void;
 }
 
-export function ServersTable({ rows, totalRows }: Props) {
+export function ServersTable({ rows, totalRows, onRowClick }: Props) {
   return (
     <DataTable
       columns={[
@@ -30,9 +32,11 @@ export function ServersTable({ rows, totalRows }: Props) {
       ]}
       rows={rows}
       rowKey={(s) => s.id}
+      onRowClick={onRowClick}
       emptyMessage={
         totalRows ? 'No servers match the current filters.' : 'No VPN servers configured.'
       }
+      emptyIcon={<ServerIcon size={32} aria-hidden />}
     />
   );
 }

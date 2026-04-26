@@ -14,6 +14,7 @@ export interface DataTableProps<T> {
   rowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
+  emptyIcon?: React.ReactNode;
   caption?: string;
   selectedId?: string | null;
 }
@@ -26,6 +27,7 @@ export function DataTable<T>({
   rowKey,
   onRowClick,
   emptyMessage = 'No results',
+  emptyIcon,
   caption,
   selectedId,
 }: DataTableProps<T>): React.ReactElement {
@@ -33,7 +35,10 @@ export function DataTable<T>({
     return (
       <div className={styles.scroll}>
         {caption ? <div className={styles.empty}>{caption}</div> : null}
-        <div className={styles.empty}>{emptyMessage}</div>
+        <div className={styles.empty}>
+          {emptyIcon ? <div className={styles.emptyIcon}>{emptyIcon}</div> : null}
+          <div>{emptyMessage}</div>
+        </div>
       </div>
     );
   }
