@@ -187,15 +187,12 @@ export async function fetchOvpnServerDetails(
   name: string,
   signal?: AbortSignal,
 ): Promise<OvpnServerDetailsResponse> {
-  return apiRequest<OvpnServerDetailsResponse>(
-    `/api/vpn/ovpn-server/${encodeURIComponent(name)}`,
-    {
-      method: 'GET',
-      headers: authHeaders(creds),
-      cache: 'no-store',
-      signal,
-    },
-  );
+  return apiRequest<OvpnServerDetailsResponse>(`/api/vpn/ovpn-server/${encodeURIComponent(name)}`, {
+    method: 'GET',
+    headers: authHeaders(creds),
+    cache: 'no-store',
+    signal,
+  });
 }
 
 export async function fetchPptpServerDetails(

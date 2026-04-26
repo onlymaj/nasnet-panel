@@ -27,10 +27,7 @@ export function mapClientFromBE(r: VPNClientResponse, routerId: string): VPNClie
   };
 }
 
-export function mapServersStatusToList(
-  s: VPNServersStatusResponse,
-  routerId: string,
-): VPNServer[] {
+export function mapServersStatusToList(s: VPNServersStatusResponse, routerId: string): VPNServer[] {
   const rows: VPNServer[] = [];
   for (const srv of s.ovpnServers ?? []) {
     rows.push({
