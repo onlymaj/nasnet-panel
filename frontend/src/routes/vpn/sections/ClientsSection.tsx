@@ -17,7 +17,6 @@ const matches = (c: VPNClient, q: string) =>
   (c.comment ?? '').toLowerCase().includes(q);
 
 interface Props {
-  routerId: string;
   creds: VPNCredentials | null;
   clients: VPNClient[];
   onChanged: () => void;

@@ -74,8 +74,8 @@ export function VPNPage() {
   return (
     <Stack>
       <StatsStrip clients={clients} servers={servers} peers={peers} protocols={protocols} />
-      <ClientsSection routerId={id} creds={creds} clients={clients} onChanged={reload} />
-      <ServersSection routerId={id} creds={creds} servers={servers} onChanged={reload} />
+      <ClientsSection creds={creds} clients={clients} onChanged={reload} />
+      <ServersSection creds={creds} servers={servers} />
       {/* <PeersSection routerId={id} peers={peers} servers={servers} onChanged={reload} /> */}
     </Stack>
   );

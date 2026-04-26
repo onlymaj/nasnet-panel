@@ -18,10 +18,8 @@ const matches = (s: VPNServer, q: string) =>
   String(s.listenPort).includes(q);
 
 interface Props {
-  routerId: string;
   creds: VPNCredentials | null;
   servers: VPNServer[];
-  onChanged: () => void;
 }
 
 export function ServersSection({ creds, servers }: Props) {

@@ -59,8 +59,9 @@ export function ClientsTable({ rows, totalRows, creds, onToggled }: Props) {
                       await updateVPNClient(creds, c.name, { disabled: !next });
                     } catch (err) {
                       setOptimistic((m) => {
-                        const { [c.id]: _, ...rest } = m;
-                        return rest;
+                        const next = { ...m };
+                        delete next[c.id];
+                        return next;
                       });
                       const message =
                         err instanceof ApiError
